@@ -44,6 +44,9 @@ It is designed to:
 | **Suite Runner** | ✅ Complete | preset-based scans | `python/src/viper_health/cli/suite.py` |
 | **I/O Benchmarks** | ✅ Complete | seq/random read/write | `python/src/viper_health/benchmarks/` |
 | **MFT Analysis** | ✅ Complete | size + fragmentation | `python/src/viper_health/collectors/mft_info.py` |
+| **TRIM Status** | ✅ Complete | SSD TRIM verification | `python/src/viper_health/collectors/trim_status.py` |
+| **Free Space Monitor** | ✅ Complete | QLC-specific thresholds | `python/src/viper_health/collectors/disk_space.py` |
+| **Baseline Comparison** | ✅ Complete | trend analysis | `python/src/viper_health/analyzers/baseline_comparison.py` |
 
 ---
 
@@ -187,6 +190,68 @@ python -m viper_health.cli.scan_mft --drive C: --output mft_health.json
 1. Open PowerShell or Command Prompt as Administrator
 2. Navigate to viper-health directory
 3. Run: `.venv\Scripts\python.exe -m viper_health.cli.scan_mft`
+
+---
+
+### Checking TRIM Status
+
+**Requires administrator privileges** — TRIM is critical for SSD health:
+
+```bash
+# Check if TRIM is enabled (requires admin)
+python -m viper_health.cli.check_trim
+```
+
+**What it reports:**
+- TRIM enabled/disabled status
+- Critical if disabled (drive will continuously degrade without TRIM)
+- Fix commands if disabled: `fsutil behavior set DisableDeleteNotify 0`
+
+**CRITICAL:** If TRIM is disabled, file deletions won't improve drive performance!
+
+---
+
+### Monitoring Free Space
+
+Track disk space with SSD-specific thresholds:
+
+```bash
+# Check free space on C: drive
+python -m viper_health.cli.check_space --drive C:
+
+# Save results
+python -m viper_health.cli.check_space --output space_check.json
+```
+
+**Thresholds:**
+- <10% free = CRITICAL (immediate action needed)
+- 10-20% free = WARNING (clean up soon)
+- >20% free = GOOD (healthy)
+
+**Why it matters:** QLC SSDs need 15-20% free space for wear leveling, garbage collection, and SLC cache capacity.
+
+---
+
+### Comparing to Baseline (Trend Analysis)
+
+Track performance degradation over time:
+
+```bash
+# Save baseline after cleanup
+python -m viper_health.cli.benchmark_io --output data/baselines/baseline.json
+
+# Later, compare current results
+python -m viper_health.cli.benchmark_io --output data/benchmarks/current.json
+python -m viper_health.cli.compare_baseline --baseline data/baselines/baseline.json --current data/benchmarks/current.json
+```
+
+**What it detects:**
+- Benchmark throughput degradation (>10% = WARNING, >20% = CRITICAL)
+- MFT size growth
+- Health score changes
+- Improvements after cleanup
+
+**Recommended:** Run weekly comparisons to catch gradual degradation early.
 
 ---
 
