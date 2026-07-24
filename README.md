@@ -1,44 +1,148 @@
-# viper-health
+# 💚 viper-health
 
-SSD and filesystem health diagnostics toolkit (Python + PowerShell).
+![Status](https://img.shields.io/badge/Status-Active%20Scaffold-success)
+![Python](https://img.shields.io/badge/Python-3.12%2B-blue?logo=python)
+![PowerShell](https://img.shields.io/badge/PowerShell-7%2B-5391FE?logo=powershell)
+![License](https://img.shields.io/badge/License-MIT-green)
+![CI](https://img.shields.io/badge/CI-GitHub%20Actions-black?logo=githubactions)
 
-## Purpose
+## Detect the churn • Protect the system • Keep the SSD healthy
 
-`viper-health` focuses on long-term filesystem/SSD health by detecting metadata pressure, tiny-file hotspots, churn patterns, and risky growth trends while enforcing safe maintenance boundaries.
+Filesystem and SSD-health diagnostics toolkit focused on metadata pressure, tiny-file hotspots, churn detection, and safe maintenance boundaries.
 
-## Layout
+[📘 Spec](viper-ssd-health.md) • [🧱 Project Structure](#-project-structure) • [🚀 Quick Start](#-quick-start) • [🛡️ Safety Model](#️-safety-model) • [🧪 CI](#-ci)
 
-- `docs/` - specs, architecture notes, and runbooks
-- `python/` - Python package and tests
-- `powershell/` - PowerShell module
-- `config/` - thresholds, allowlists, and profiles
-- `data/` - baselines, snapshots, and generated reports
-- `scripts/` - convenience entry scripts
+---
 
-See `viper-ssd-health.md` for the authoritative specification.
+## 🎯 What is viper-health?
 
-## Setup
+`viper-health` is a dual-stack diagnostics project (Python + PowerShell) built to identify and prevent long-term storage degradation patterns on Windows systems, especially where heavy metadata churn impacts SSD responsiveness.
 
-### Python
+It is designed to:
 
-1. Create/activate a Python 3.12+ environment
-2. Install package in editable mode:
-   - `pip install -e python`
-3. Install test dependencies:
-   - `pip install pytest`
+- detect tiny-file hotspots and directory density anomalies
+- detect metadata pressure and churn acceleration over time
+- detect cache explosions, cloud-sync churn, and update leftovers
+- preserve critical paths through strict maintenance guardrails
+- produce actionable reports (JSON, Markdown, console)
 
-### PowerShell
+---
 
-- Module source is under `powershell/PSViperHealth/`.
-- Import during development with:
-  - `Import-Module .\powershell\PSViperHealth\PSViperHealth.psd1 -Force`
+## 📊 Project Status
 
-## Development standards
+| Component | Status | Progress | Location |
+| --- | --- | --- | --- |
+| **Specification** | ✅ Complete (drafted) | v0.2 | [`viper-ssd-health.md`](viper-ssd-health.md) |
+| **Python Package Scaffold** | ✅ Complete | baseline | [`python/`](python/) |
+| **PowerShell Module Scaffold** | ✅ Complete | baseline | [`powershell/PSViperHealth/`](powershell/PSViperHealth/) |
+| **Config Baseline** | ✅ Complete | baseline | [`config/`](config/) |
+| **Data Baseline Folders** | ✅ Complete | baseline | [`data/`](data/) |
+| **CI Workflow** | ✅ Complete | initial | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
+| **Detectors Implementation** | 🟡 In Progress | phase 1 next | `python/src/viper_health/collectors` + `analyzers` |
 
-- Default behavior for maintenance tooling must remain read-only unless explicitly overridden.
-- Protected/immutable paths must never be auto-cleaned.
-- Mutating actions must support dry-run and auditable manifests.
+---
 
-## CI
+## 🧱 Project Structure
 
-GitHub Actions runs Python tests on pushes and pull requests to `main`.
+```text
+viper-health/
+├── docs/                          # Architecture notes + runbooks
+├── python/                        # Python package + tests
+│   ├── pyproject.toml
+│   ├── src/viper_health/
+│   │   ├── collectors/
+│   │   ├── analyzers/
+│   │   ├── scoring/
+│   │   ├── reports/
+│   │   ├── cli/
+│   │   └── utils/
+│   └── tests/
+├── powershell/PSViperHealth/      # PowerShell module
+│   ├── Collectors/
+│   ├── Analyzers/
+│   ├── Scoring/
+│   └── Reports/
+├── config/                        # thresholds + path policies
+├── data/                          # baselines/snapshots/reports
+├── scripts/                       # convenience wrappers
+├── viper-ssd-health.md            # authoritative implementation spec
+└── README.md
+```
+
+### Why this structure?
+
+- ✅ Clear separation of detectors, analyzers, scoring, and reporting
+- ✅ Friendly for phased implementation and testing
+- ✅ Safe defaults can be centralized in config
+- ✅ Automation-ready for CI and future scheduled health runs
+
+---
+
+## 🚀 Quick Start
+
+### Python contributors
+
+1. Create/activate Python 3.12+
+2. Install in editable mode
+3. Run tests
+
+```bash
+pip install -e python
+pip install -e python[dev]
+pytest -q python/tests
+```
+
+### PowerShell contributors
+
+```powershell
+Import-Module .\powershell\PSViperHealth\PSViperHealth.psd1 -Force
+```
+
+### Read the spec first
+
+Before implementing detectors/maintenance logic, read:
+
+- [`viper-ssd-health.md`](viper-ssd-health.md)
+
+---
+
+## 🛡️ Safety Model
+
+This project is intentionally conservative for mutating operations.
+
+Core principles:
+
+- observe/read-only is default
+- maintenance mode requires explicit operator intent
+- immutable/sensitive roots are protected
+- quarantine-first behavior over hard-delete
+- dry-run + manifests + action caps are required
+
+Notable protected path example:
+
+- VS Code built-in extension tree under `%LOCALAPPDATA%\Programs\Microsoft VS Code\resources\app\extensions`
+
+---
+
+## 🧪 CI
+
+GitHub Actions runs Python tests on push and pull request to `main`.
+
+- workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+
+---
+
+## 🤝 Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for workflow, expectations, and safety constraints.
+
+---
+
+## 📜 License
+
+MIT — see [`LICENSE`](LICENSE).
+
+Built with care for long-term system health.
+
+---
+
