@@ -122,8 +122,12 @@ Use the configured virtual environment interpreter.
 For deep project work, use:
 - `.github/agents/ViperHealth-Beast-Mode.agent.md`
 
-This agent is tuned for:
-- multi-step implementation planning
-- safety-aware script generation
-- detector/analyzer/test co-development
-- disciplined git hygiene
+Specialized companions:
+- `.github/agents/ViperHealth-Implementation.agent.md`
+- `.github/agents/ViperHealth-Testing.agent.md`
+- `.github/agents/ViperHealth-Analysis.agent.md`
+- `.github/agents/ViperHealth-Documentation.agent.md`
+
+Selection index:
+- `.github/agents/AGENT-SELECTION-GUIDE.md`
+- `.github/AGENTS.md`
