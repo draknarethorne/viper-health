@@ -97,18 +97,93 @@ Examples:
         print(f"  {status_color}{Style.BRIGHT}{status_icon} Overall: {analysis['overall_severity'].upper()}{Style.RESET_ALL}")
         print("="*70 + "\n")
         
-        # Recommendations
+        # Detailed recommendations
         if analysis["overall_severity"] != "good":
-            print(f"{Fore.YELLOW}💡 Recommendations:{Style.RESET_ALL}")
+            print(f"{Fore.YELLOW}{Style.BRIGHT}💡 RECOMMENDATIONS & NEXT STEPS:{Style.RESET_ALL}\n")
             
-            if analysis["size_severity"] != "good":
-                print(f"  • MFT size is {analysis['size_severity']} ({analysis['mft_size_gb']:.2f} GB)")
-                print("    Consider reducing file count or archiving unused files")
+            if analysis["size_severity"] == "critical":
+                print(f"{Fore.RED}{Style.BRIGHT}🚨 CRITICAL: MFT Size {analysis['mft_size_gb']:.2f} GB{Style.RESET_ALL}")
+                print(f"   Threshold: >2.5 GB indicates severe metadata pressure")
+                print(f"   Total Files: {analysis['total_files']:,} | Folders: {analysis['total_folders']:,}")
+                print(f"\n   {Style.BRIGHT}Why This Matters:{Style.RESET_ALL}")
+                print("   • Every file/folder requires MFT entry (~1KB each)")
+                print("   • Large MFT = slower file operations, longer boot times")
+                print("   • DRAM-less SSDs struggle with metadata-heavy workloads")
+                print(f"\n   {Style.BRIGHT}Immediate Actions:{Style.RESET_ALL}")
+                print("   1. Identify tiny-file hotspots:")
+                print("      python -m viper_health.cli.suite --preset full-system --console-summary")
+                print("   2. Target high-impact areas:")
+                print("      • Browser caches (Chrome/Edge/Firefox)")
+                print("      • VS Code workspace storage")
+                print("      • npm/pip/NuGet package caches")
+                print("      • Windows temp folders")
+                print("   3. Archive or consolidate:")
+                print("      • Zip old projects instead of leaving thousands of files")
+                print("      • Move static data to secondary drive")
+                print("   4. After cleanup, defragment MFT:")
+                print("      defrag C: /U /V (requires admin)")
+                print()
             
-            if analysis["fragmentation_severity"] != "good":
-                print(f"  • MFT fragmentation is {analysis['fragmentation_severity']} ({analysis['mft_fragments']} fragments)")
-                print("    Consider running defragmentation on the MFT")
+            elif analysis["size_severity"] == "warning":
+                print(f"{Fore.YELLOW}{Style.BRIGHT}⚠️  WARNING: MFT Size {analysis['mft_size_gb']:.2f} GB{Style.RESET_ALL}")
+                print(f"   Threshold: >2.0 GB suggests growing metadata pressure")
+                print(f"\n   {Style.BRIGHT}Recommended Actions:{Style.RESET_ALL}")
+                print("   1. Run filesystem scan to identify hotspots:")
+                print("      python -m viper_health.cli.suite --preset user-data")
+                print("   2. Clean up high-churn areas regularly")
+                print("   3. Monitor MFT size weekly to track trends")
+                print()
             
+            if analysis["fragmentation_severity"] == "critical":
+                print(f"{Fore.RED}{Style.BRIGHT}🚨 CRITICAL: MFT Fragmentation - {analysis['mft_fragments']} fragments{Style.RESET_ALL}")
+                print(f"   Threshold: >10 fragments severely impacts performance")
+                print(f"\n   {Style.BRIGHT}Why This Matters:{Style.RESET_ALL}")
+                print("   • Fragmented MFT = random I/O for every file operation")
+                print("   • Especially bad for DRAM-less QLC SSDs")
+                print("   • Causes slowdowns in file explorer, app launches, boot")
+                print(f"\n   {Style.BRIGHT}Immediate Actions:{Style.RESET_ALL}")
+                print("   1. Defragment the MFT (admin required):")
+                print("      defrag C: /U /V")
+                print("      (This may take 10-30 minutes)")
+                print("   2. After defrag, re-run this scan to verify:")
+                print("      python -m viper_health.cli.scan_mft --drive C:")
+                print("   3. If fragmentation persists:")
+                print("      • Indicates severe disk stress or insufficient free space")
+                print("      • Ensure >20% free space on drive")
+                print("      • Consider disk cleanup or moving large files")
+                print()
+            
+            elif analysis["fragmentation_severity"] == "warning":
+                print(f"{Fore.YELLOW}{Style.BRIGHT}⚠️  WARNING: MFT Fragmentation - {analysis['mft_fragments']} fragments{Style.RESET_ALL}")
+                print(f"   Threshold: >5 fragments may impact performance")
+                print(f"\n   {Style.BRIGHT}Recommended Actions:{Style.RESET_ALL}")
+                print("   1. Schedule MFT defragmentation:")
+                print("      defrag C: /U /V (run during low-activity period)")
+                print("   2. Monitor fragmentation monthly")
+                print()
+            
+            # Additional context
+            print(f"{Fore.CYAN}{Style.BRIGHT}📋 ADDITIONAL CONTEXT:{Style.RESET_ALL}")
+            print(f"   {Style.BRIGHT}Post-Cleanup 'Calm Phase':{Style.RESET_ALL}")
+            print("   • After deleting files, let system idle 30-60 minutes")
+            print("   • Windows updates MFT and runs TRIM on deleted blocks")
+            print("   • SSD garbage collection reclaims space")
+            print("   • Re-run scan after calm phase to see improvements")
+            print(f"\n   {Style.BRIGHT}TRIM Status Check (admin required):{Style.RESET_ALL}")
+            print("   fsutil behavior query DisableDeleteNotify")
+            print("   • Should show: DisableDeleteNotify = 0 (TRIM enabled)")
+            print("   • If disabled (=1), enable with:")
+            print("     fsutil behavior set DisableDeleteNotify 0")
+            print(f"\n   {Style.BRIGHT}Related Health Checks:{Style.RESET_ALL}")
+            print("   • I/O Performance: python -m viper_health.cli.benchmark_io")
+            print("   • Filesystem Scan: python -m viper_health.cli.suite --preset quick-check")
+            print()
+        
+        else:
+            print(f"{Fore.GREEN}{Style.BRIGHT}✅ Excellent MFT Health!{Style.RESET_ALL}")
+            print(f"   MFT Size: {analysis['mft_size_gb']:.2f} GB (healthy)")
+            print(f"   Fragmentation: {analysis['mft_fragments']} fragments (healthy)")
+            print("   Continue periodic monitoring to maintain health.")
             print()
         
         # Save to JSON if requested
