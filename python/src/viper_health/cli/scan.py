@@ -34,6 +34,33 @@ from viper_health.scoring.health_score import (
 from viper_health.utils.progress import ProgressReporter
 
 
+# Check if console supports Unicode emojis
+def _supports_unicode() -> bool:
+    """Check if stdout supports UTF-8 encoding."""
+    try:
+        return sys.stdout.encoding.lower() in ('utf-8', 'utf8')
+    except AttributeError:
+        return False
+
+
+# Icon sets with fallback for non-UTF8 consoles
+ICONS = {
+    'scan': '🔍' if _supports_unicode() else '[SCAN]',
+    'complete': '✅' if _supports_unicode() else '[OK]',
+    'warning': '⚠️' if _supports_unicode() else '[WARN]',
+    'critical': '❌' if _supports_unicode() else '[CRIT]',
+    'stats': '📊' if _supports_unicode() else '[STATS]',
+    'folder': '📂' if _supports_unicode() else '[DIR]',
+    'dir': '📁' if _supports_unicode() else '[DIRS]',
+    'file': '📄' if _supports_unicode() else '[FILES]',
+    'microscope': '🔬' if _supports_unicode() else '[TINY]',
+    'magnify': '🔍' if _supports_unicode() else '[FIND]',
+    'mute': '🔕' if _supports_unicode() else '[SUPP]',
+    'bulb': '💡' if _supports_unicode() else '[TIP]',
+    'bullet': '•' if _supports_unicode() else '-',
+}
+
+
 def run_full_scan(
     root: Path,
     *,
@@ -321,18 +348,32 @@ Examples:
 
     # Console summary (default if no files specified)
     if args.console_summary or (not args.output_json and not args.output_md):
+        # Determine health icon
+        severity = results['health_score'].severity_band
+        if severity == "good":
+            health_icon = ICONS['complete']
+        elif severity == "watch":
+            health_icon = ICONS['warning']
+        elif severity == "degraded":
+            health_icon = ICONS['warning']
+        else:  # critical
+            health_icon = ICONS['critical']
+        
         print("\n" + "="*70)
-        print("VIPER HEALTH SCAN SUMMARY")
+        print(f"{ICONS['stats']} VIPER HEALTH SCAN SUMMARY")
         print("="*70)
-        print(f"Root: {results['scan_root']}")
-        print(f"Health Score: {results['health_score'].overall_score:.1f} / 100 ({results['health_score'].severity_band.upper()})")
-        print(f"Findings: {len(results['findings'])} | Suppressed: {len(results['suppressed'])}")
+        print(f"{ICONS['folder']} Root: {results['scan_root']}")
+        print(f"{ICONS['dir']} Directories Scanned: {results['inventory'].directories_scanned:,}")
+        print(f"{ICONS['file']} Files Scanned: {results['inventory'].total_files:,}")
+        print(f"{ICONS['microscope']} Tiny Files (<{args.tiny_max_bytes} bytes): {results['inventory'].tiny_files:,}")
+        print(f"{health_icon} Health Score: {results['health_score'].overall_score:.1f} / 100 ({results['health_score'].severity_band.upper()})")
+        print(f"{ICONS['magnify']} Findings: {len(results['findings'])} | {ICONS['mute']} Suppressed: {len(results['suppressed'])}")
         print("="*70 + "\n")
 
         if results["recommendations"]:
-            print("Recommendations:")
+            print(f"{ICONS['bulb']} Recommendations:")
             for rec in results["recommendations"]:
-                print(f"  - {rec}")
+                print(f"  {ICONS['bullet']} {rec}")
             print()
 
     # Exit code: 1 if critical severity, 0 otherwise

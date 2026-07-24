@@ -36,6 +36,35 @@ from viper_health.reports.json_reporter import build_json_report, write_json_rep
 from viper_health.reports.markdown_reporter import build_markdown_report, write_markdown_report
 
 
+# Check if console supports Unicode emojis
+def _supports_unicode() -> bool:
+    """Check if stdout supports UTF-8 encoding."""
+    try:
+        return sys.stdout.encoding.lower() in ('utf-8', 'utf8')
+    except AttributeError:
+        return False
+
+
+# Icon sets with fallback for non-UTF8 consoles
+ICONS = {
+    'rocket': '🚀' if _supports_unicode() else '[RUN]',
+    'memo': '📝' if _supports_unicode() else '[DESC]',
+    'target': '🎯' if _supports_unicode() else '[TARGET]',
+    'scan': '🔍' if _supports_unicode() else '[SCAN]',
+    'skip': '⏭️' if _supports_unicode() else '[SKIP]',
+    'complete': '✅' if _supports_unicode() else '[OK]',
+    'watch': '🔍' if _supports_unicode() else '[WATCH]',
+    'warning': '⚠️' if _supports_unicode() else '[WARN]',
+    'critical': '❌' if _supports_unicode() else '[CRIT]',
+    'error': '❌' if _supports_unicode() else '[ERR]',
+    'file': '📄' if _supports_unicode() else '[JSON]',
+    'markdown': '📝' if _supports_unicode() else '[MD]',
+    'stats': '📊' if _supports_unicode() else '[STATS]',
+    'magnify': '🔍' if _supports_unicode() else '[FIND]',
+    'mute': '🔕' if _supports_unicode() else '[SUPP]',
+}
+
+
 def expand_env_path(path_str: str) -> Path:
     """Expand environment variables and resolve path."""
     expanded = os.path.expandvars(path_str)
@@ -113,17 +142,18 @@ def run_preset_scan(
     # Run scans for all targets
     all_results = []
     
-    print(f"Running preset: {preset_name}")
-    print(f"Description: {preset.get('description', 'No description')}")
-    print(f"Targets: {len(targets)}")
+    print(f"{ICONS['rocket']} Running preset: {preset_name}")
+    print(f"{ICONS['memo']} Description: {preset.get('description', 'No description')}")
+    print(f"{ICONS['target']} Targets: {len(targets)}")
     print()
     
     for idx, target in enumerate(targets, 1):
         if not target.exists():
-            print(f"[{idx}/{len(targets)}] SKIP: {target} (does not exist)")
+            print(f"[{idx}/{len(targets)}] {ICONS['skip']} SKIP: {target} (does not exist)")
             continue
         
-        print(f"[{idx}/{len(targets)}] Scanning: {target}")
+        print(f"[{idx}/{len(targets)}] {ICONS['scan']} Scanning: {target}")
+        print()
         
         try:
             result = run_full_scan(
@@ -144,10 +174,23 @@ def run_preset_scan(
             score = result["health_score"].overall_score
             band = result["health_score"].severity_band.upper()
             findings = len(result.get("findings", []))
-            print(f"  → Health: {score:.1f}/100 ({band}) | Findings: {findings}")
+            
+            # Choose icon based on health
+            if band == "GOOD":
+                icon = ICONS['complete']
+            elif band == "WATCH":
+                icon = ICONS['watch']
+            elif band == "DEGRADED":
+                icon = ICONS['warning']
+            else:  # CRITICAL
+                icon = ICONS['critical']
+            
+            print(f"  {icon} Health: {score:.1f}/100 ({band}) | {ICONS['magnify']} Findings: {findings}")
+            print()
             
         except Exception as e:
-            print(f"  → ERROR: {e}")
+            print(f"  {ICONS['error']} ERROR: {e}")
+            print()
             continue
         
         print()
@@ -250,8 +293,8 @@ def run_preset_scan(
             }
             json.dump(consolidated_output, f, indent=2)
         
-        print(f"JSON report: {json_path}")
-        print(f"Markdown report: {md_path}")
+        print(f"{ICONS['file']} JSON report: {json_path}")
+        print(f"{ICONS['markdown']} Markdown report: {md_path}")
     
     if output_json:
         # Similar serialization for explicit JSON path
@@ -262,16 +305,29 @@ def run_preset_scan(
         pass
     
     if console_summary or (not output_dir and not output_json and not output_md):
+        print()
         print("=" * 70)
-        print("VIPER HEALTH SUITE SUMMARY")
+        print(f"{ICONS['stats']} VIPER HEALTH SUITE SUMMARY")
         print("=" * 70)
-        print(f"Preset: {preset_name}")
-        print(f"Targets Scanned: {consolidated['targets_scanned']}/{consolidated['targets_total']}")
+        print(f"{ICONS['target']} Preset: {preset_name}")
+        print(f"{ICONS['magnify']} Targets Scanned: {consolidated['targets_scanned']}/{consolidated['targets_total']}")
         if "summary" in consolidated:
-            print(f"Average Health: {consolidated['summary']['average_health_score']}/100")
-            print(f"Total Findings: {consolidated['summary']['total_findings']}")
-            print(f"Total Suppressed: {consolidated['summary']['total_suppressed']}")
+            avg = consolidated['summary']['average_health_score']
+            # Determine health icon for average
+            if avg >= 80:
+                avg_icon = ICONS['complete']
+            elif avg >= 60:
+                avg_icon = ICONS['watch']
+            elif avg >= 40:
+                avg_icon = ICONS['warning']
+            else:
+                avg_icon = ICONS['critical']
+            
+            print(f"{avg_icon} Average Health: {avg}/100")
+            print(f"{ICONS['magnify']} Total Findings: {consolidated['summary']['total_findings']}")
+            print(f"{ICONS['mute']} Total Suppressed: {consolidated['summary']['total_suppressed']}")
         print("=" * 70)
+        print()
     
     return consolidated
 

@@ -80,7 +80,7 @@ class ProgressReporter:
             return
         self.start_time = datetime.now()
         self.last_update = self.start_time
-        print(f"\n{message}", file=sys.stderr)
+        print(f"\n🔍 {message}", file=sys.stderr)
         
     def update(self, dirs_scanned: int, files_scanned: int, current_path: str) -> None:
         """
@@ -105,7 +105,7 @@ class ProgressReporter:
             # Print newline when moving to a new top-level directory
             if self.start_time and (now - self.start_time).total_seconds() > 1:
                 print(file=sys.stderr)
-                print(f"  → Scanning: {display_path}", file=sys.stderr)
+                print(f"  ➜ Scanning: {display_path}", file=sys.stderr)
         
         # Calculate elapsed time
         if self.start_time:
@@ -120,7 +120,7 @@ class ProgressReporter:
         
         # Print progress (overwrite previous line with \r)
         print(
-            f"\r  [{elapsed_str}] Dirs: {dirs_scanned:,} | Files: {files_scanned:,} | {display_path}",
+            f"\r  ⏱️  {elapsed_str} | 📁 {dirs_scanned:,} dirs | 📄 {files_scanned:,} files | {display_path}",
             end='',
             file=sys.stderr,
             flush=True
@@ -146,7 +146,7 @@ class ProgressReporter:
         
         # Clear the progress line and print final stats
         print(
-            f"\r  Completed: {dirs_scanned:,} directories, {files_scanned:,} files in {elapsed_str}    ",
+            f"\r  ✅ Completed: 📁 {dirs_scanned:,} directories | 📄 {files_scanned:,} files | ⏱️  {elapsed_str}    ",
             file=sys.stderr
         )
         print(file=sys.stderr)  # Extra newline
