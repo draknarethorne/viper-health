@@ -47,6 +47,12 @@ It is designed to:
 | **TRIM Status** | ✅ Complete | SSD TRIM verification | `python/src/viper_health/collectors/trim_status.py` |
 | **Free Space Monitor** | ✅ Complete | QLC-specific thresholds | `python/src/viper_health/collectors/disk_space.py` |
 | **Baseline Comparison** | ✅ Complete | trend analysis | `python/src/viper_health/analyzers/baseline_comparison.py` |
+| **Metadata Pressure** | ✅ Complete | composite signal (4.3) | `python/src/viper_health/analyzers/metadata_pressure.py` |
+| **Churn/Cache Detectors** | ✅ Complete | cloud/browser/update/telemetry (4.4-4.7) | `python/src/viper_health/analyzers/category_pressure.py` |
+| **Snapshot & Churn Velocity** | ✅ Complete | files/day trends (Sec 11) | `python/src/viper_health/analyzers/churn.py` |
+| **Drive Health / SMART** | ✅ Complete | health/temp/wear | `python/src/viper_health/collectors/smart_data.py` |
+| **Process I/O Monitor** | ✅ Complete | top disk-I/O procs | `python/src/viper_health/collectors/io_processes.py` |
+| **Maintenance Mode** | ⏸️ Deferred | intentionally observe-only | see [Safety Model](#️-safety-model) |
 
 ---
 
@@ -252,6 +258,82 @@ python -m viper_health.cli.compare_baseline --baseline data/baselines/baseline.j
 - Improvements after cleanup
 
 **Recommended:** Run weekly comparisons to catch gradual degradation early.
+
+---
+
+### Scanning Churn / Cache / Residue (spec 4.4-4.7)
+
+Scan the well-known Windows churn hotspots — cloud-sync, browser/WebView
+caches, update residue, and telemetry/log directories:
+
+```bash
+# Scan all churn categories
+python -m viper_health.cli.scan_targets --category all
+
+# Just browser/WebView caches
+python -m viper_health.cli.scan_targets --category browser
+
+# Save results
+python -m viper_health.cli.scan_targets --category all --output data/reports/targets.json
+```
+
+Categories: `cloud`, `browser`, `update`, `telemetry`, `all`.
+
+---
+
+### Tracking Churn Over Time (Snapshots, spec Section 11)
+
+Capture point-in-time snapshots and diff them to compute churn velocity
+(files/day) and acceleration:
+
+```bash
+# Capture a baseline snapshot of all target roots
+python -m viper_health.cli.scan_snapshot capture --output data/snapshots/day1.json
+
+# Later, capture again and diff
+python -m viper_health.cli.scan_snapshot capture --output data/snapshots/day2.json
+python -m viper_health.cli.scan_snapshot diff --previous data/snapshots/day1.json --current data/snapshots/day2.json
+```
+
+---
+
+### Composite Metadata Pressure (spec 4.3)
+
+Combine tiny-file totals, directory counts, and optional MFT signals into a
+single pressure score:
+
+```bash
+# Analyze a directory tree
+python -m viper_health.cli.scan_metadata --root C:\Users\me\AppData
+
+# Include MFT signals (requires admin)
+python -m viper_health.cli.scan_metadata --root C:\ --drive C:
+```
+
+---
+
+### Drive Health / SMART / Temperature
+
+Query physical disk health, temperature, and wear via Windows Storage cmdlets:
+
+```bash
+python -m viper_health.cli.check_smart --output data/reports/smart.json
+```
+
+Reports health status, temperature (°C), wear %, power-on hours, and error
+counts per physical disk. For detailed vendor SMART attributes, use
+CrystalDiskInfo or `smartctl`.
+
+---
+
+### Top Disk-I/O Processes
+
+Identify which processes are generating the most disk I/O (helps diagnose
+sustained latency from search indexing, antivirus, or cloud sync):
+
+```bash
+python -m viper_health.cli.check_io --top 10
+```
 
 ---
 

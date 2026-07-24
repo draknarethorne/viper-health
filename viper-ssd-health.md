@@ -500,19 +500,68 @@ Phase 3:
 
 ## 14) Open Decisions (must be finalized before full implementation)
 
-1. **Supported Python version** (recommend `3.12+`)
-2. **Preferred config format** (`YAML` vs `JSON`)
-3. **Canonical path normalization strategy** for Windows short/long paths
-4. **Score calibration source** (fixed weights vs data-driven tuning)
-5. **Maximum scan scope defaults** (system-wide vs targeted roots)
-6. **Retention policy** for snapshots/reports
-7. **Maintenance action boundary** (what we will never auto-clean)
-8. **Quarantine retention default** (recommended: 14–30 days)
-9. **Per-run action caps** (recommended initial guardrails)
-10. **Emergency override process** (who can run it and when)
+> **Resolution status (2026-07-24):** Most decisions are now settled by the
+> Python implementation. Remaining open items are noted inline.
+
+1. **Supported Python version** — ✅ Resolved: `3.12+` (`python/pyproject.toml`).
+2. **Preferred config format** — ✅ Resolved: `YAML` (`config/*.yaml`).
+3. **Canonical path normalization strategy** — ✅ Resolved: `Path.resolve()` /
+   env-var expansion; long/short path edge cases deferred.
+4. **Score calibration source** — ✅ Resolved: fixed weights (Section 6).
+5. **Maximum scan scope defaults** — ✅ Resolved: targeted roots via presets
+   (`config/scan-presets.yaml`); full-system available on demand.
+6. **Retention policy** for snapshots/reports — ⏳ Open: outputs are git-ignored;
+   no automatic purge yet.
+7. **Maintenance action boundary** — ✅ Resolved: **no auto-clean**. Tooling is
+   observe-only (see status note below).
+8. **Quarantine retention default** — ⏳ Deferred with maintenance mode.
+9. **Per-run action caps** — ⏳ Deferred with maintenance mode.
+10. **Emergency override process** — ⏳ Deferred with maintenance mode.
+
+---
+
+## 14.1) Implementation Status (2026-07-24)
+
+**Detector families (Section 4): implemented (read-only).**
+
+- 4.1 Tiny-file hotspots — ✅ `analyzers/tiny_file_hotspots.py`
+- 4.2 Directory density — ✅ `analyzers/directory_density.py`
+- 4.3 Metadata pressure composite — ✅ `analyzers/metadata_pressure.py`
+- 4.4 Cloud-sync churn — ✅ `analyzers/category_pressure.py` + `collectors/target_roots.py`
+- 4.5 Browser/WebView2 cache churn — ✅ `analyzers/category_pressure.py`
+- 4.6 Update/installer residue — ✅ `analyzers/category_pressure.py`
+- 4.7 Telemetry/log churn — ✅ `analyzers/category_pressure.py`
+
+**Trend & drive health (Sections 11, plus SSD longevity checks): implemented.**
+
+- Snapshot capture + churn velocity — ✅ `collectors/snapshot.py`, `analyzers/churn.py`
+- Baseline comparison — ✅ `analyzers/baseline_comparison.py`
+- MFT health — ✅ `collectors/mft_info.py`
+- TRIM status — ✅ `collectors/trim_status.py`
+- Free space — ✅ `collectors/disk_space.py`
+- Drive health / SMART / temperature — ✅ `collectors/smart_data.py`
+- Process I/O — ✅ `collectors/io_processes.py`
+- I/O benchmarks — ✅ `benchmarks/io_bench.py`
+
+**Maintenance mode (Sections 3, 8): intentionally deferred.**
+
+The toolkit is deliberately **observe-only**. It reports cleanup candidates but
+never mutates the filesystem. This decision is informed by the VS Code
+extension-tree incident (Section 0): automated cleanup is hazardous even with
+guardrails. If maintenance mode is added later, it MUST implement the full
+mutation-gating model (3.2), immutable-root enforcement (3.3), quarantine-first
+policy (8.1), symlink safety (8.2), process-awareness (8.3), and the safety
+test suite (8.4) before any mutating action ships.
+
+**PowerShell parity (Section 10): not started.** Python is the reference
+implementation; the PowerShell module remains a scaffold.
 
 ---
 
 ## 15) Immediate Next Step
 
-Before writing production scripts, create the directory skeleton in Section 2 and finalize Section 14 decisions. After that, implementation can begin in Phase 1 with minimal rework.
+The directory skeleton (Section 2) exists and Phase 1–2 detectors are
+implemented and test-backed. Remaining optional work: detailed vendor SMART
+attribute parsing, write-amplification tracking, indexing-service detection,
+scheduled runs, and PowerShell parity. Maintenance mode remains deferred by
+design.

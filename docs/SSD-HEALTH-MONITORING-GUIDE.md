@@ -19,182 +19,53 @@
 | **MFT Analysis** | Track MFT size and fragmentation | ✅ Complete |
 | **Tiny-File Hotspots** | Identify metadata pressure from small files | ✅ Complete |
 | **Directory Density** | Find directories with excessive file counts | ✅ Complete |
+| **Metadata Pressure Composite** | Combine tiny-file/dir/MFT/growth signals (4.3) | ✅ Complete |
+| **Cloud-Sync Churn** | OneDrive/Google Drive/Dropbox/workspaceStorage (4.4) | ✅ Complete |
+| **Browser/WebView Cache** | Edge/Chrome/Discord/Teams cache pressure (4.5) | ✅ Complete |
+| **Update/Installer Residue** | SoftwareDistribution/Package Cache (4.6) | ✅ Complete |
+| **Telemetry/Log Churn** | WER/CBS/Temp log pressure (4.7) | ✅ Complete |
+| **Snapshot & Churn Velocity** | Files/day + acceleration trends (Sec 11) | ✅ Complete |
+| **TRIM Status** | Verify TRIM enabled (fsutil) | ✅ Complete |
+| **Free Space Monitor** | QLC-aware free-space thresholds | ✅ Complete |
+| **Drive Health / SMART / Temp** | Physical disk health via Storage cmdlets | ✅ Complete |
+| **Process I/O Monitor** | Top disk-I/O processes | ✅ Complete |
+| **Baseline Comparison** | Trend analysis vs saved baselines | ✅ Complete |
 | **Health Scoring** | Weighted overall health assessment | ✅ Complete |
 | **Suite Runner** | Preset-based multi-target scanning | ✅ Complete |
 
 ### Current Capabilities
 
-- **Filesystem Pressure Detection:** Identify tiny-file proliferation and directory bloat
-- **Performance Baseline:** Measure I/O throughput and IOPS
-- **Metadata Health:** Track MFT size and fragmentation
+- **Filesystem Pressure Detection:** Tiny-file proliferation, directory bloat, composite metadata pressure
+- **Churn Detection:** Cloud-sync, browser/cache, update residue, telemetry/log families + snapshot velocity
+- **Performance Baseline:** I/O throughput and IOPS with DRAM-less QLC thresholds
+- **Metadata Health:** MFT size and fragmentation
+- **Drive Health:** SMART/temperature/wear via Windows Storage cmdlets
+- **TRIM & Free Space:** Critical SSD-longevity checks
+- **Trend Tracking:** Snapshot-over-snapshot churn + baseline comparison
 - **Safety-First Design:** Read-only defaults, immutable path protection
 - **Multi-Format Reports:** JSON, Markdown, console output with color coding
 
 ---
 
-## What We're Missing (Critical Gaps)
+## What We're Missing (Remaining Gaps)
 
-### 🚨 High Priority (Essential for SSD Health)
-
-#### 1. TRIM Status Monitoring
-**Why It Matters:**
-- TRIM tells the SSD which blocks are no longer in use
-- Without TRIM, SSD can't reclaim deleted space efficiently
-- Critical for DRAM-less QLC drives (no mapping cache)
-
-**What to Build:**
-```python
-# python/src/viper_health/collectors/trim_status.py
-def check_trim_status(drive: str = "C:") -> dict:
-    """
-    Check if TRIM is enabled for the drive.
-    Uses: fsutil behavior query DisableDeleteNotify
-    Returns: {enabled: bool, message: str}
-    """
-```
-
-**CLI Command:**
-```bash
-python -m viper_health.cli.check_trim --drive C:
-```
-
-**Impact:** If TRIM is disabled, your SSD will continuously degrade even after cleanup.
-
----
-
-#### 2. Free Space Monitoring
-**Why It Matters:**
-- SSDs need 15-20% free space for optimal performance
-- QLC drives especially need headroom for wear leveling
-- SLC cache size depends on available free space
-
-**What to Build:**
-```python
-# python/src/viper_health/collectors/disk_space.py
-def analyze_disk_space(drive: str = "C:") -> dict:
-    """
-    Track free space, warn when <20% free.
-    Returns: {
-        total_gb: float,
-        used_gb: float,
-        free_gb: float,
-        free_percent: float,
-        severity: "good"|"warning"|"critical"
-    }
-    """
-```
-
-**Thresholds:**
-- `<10% free` = CRITICAL (immediate action needed)
-- `10-20% free` = WARNING (clean up soon)
-- `>20% free` = GOOD
-
----
-
-#### 3. Drive Temperature Monitoring
-**Why It Matters:**
-- High temps (>70°C) trigger thermal throttling
-- QLC NAND is more temperature-sensitive than TLC
-- Sustained high temps reduce drive lifespan
-
-**What to Build:**
-```python
-# python/src/viper_health/collectors/drive_temp.py
-def get_drive_temperature(drive: str = "C:") -> dict:
-    """
-    Query SMART temperature data.
-    Uses: wmic or smartctl (if available)
-    Returns: {
-        temperature_c: float,
-        severity: "good"|"warning"|"critical"
-    }
-    """
-```
-
-**Thresholds:**
-- `<55°C` = GOOD (optimal)
-- `55-70°C` = WARNING (monitor)
-- `>70°C` = CRITICAL (throttling likely)
-
----
-
-#### 4. SMART Data Analysis
-**Why It Matters:**
-- SMART attributes reveal drive health (wear level, reallocated sectors, etc.)
-- Power-on hours, write amplification, total bytes written
-- Early warning of impending failure
-
-**What to Build:**
-```python
-# python/src/viper_health/collectors/smart_data.py
-def analyze_smart_data(drive: str = "C:") -> dict:
-    """
-    Parse SMART attributes.
-    Requires: smartctl (smartmontools) or wmic
-    Key attributes:
-    - 05: Reallocated Sector Count
-    - 09: Power-On Hours
-    - 0C: Power Cycle Count
-    - C2: Temperature
-    - F1: Total LBAs Written
-    """
-```
-
-**Use External Tool:** CrystalDiskInfo or `smartctl` from smartmontools
-
----
-
-#### 5. Trend Tracking / Baseline Comparison
-**Why It Matters:**
-- Single-point measurements don't show degradation
-- Need weekly/monthly baselines to track performance over time
-- Identify gradual decline before it becomes critical
-
-**What to Build:**
-```python
-# python/src/viper_health/analyzers/trend_analyzer.py
-def compare_to_baseline(current_results: dict, baseline_path: Path) -> dict:
-    """
-    Compare current scan results to saved baseline.
-    Detect:
-    - Performance regression (benchmark throughput down >20%)
-    - MFT size growth (>500 MB increase)
-    - Tiny-file count explosion (>50K increase)
-    Returns: {changes: [...], severity: str, alerts: [...]}
-    """
-```
-
-**Workflow:**
-1. Save baseline after cleanup: `--output data/baselines/week1.json`
-2. Compare weekly: `python -m viper_health.cli.compare_baseline --baseline data/baselines/week1.json`
-
----
+The core detector families and drive-health checks from the spec are now
+implemented. Remaining items are lower-value or better served by mature
+external tools.
 
 ### ⚠️ Medium Priority (Useful for Deep Diagnostics)
 
-#### 6. Background Process I/O Monitoring
-**Why It Matters:**
-- Rogue processes can hammer the drive (Windows Search, antivirus, cloud sync)
-- Identify what's causing sustained high I/O
+#### 1. Detailed SMART Attribute Parsing
+**Status:** Partially covered by `check_smart` (health, temperature, wear,
+power-on hours, error counts via Storage cmdlets).
 
-**Tools to Integrate:**
-- Windows Resource Monitor → Disk tab
-- Process Explorer (SysInternals)
-- `Get-Process | Sort-Object -Property WorkingSet -Descending`
-
-**What to Build:**
-```python
-# python/src/viper_health/collectors/io_processes.py
-def identify_high_io_processes() -> list[dict]:
-    """
-    Query top I/O processes via WMI or psutil.
-    Returns: [{name, pid, read_bytes, write_bytes}]
-    """
-```
+**Gap:** Raw vendor SMART attributes (reallocated sectors, write amplification,
+total LBAs written). Best served by **CrystalDiskInfo** or `smartctl`
+(smartmontools), which already parse vendor-specific attributes reliably.
 
 ---
 
-#### 7. Write Amplification Tracking
+#### 2. Write Amplification Tracking
 **Why It Matters:**
 - Ratio of NAND writes to host writes
 - High write amplification = excessive garbage collection overhead
@@ -205,11 +76,11 @@ def identify_high_io_processes() -> list[dict]:
 - Compare to filesystem write tracking
 
 **Implementation:**
-Integrate with SMART data collector (item #4 above)
+Integrate with detailed SMART attribute parsing (item #1 above)
 
 ---
 
-#### 8. Indexing Service Detection
+#### 3. Indexing Service Detection
 **Why It Matters:**
 - Windows Search indexing hammers SSDs with tiny-file reads
 - Can cause sustained 100% disk usage
@@ -231,7 +102,7 @@ def check_indexing_status(path: Path) -> dict:
 
 ---
 
-#### 9. Defragmentation Scheduler
+#### 4. Defragmentation Scheduler
 **Why It Matters:**
 - MFT defragmentation should be scheduled after cleanup
 - SSDs don't need traditional defrag, but MFT defrag is valuable
@@ -254,15 +125,15 @@ function Invoke-MFTDefrag {
 
 ### 💡 Low Priority (Nice to Have)
 
-#### 10. SSD Firmware Version Check
+#### 5. SSD Firmware Version Check
 - Outdated firmware may have performance bugs
 - Check manufacturer's site for updates
 
-#### 11. Over-Provisioning Calculator
+#### 6. Over-Provisioning Calculator
 - Recommend over-provisioning space for QLC drives
 - Improves endurance and performance
 
-#### 12. Power Loss Protection Check
+#### 7. Power Loss Protection Check
 - Detect if drive has power-loss protection (PLP)
 - DRAM-less drives often lack PLP
 
@@ -285,15 +156,20 @@ python -m viper_health.cli.suite --preset user-data --console-summary
 ### Weekly
 ```bash
 # 1. Run full I/O benchmark
-python -m viper_health.cli.benchmark_io --output data/benchmarks/week$(date +%V).json
+python -m viper_health.cli.benchmark_io --output data/benchmarks/week.json
 
 # 2. Compare to baseline
-python -m viper_health.cli.compare_baseline --baseline data/baselines/baseline.json
+python -m viper_health.cli.compare_baseline --baseline data/baselines/baseline.json --current data/benchmarks/week.json
 
 # 3. Check MFT health (requires admin)
-python -m viper_health.cli.scan_mft --drive C: --output data/mft/week$(date +%V).json
+python -m viper_health.cli.scan_mft --drive C: --output data/reports/mft_week.json
 
-# 4. Review trends for degradation
+# 4. Check churn/cache pressure
+python -m viper_health.cli.scan_targets --category all
+
+# 5. Capture a churn snapshot and diff vs last week
+python -m viper_health.cli.scan_snapshot capture --output data/snapshots/week.json
+python -m viper_health.cli.scan_snapshot diff --previous data/snapshots/last_week.json --current data/snapshots/week.json
 ```
 
 ### Monthly
@@ -382,6 +258,7 @@ Get-PSDrive C | Select-Object Used,Free
 resmon.exe
 # Go to Disk tab, sort by Total (B/sec)
 ```
+- Or use the built-in monitor: `python -m viper_health.cli.check_io`
 - Look for sustained high I/O (Windows Search, antivirus, cloud sync)
 - Temporarily disable/pause to test
 
@@ -393,7 +270,8 @@ fsutil behavior query DisableDeleteNotify
 - If disabled: `fsutil behavior set DisableDeleteNotify 0`
 
 **Step 4: Check Drive Temperature**
-- Download CrystalDiskInfo or HWiNFO64
+- Run: `python -m viper_health.cli.check_smart`
+- Or download CrystalDiskInfo / HWiNFO64 for vendor SMART attributes
 - If >70°C, improve cooling or reduce workload
 
 **Step 5: Scan for Tiny-File Hotspots**
@@ -438,25 +316,33 @@ python -m viper_health.cli.scan_mft --drive C:
 
 ## Next Steps for This Project
 
-### Priority 1: Build Missing Core Analyzers
-1. TRIM status checker
-2. Free space monitor with thresholds
-3. Baseline comparison / trend tracking
+### ✅ Completed (Core Detector Families & Drive Health)
 
-### Priority 2: Enhanced Reporting
-1. Add trend graphs (if matplotlib available)
-2. Combined health report (all metrics in one view)
-3. Actionable recommendations based on findings
+1. TRIM status checker — `check_trim`
+2. Free space monitor with thresholds — `check_space`
+3. Baseline comparison / trend tracking — `compare_baseline`
+4. Metadata pressure composite — `scan_metadata`
+5. Cloud-sync / browser / update / telemetry churn — `scan_targets`
+6. Snapshot & churn velocity — `scan_snapshot`
+7. Drive health / SMART / temperature — `check_smart`
+8. Process I/O monitor — `check_io`
 
-### Priority 3: Automation
-1. Scheduled health checks (Task Scheduler integration)
-2. Email/notification alerts for critical findings
-3. Auto-cleanup dry-run generator
+### Remaining (Lower Priority / External Tools)
 
-### Priority 4: PowerShell Parity
-1. Port Python analyzers to PowerShell module
-2. Windows-native tooling for sysadmins
-3. Integration with Windows Admin Center
+1. Detailed vendor SMART attribute parsing (use CrystalDiskInfo / smartctl)
+2. Write-amplification tracking
+3. Indexing-service detection + recommendations
+4. Scheduled health checks (Task Scheduler integration)
+5. PowerShell parity for the new analyzers
+
+### Note on Maintenance Mode
+
+The spec's maintenance/cleanup mode (Sections 3, 8) is **intentionally deferred**.
+viper-health is deliberately **observe-only**: it reports cleanup candidates but
+never mutates the filesystem. Manual cleanup guided by these reports is safer
+for a system where a prior automated cleanup damaged VS Code's built-in
+extensions. If maintenance mode is ever added, it must implement the full
+quarantine-first, dry-run, mutation-gating, and kill-switch safeguards in the spec.
 
 ---
 

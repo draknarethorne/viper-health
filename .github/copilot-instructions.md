@@ -32,6 +32,30 @@ Authoritative spec:
 
 ---
 
+## Implemented Detectors & CLIs (observe-only)
+
+All detector families in the spec (Section 4) plus drive-health checks are
+implemented in Python and test-backed. The toolkit is **read-only**; maintenance
+mode (spec Sections 3, 8) is intentionally deferred.
+
+| CLI (`python -m viper_health.cli.<x>`) | Purpose |
+| --- | --- |
+| `scan` | Unified tiny-file + directory-density scan with health score |
+| `suite` | Preset-based multi-target scans (`config/scan-presets.yaml`) |
+| `scan_tiny_files` / `scan_directory_density` | Individual detectors |
+| `scan_metadata` | Composite metadata pressure (4.3) |
+| `scan_targets` | Cloud/browser/update/telemetry churn (4.4-4.7) |
+| `scan_snapshot` | Capture/diff snapshots for churn velocity (Sec 11) |
+| `scan_mft` | MFT size + fragmentation (admin) |
+| `check_trim` | TRIM status (admin) |
+| `check_space` | Free-space thresholds |
+| `check_smart` | Drive health / SMART / temperature |
+| `check_io` | Top disk-I/O processes |
+| `benchmark_io` | Sequential/random I/O benchmarks |
+| `compare_baseline` | Trend analysis vs saved baseline |
+
+---
+
 ## Project Structure
 
 ```text

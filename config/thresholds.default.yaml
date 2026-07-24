@@ -6,3 +6,56 @@ thresholds:
   directory_density_critical: 100000
   mft_size_gib_critical: 2.5
   mft_fragments_critical: 10
+
+# Composite metadata pressure (spec 4.3)
+metadata_pressure:
+  mft_size_gib_warning: 2.0
+  mft_size_gib_critical: 2.5
+  mft_fragments_warning: 5
+  mft_fragments_critical: 10
+  tiny_files_warning: 250000
+  tiny_files_critical: 500000
+  directories_warning: 100000
+  directories_critical: 200000
+  growth_per_day_warning: 10000
+  growth_per_day_critical: 25000
+
+# Churn / cache / residue categories (spec 4.4-4.7)
+category_pressure:
+  cloud_sync:
+    file_count_warning: 50000
+    file_count_critical: 100000
+    size_gib_warning: 10
+    size_gib_critical: 25
+  browser_cache:
+    file_count_warning: 50000
+    file_count_critical: 100000
+    size_gib_warning: 5
+    size_gib_critical: 15
+  update_residue:
+    file_count_warning: 10000
+    file_count_critical: 30000
+    size_gib_warning: 5
+    size_gib_critical: 15
+  telemetry_log:
+    file_count_warning: 10000
+    file_count_critical: 30000
+    size_gib_warning: 5
+    size_gib_critical: 15
+
+# Churn velocity (snapshot-over-snapshot, spec Section 11)
+churn:
+  files_per_day_warning: 10000
+  files_per_day_critical: 25000
+
+# Free space (SSD longevity)
+disk_space:
+  free_percent_warning: 20
+  free_percent_critical: 10
+
+# Drive health / SMART
+drive_health:
+  temperature_c_warning: 55
+  temperature_c_critical: 70
+  wear_percent_warning: 70
+  wear_percent_critical: 90
