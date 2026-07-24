@@ -35,6 +35,18 @@ from viper_health.cli.scan import run_full_scan
 from viper_health.reports.json_reporter import build_json_report, write_json_report
 from viper_health.reports.markdown_reporter import build_markdown_report, write_markdown_report
 
+try:
+    from colorama import Fore, Style, init as colorama_init
+    colorama_init(autoreset=True)
+    COLORS_AVAILABLE = True
+except ImportError:
+    COLORS_AVAILABLE = False
+    # Fallback no-op classes
+    class Fore:
+        GREEN = YELLOW = RED = CYAN = RESET = ""
+    class Style:
+        BRIGHT = RESET_ALL = ""
+
 
 # Check if console supports Unicode emojis
 def _supports_unicode() -> bool:
@@ -142,17 +154,17 @@ def run_preset_scan(
     # Run scans for all targets
     all_results = []
     
-    print(f"{ICONS['rocket']} Running preset: {preset_name}")
+    print(f"{Fore.CYAN}{Style.BRIGHT}{ICONS['rocket']} Running preset: {preset_name}{Style.RESET_ALL}")
     print(f"{ICONS['memo']} Description: {preset.get('description', 'No description')}")
     print(f"{ICONS['target']} Targets: {len(targets)}")
     print()
     
     for idx, target in enumerate(targets, 1):
         if not target.exists():
-            print(f"[{idx}/{len(targets)}] {ICONS['skip']} SKIP: {target} (does not exist)")
+            print(f"[{idx}/{len(targets)}] {Fore.YELLOW}{ICONS['skip']} SKIP: {target} (does not exist){Style.RESET_ALL}")
             continue
         
-        print(f"[{idx}/{len(targets)}] {ICONS['scan']} Scanning: {target}")
+        print(f"[{idx}/{len(targets)}] {Fore.CYAN}{ICONS['scan']} Scanning: {target}{Style.RESET_ALL}")
         print()
         
         try:
@@ -175,21 +187,25 @@ def run_preset_scan(
             band = result["health_score"].severity_band.upper()
             findings = len(result.get("findings", []))
             
-            # Choose icon based on health
+            # Choose icon and color based on health
             if band == "GOOD":
                 icon = ICONS['complete']
+                health_color = Fore.GREEN
             elif band == "WATCH":
                 icon = ICONS['watch']
+                health_color = Fore.YELLOW
             elif band == "DEGRADED":
                 icon = ICONS['warning']
+                health_color = Fore.YELLOW
             else:  # CRITICAL
                 icon = ICONS['critical']
+                health_color = Fore.RED
             
-            print(f"  {icon} Health: {score:.1f}/100 ({band}) | {ICONS['magnify']} Findings: {findings}")
+            print(f"  {health_color}{Style.BRIGHT}{icon} Health: {score:.1f}/100 ({band}){Style.RESET_ALL} | {ICONS['magnify']} Findings: {findings}")
             print()
             
         except Exception as e:
-            print(f"  {ICONS['error']} ERROR: {e}")
+            print(f"  {Fore.RED}{ICONS['error']} ERROR: {e}{Style.RESET_ALL}")
             print()
             continue
         
@@ -293,8 +309,8 @@ def run_preset_scan(
             }
             json.dump(consolidated_output, f, indent=2)
         
-        print(f"{ICONS['file']} JSON report: {json_path}")
-        print(f"{ICONS['markdown']} Markdown report: {md_path}")
+        print(f"{Fore.GREEN}{ICONS['file']} JSON report: {json_path}{Style.RESET_ALL}")
+        print(f"{Fore.GREEN}{ICONS['markdown']} Markdown report: {md_path}{Style.RESET_ALL}")
     
     if output_json:
         # Similar serialization for explicit JSON path
@@ -307,23 +323,27 @@ def run_preset_scan(
     if console_summary or (not output_dir and not output_json and not output_md):
         print()
         print("=" * 70)
-        print(f"{ICONS['stats']} VIPER HEALTH SUITE SUMMARY")
+        print(f"{Fore.CYAN}{Style.BRIGHT}{ICONS['stats']} VIPER HEALTH SUITE SUMMARY{Style.RESET_ALL}")
         print("=" * 70)
         print(f"{ICONS['target']} Preset: {preset_name}")
         print(f"{ICONS['magnify']} Targets Scanned: {consolidated['targets_scanned']}/{consolidated['targets_total']}")
         if "summary" in consolidated:
             avg = consolidated['summary']['average_health_score']
-            # Determine health icon for average
+            # Determine health icon and color for average
             if avg >= 80:
                 avg_icon = ICONS['complete']
+                avg_color = Fore.GREEN
             elif avg >= 60:
                 avg_icon = ICONS['watch']
+                avg_color = Fore.YELLOW
             elif avg >= 40:
                 avg_icon = ICONS['warning']
+                avg_color = Fore.YELLOW
             else:
                 avg_icon = ICONS['critical']
+                avg_color = Fore.RED
             
-            print(f"{avg_icon} Average Health: {avg}/100")
+            print(f"{avg_color}{Style.BRIGHT}{avg_icon} Average Health: {avg}/100{Style.RESET_ALL}")
             print(f"{ICONS['magnify']} Total Findings: {consolidated['summary']['total_findings']}")
             print(f"{ICONS['mute']} Total Suppressed: {consolidated['summary']['total_suppressed']}")
         print("=" * 70)

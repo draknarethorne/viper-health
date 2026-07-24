@@ -33,6 +33,18 @@ from viper_health.scoring.health_score import (
 )
 from viper_health.utils.progress import ProgressReporter
 
+try:
+    from colorama import Fore, Style, init as colorama_init
+    colorama_init(autoreset=True)
+    COLORS_AVAILABLE = True
+except ImportError:
+    COLORS_AVAILABLE = False
+    # Fallback no-op classes
+    class Fore:
+        GREEN = YELLOW = RED = CYAN = RESET = ""
+    class Style:
+        BRIGHT = RESET_ALL = ""
+
 
 # Check if console supports Unicode emojis
 def _supports_unicode() -> bool:
@@ -348,30 +360,34 @@ Examples:
 
     # Console summary (default if no files specified)
     if args.console_summary or (not args.output_json and not args.output_md):
-        # Determine health icon
+        # Determine health icon and color
         severity = results['health_score'].severity_band
         if severity == "good":
             health_icon = ICONS['complete']
+            health_color = Fore.GREEN
         elif severity == "watch":
             health_icon = ICONS['warning']
+            health_color = Fore.YELLOW
         elif severity == "degraded":
             health_icon = ICONS['warning']
+            health_color = Fore.YELLOW
         else:  # critical
             health_icon = ICONS['critical']
+            health_color = Fore.RED
         
         print("\n" + "="*70)
-        print(f"{ICONS['stats']} VIPER HEALTH SCAN SUMMARY")
+        print(f"{Fore.CYAN}{Style.BRIGHT}{ICONS['stats']} VIPER HEALTH SCAN SUMMARY{Style.RESET_ALL}")
         print("="*70)
         print(f"{ICONS['folder']} Root: {results['scan_root']}")
         print(f"{ICONS['dir']} Directories Scanned: {results['inventory'].directories_scanned:,}")
         print(f"{ICONS['file']} Files Scanned: {results['inventory'].total_files:,}")
         print(f"{ICONS['microscope']} Tiny Files (<{args.tiny_max_bytes} bytes): {results['inventory'].tiny_files:,}")
-        print(f"{health_icon} Health Score: {results['health_score'].overall_score:.1f} / 100 ({results['health_score'].severity_band.upper()})")
+        print(f"{health_color}{Style.BRIGHT}{health_icon} Health Score: {results['health_score'].overall_score:.1f} / 100 ({results['health_score'].severity_band.upper()}){Style.RESET_ALL}")
         print(f"{ICONS['magnify']} Findings: {len(results['findings'])} | {ICONS['mute']} Suppressed: {len(results['suppressed'])}")
         print("="*70 + "\n")
 
         if results["recommendations"]:
-            print(f"{ICONS['bulb']} Recommendations:")
+            print(f"{Fore.YELLOW}{ICONS['bulb']} Recommendations:{Style.RESET_ALL}")
             for rec in results["recommendations"]:
                 print(f"  {ICONS['bullet']} {rec}")
             print()

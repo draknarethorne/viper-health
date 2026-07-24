@@ -6,6 +6,18 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
+try:
+    from colorama import Fore, Style, init as colorama_init
+    colorama_init(autoreset=True)
+    COLORS_AVAILABLE = True
+except ImportError:
+    COLORS_AVAILABLE = False
+    # Fallback no-op classes
+    class Fore:
+        GREEN = YELLOW = RED = CYAN = RESET = ""
+    class Style:
+        BRIGHT = RESET_ALL = ""
+
 
 class ProgressReporter:
     """Hierarchical progress reporter for console output."""
@@ -80,7 +92,7 @@ class ProgressReporter:
             return
         self.start_time = datetime.now()
         self.last_update = self.start_time
-        print(f"\n🔍 {message}", file=sys.stderr)
+        print(f"\n{Fore.CYAN}{Style.BRIGHT}🔍 {message}{Style.RESET_ALL}", file=sys.stderr)
         
     def update(self, dirs_scanned: int, files_scanned: int, current_path: str) -> None:
         """
@@ -105,7 +117,7 @@ class ProgressReporter:
             # Print newline when moving to a new top-level directory
             if self.start_time and (now - self.start_time).total_seconds() > 1:
                 print(file=sys.stderr)
-                print(f"  ➜ Scanning: {display_path}", file=sys.stderr)
+                print(f"  {Fore.YELLOW}➜ Scanning: {display_path}{Style.RESET_ALL}", file=sys.stderr)
         
         # Calculate elapsed time
         if self.start_time:
@@ -146,7 +158,7 @@ class ProgressReporter:
         
         # Clear the progress line and print final stats
         print(
-            f"\r  ✅ Completed: 📁 {dirs_scanned:,} directories | 📄 {files_scanned:,} files | ⏱️  {elapsed_str}    ",
+            f"\r  {Fore.GREEN}{Style.BRIGHT}✅ Completed: 📁 {dirs_scanned:,} directories | 📄 {files_scanned:,} files | ⏱️  {elapsed_str}{Style.RESET_ALL}    ",
             file=sys.stderr
         )
         print(file=sys.stderr)  # Extra newline
