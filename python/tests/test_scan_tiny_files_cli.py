@@ -19,11 +19,16 @@ def test_build_tiny_file_report_contains_summary_and_hotspots(tmp_path: Path) ->
         inventory,
         warning_threshold=2,
         critical_threshold=5,
-        safe_paths=[],
+        safe_paths=None,
     )
+
+    assert "summary" in report
+    assert "findings" in report
+    assert "suppressed" in report
 
     assert report["summary"]["total_files"] == 3
     assert report["summary"]["tiny_files"] == 3
-    assert report["summary"]["hotspot_count"] == 1
-    assert report["summary"]["active_hotspot_count"] == 1
-    assert report["hotspots"][0]["path"] == str(hotspot.resolve())
+    assert report["summary"]["warning_count"] == 1
+    assert report["summary"]["critical_count"] == 0
+    assert len(report["findings"]) == 1
+    assert report["findings"][0]["path"] == str(hotspot)

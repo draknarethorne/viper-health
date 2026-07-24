@@ -15,7 +15,7 @@ def build_tiny_file_report(
     *,
     warning_threshold: int,
     critical_threshold: int,
-    safe_paths: list[str] | None,
+    safe_paths: list[Path] | None,
 ) -> dict:
     """Build a serializable report dictionary."""
 
@@ -26,15 +26,22 @@ def build_tiny_file_report(
         safe_paths=safe_paths,
     )
 
-    hotspots = [
+    findings = [
         {
-            "path": finding.path,
+            "path": str(finding.path),
             "tiny_files": finding.tiny_files,
             "severity": finding.severity,
-            "suppressed": finding.suppressed,
-            "reason": finding.reason,
         }
-        for finding in analysis.hotspots
+        for finding in analysis.findings
+    ]
+
+    suppressed = [
+        {
+            "path": str(finding.path),
+            "tiny_files": finding.tiny_files,
+            "severity": finding.severity,
+        }
+        for finding in analysis.suppressed
     ]
 
     return {
@@ -45,14 +52,12 @@ def build_tiny_file_report(
             "tiny_files": inventory.tiny_files,
             "total_bytes": inventory.total_bytes,
             "directories_scanned": inventory.directories_scanned,
-            "hotspot_count": len(hotspots),
-            "active_hotspot_count": sum(1 for h in hotspots if not h["suppressed"]),
+            "warning_count": analysis.warning_count,
+            "critical_count": analysis.critical_count,
+            "suppressed_count": len(analysis.suppressed),
         },
-        "thresholds": {
-            "warning": analysis.warning_threshold,
-            "critical": analysis.critical_threshold,
-        },
-        "hotspots": hotspots,
+        "findings": findings,
+        "suppressed": suppressed,
     }
 
 

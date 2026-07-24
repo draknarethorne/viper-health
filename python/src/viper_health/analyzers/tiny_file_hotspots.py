@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Sequence
 
 from viper_health.collectors.file_inventory import InventoryResult
 
@@ -12,26 +13,20 @@ from viper_health.collectors.file_inventory import InventoryResult
 class TinyFileHotspot:
     """Classification result for a single directory."""
 
-    path: str
+    path: Path
     tiny_files: int
-    severity: str
-    suppressed: bool
-    reason: str | None = None
+    severity: str  # "warning" | "critical"
 
 
 @dataclass(frozen=True)
 class TinyFileHotspotReport:
     """Aggregated hotspot analysis output."""
 
-    warning_threshold: int
-    critical_threshold: int
-    hotspots: list[TinyFileHotspot]
-
-
-def _normalize_paths(paths: list[str] | None) -> set[str]:
-    if not paths:
-        return set()
-    return {str(Path(path).resolve()) for path in paths}
+    findings: tuple[TinyFileHotspot, ...]
+    suppressed: tuple[TinyFileHotspot, ...]
+    total_directories_scanned: int
+    warning_count: int
+    critical_count: int
 
 
 def analyze_tiny_file_hotspots(
@@ -39,7 +34,7 @@ def analyze_tiny_file_hotspots(
     *,
     warning_threshold: int = 20_000,
     critical_threshold: int = 50_000,
-    safe_paths: list[str] | None = None,
+    safe_paths: list[Path | str] | None = None,
 ) -> TinyFileHotspotReport:
     """Detect directories exceeding tiny-file thresholds.
 
@@ -51,28 +46,49 @@ def analyze_tiny_file_hotspots(
     if critical_threshold <= warning_threshold:
         raise ValueError("critical_threshold must be greater than warning_threshold")
 
-    normalized_safe_paths = _normalize_paths(safe_paths)
-    findings: list[TinyFileHotspot] = []
+    # Normalize safe paths
+    safe_set = {Path(p).resolve() for p in safe_paths} if safe_paths else set()
 
-    for directory, stats in sorted(inventory.per_directory.items()):
+    findings_list: list[TinyFileHotspot] = []
+    suppressed_list: list[TinyFileHotspot] = []
+
+    for directory_str, stats in sorted(inventory.per_directory.items()):
         if stats.tiny_files < warning_threshold:
             continue
 
+        dir_path = Path(directory_str)
         severity = "critical" if stats.tiny_files >= critical_threshold else "warning"
-        suppressed = directory in normalized_safe_paths
 
-        findings.append(
-            TinyFileHotspot(
-                path=directory,
-                tiny_files=stats.tiny_files,
-                severity=severity,
-                suppressed=suppressed,
-                reason="safe_path" if suppressed else None,
-            )
+        hotspot = TinyFileHotspot(
+            path=dir_path,
+            tiny_files=stats.tiny_files,
+            severity=severity,
         )
 
+        # Check if path is in safe set (exact match or parent match)
+        is_safe = False
+        resolved_dir = dir_path.resolve()
+        for safe in safe_set:
+            if resolved_dir == safe or safe in resolved_dir.parents:
+                is_safe = True
+                break
+
+        if is_safe:
+            suppressed_list.append(hotspot)
+        else:
+            findings_list.append(hotspot)
+
+    # Sort by tiny_files descending
+    findings_sorted = sorted(findings_list, key=lambda h: h.tiny_files, reverse=True)
+    suppressed_sorted = sorted(suppressed_list, key=lambda h: h.tiny_files, reverse=True)
+
+    warning_count = sum(1 for h in findings_sorted if h.severity == "warning")
+    critical_count = sum(1 for h in findings_sorted if h.severity == "critical")
+
     return TinyFileHotspotReport(
-        warning_threshold=warning_threshold,
-        critical_threshold=critical_threshold,
-        hotspots=findings,
+        findings=tuple(findings_sorted),
+        suppressed=tuple(suppressed_sorted),
+        total_directories_scanned=inventory.directories_scanned,
+        warning_count=warning_count,
+        critical_count=critical_count,
     )

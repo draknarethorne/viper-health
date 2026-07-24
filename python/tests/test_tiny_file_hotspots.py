@@ -25,25 +25,35 @@ def test_analyzer_flags_warning_and_critical(tmp_path: Path) -> None:
         critical_threshold=5,
     )
 
-    findings = {f.path: f for f in report.hotspots}
+    assert len(report.findings) == 2
+    assert report.warning_count == 1
+    assert report.critical_count == 1
 
-    assert findings[str(warn_dir.resolve())].severity == "warning"
-    assert findings[str(crit_dir.resolve())].severity == "critical"
+    # Check severity assignment
+    findings_dict = {f.path: f for f in report.findings}
+    assert findings_dict[warn_dir].severity == "warning"
+    assert findings_dict[crit_dir].severity == "critical"
 
 
 def test_analyzer_suppresses_safe_path(tmp_path: Path) -> None:
     safe_dir = tmp_path / "safe-zone"
+    unsafe_dir = tmp_path / "unsafe-zone"
+
     for i in range(4):
         _write_file(safe_dir / f"f-{i}.bin", 100)
+        _write_file(unsafe_dir / f"f-{i}.bin", 100)
 
     inventory = scan_file_inventory(tmp_path, tiny_file_max_bytes=4096)
     report = analyze_tiny_file_hotspots(
         inventory,
         warning_threshold=2,
         critical_threshold=5,
-        safe_paths=[str(safe_dir)],
+        safe_paths=[safe_dir],
     )
 
-    finding = next(f for f in report.hotspots if f.path == str(safe_dir.resolve()))
-    assert finding.suppressed is True
-    assert finding.reason == "safe_path"
+    # safe_dir should be in suppressed, unsafe_dir in findings
+    assert len(report.findings) == 1
+    assert report.findings[0].path == unsafe_dir
+
+    assert len(report.suppressed) == 1
+    assert report.suppressed[0].path == safe_dir
