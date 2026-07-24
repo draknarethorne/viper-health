@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -36,7 +37,13 @@ def _increment_stats(existing: DirectoryStats, *, size_bytes: int, is_tiny: bool
     )
 
 
-def scan_file_inventory(root: Path | str, *, tiny_file_max_bytes: int = 4096) -> InventoryResult:
+def scan_file_inventory(
+    root: Path | str,
+    *,
+    tiny_file_max_bytes: int = 4096,
+    progress_callback: Callable[[int, int, str], None] | None = None,
+    progress_interval: int = 100,
+) -> InventoryResult:
     """Scan a directory tree and aggregate tiny-file statistics.
 
     Parameters
@@ -45,6 +52,10 @@ def scan_file_inventory(root: Path | str, *, tiny_file_max_bytes: int = 4096) ->
         Root directory to scan recursively.
     tiny_file_max_bytes:
         File size threshold (inclusive) for tiny-file classification.
+    progress_callback:
+        Optional callback(directories_scanned, files_scanned, current_dir) for progress reporting.
+    progress_interval:
+        How often to call progress_callback (every N directories).
     """
 
     root_path = Path(root).resolve()
@@ -63,6 +74,10 @@ def scan_file_inventory(root: Path | str, *, tiny_file_max_bytes: int = 4096) ->
         directories_scanned += 1
         dir_key = str(dirpath.resolve())
         per_directory.setdefault(dir_key, DirectoryStats())
+        
+        # Report progress periodically
+        if progress_callback and directories_scanned % progress_interval == 0:
+            progress_callback(directories_scanned, total_files, str(dirpath))
 
         for filename in filenames:
             file_path = dirpath / filename

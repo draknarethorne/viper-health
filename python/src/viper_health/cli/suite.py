@@ -67,6 +67,7 @@ def run_preset_scan(
     output_json: Path | None = None,
     output_md: Path | None = None,
     console_summary: bool = False,
+    show_progress: bool = False,
     config_path: Path | None = None,
 ) -> dict:
     """
@@ -78,6 +79,7 @@ def run_preset_scan(
         output_json: Explicit JSON output path
         output_md: Explicit Markdown output path
         console_summary: Print summary to console
+        show_progress: Show progress updates during scans
         config_path: Optional custom config file path
 
     Returns:
@@ -133,6 +135,7 @@ def run_preset_scan(
                 dir_density_warning=dir_density_warning,
                 dir_density_critical=dir_density_critical,
                 safe_paths=exclusions if exclusions else None,
+                show_progress=show_progress,
             )
             result["scan_target"] = str(target)
             all_results.append(result)
@@ -309,7 +312,7 @@ Examples:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        help="Directory for auto-named output files (JSON + Markdown)",
+        help="Directory for auto-named output files (default: data/reports/ in project)",
     )
     
     parser.add_argument(
@@ -328,6 +331,12 @@ Examples:
         "--console-summary",
         action="store_true",
         help="Print summary to console (default: true if no output specified)",
+    )
+    
+    parser.add_argument(
+        "--progress",
+        action="store_true",
+        help="Show progress updates during scans (recommended for large scans like full-system)",
     )
     
     parser.add_argument(
@@ -359,13 +368,22 @@ Examples:
     if not args.preset:
         parser.error("--preset is required (or use --list-presets)")
     
+    # Default output_dir to project data/reports if not specified
+    output_dir = args.output_dir
+    if not output_dir and not args.output_json and not args.output_md:
+        # Calculate path relative to this file: suite.py -> src/viper_health/cli
+        # Go up to repo root: cli -> viper_health -> src -> python -> repo_root
+        repo_root = Path(__file__).parent.parent.parent.parent.parent
+        output_dir = repo_root / "data" / "reports"
+    
     try:
         run_preset_scan(
             preset_name=args.preset,
-            output_dir=args.output_dir,
+            output_dir=output_dir,
             output_json=args.output_json,
             output_md=args.output_md,
             console_summary=args.console_summary,
+            show_progress=args.progress,
             config_path=args.config,
         )
         return 0

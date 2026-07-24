@@ -31,6 +31,7 @@ from viper_health.scoring.health_score import (
     calculate_component_score,
     calculate_health_score,
 )
+from viper_health.utils.progress import ProgressReporter
 
 
 def run_full_scan(
@@ -43,6 +44,7 @@ def run_full_scan(
     dir_density_warning: int = 50_000,
     dir_density_critical: int = 100_000,
     safe_paths: list[Path] | None = None,
+    show_progress: bool = False,
 ) -> dict:
     """
     Execute full viper-health scan workflow.
@@ -56,12 +58,23 @@ def run_full_scan(
         dir_density_warning: Warning threshold for directory density
         dir_density_critical: Critical threshold for directory density
         safe_paths: Optional list of paths to suppress from findings
+        show_progress: Show progress updates during scan
 
     Returns:
         Complete scan results dictionary
     """
-    # Step 1: Collect inventory
-    inventory = scan_file_inventory(root, tiny_file_max_bytes=tiny_file_max_bytes)
+    # Step 1: Collect inventory with progress reporting
+    progress = ProgressReporter(enabled=show_progress, root_path=root)
+    progress.start(f"Scanning {root}...")
+    
+    inventory = scan_file_inventory(
+        root,
+        tiny_file_max_bytes=tiny_file_max_bytes,
+        progress_callback=progress.update if show_progress else None,
+        progress_interval=100,
+    )
+    
+    progress.finish(inventory.directories_scanned, inventory.total_files)
 
     # Step 2: Run detectors
     tiny_hotspots = analyze_tiny_file_hotspots(
@@ -245,6 +258,12 @@ Examples:
         action="store_true",
         help="Print console summary (default: true if no output files specified)",
     )
+    
+    parser.add_argument(
+        "--progress",
+        action="store_true",
+        help="Show progress updates during scan (recommended for large scans)",
+    )
 
     args = parser.parse_args(argv)
 
@@ -263,6 +282,7 @@ Examples:
         dir_density_warning=args.density_warning,
         dir_density_critical=args.density_critical,
         safe_paths=args.safe_paths,
+        show_progress=args.progress,
     )
 
     # Build reports
