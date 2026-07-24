@@ -1,0 +1,49 @@
+{
+  "benchmark_config": {
+    "target_dir": "temp",
+    "test_file_size_mb": 10,
+    "block_size_kb": 4
+  },
+  "results": [
+    {
+      "test_name": "sequential_write",
+      "operation": "write",
+      "pattern": "sequential",
+      "block_size": 4096,
+      "total_bytes": 10485760,
+      "duration_seconds": 0.1592534000010346,
+      "throughput_mb_s": 62.79,
+      "iops": 16075.0
+    },
+    {
+      "test_name": "sequential_read",
+      "operation": "read",
+      "pattern": "sequential",
+      "block_size": 4096,
+      "total_bytes": 10485760,
+      "duration_seconds": 0.00914800000100513,
+      "throughput_mb_s": 1093.14,
+      "iops": 279843.0
+    },
+    {
+      "test_name": "random_write",
+      "operation": "write",
+      "pattern": "random",
+      "block_size": 4096,
+      "total_bytes": 4096000,
+      "duration_seconds": 0.1102772999984154,
+      "throughput_mb_s": 35.42,
+      "iops": 9068.0
+    },
+    {
+      "test_name": "random_read",
+      "operation": "read",
+      "pattern": "random",
+      "block_size": 4096,
+      "total_bytes": 4096000,
+      "duration_seconds": 0.005708299999241717,
+      "throughput_mb_s": 684.31,
+      "iops": 175184.0
+    }
+  ]
+}

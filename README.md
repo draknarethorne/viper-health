@@ -42,6 +42,8 @@ It is designed to:
 | **Health Scoring** | ✅ Complete | weighted scoring | `python/src/viper_health/scoring/` |
 | **Reporters** | ✅ Complete | JSON + Markdown | `python/src/viper_health/reports/` |
 | **Suite Runner** | ✅ Complete | preset-based scans | `python/src/viper_health/cli/suite.py` |
+| **I/O Benchmarks** | ✅ Complete | seq/random read/write | `python/src/viper_health/benchmarks/` |
+| **MFT Analysis** | ✅ Complete | size + fragmentation | `python/src/viper_health/collectors/mft_info.py` |
 
 ---
 
@@ -130,6 +132,63 @@ python -m viper_health.cli.scan C:/Temp \
 - `development` — VS Code, nvim, dev tools
 
 See [`config/scan-presets.yaml`](config/scan-presets.yaml) for full preset definitions.
+
+---
+
+### Running I/O Performance Benchmarks
+
+Measure SSD read/write performance to detect degradation:
+
+```bash
+# Quick benchmark on default temp directory
+python -m viper_health.cli.benchmark_io
+
+# Benchmark specific drive with larger test file
+python -m viper_health.cli.benchmark_io --target D:\ --file-size 200
+
+# Save benchmark results for baseline tracking
+python -m viper_health.cli.benchmark_io --output data/benchmarks/baseline.json
+```
+
+**What it measures:**
+
+- Sequential write/read throughput and IOPS
+- Random write/read throughput and IOPS
+- Color-coded health assessment (✅ GOOD, ⚠️ WARNING, ❌ CRITICAL)
+
+**Thresholds calibrated for DRAM-less QLC SSDs:**
+
+- Sequential write: <100 MB/s = CRITICAL, 100-200 = WARNING, >200 = GOOD
+- Random write: <20 MB/s = CRITICAL, 20-50 = WARNING (typical DRAM-less QLC), >50 = GOOD
+
+---
+
+### Analyzing MFT (Master File Table) Health
+
+**Requires administrator privileges** — MFT analysis uses Windows `fsutil` to inspect filesystem metadata:
+
+```bash
+# Analyze C: drive MFT (run as Administrator)
+python -m viper_health.cli.scan_mft --drive C:
+
+# Save MFT health metrics
+python -m viper_health.cli.scan_mft --drive C: --output mft_health.json
+```
+
+**What it reports:**
+
+- MFT size in GB and bytes
+- MFT fragmentation level
+- Total file and folder counts
+- Health assessment against spec thresholds (MFT size >2.5 GB, fragments >10)
+
+**To run with elevation:**
+
+1. Open PowerShell or Command Prompt as Administrator
+2. Navigate to viper-health directory
+3. Run: `.venv\Scripts\python.exe -m viper_health.cli.scan_mft`
+
+---
 
 ### Python Development Setup
 
