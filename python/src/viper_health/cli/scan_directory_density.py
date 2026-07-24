@@ -73,7 +73,19 @@ def build_directory_density_report(
 def main(argv: list[str] | None = None) -> int:
     """Main CLI entrypoint."""
     parser = argparse.ArgumentParser(
-        description="Scan directory density (file counts per directory tree)"
+        description="Scan directory density (file counts per directory tree)",
+        epilog="""
+Examples:
+  # Scan with default thresholds
+  python -m viper_health.cli.scan_directory_density C:/Users/scott/AppData/Local
+
+  # Scan with custom thresholds and save to JSON
+  python -m viper_health.cli.scan_directory_density C:/Temp --warning-threshold 30000 --critical-threshold 80000 --output-json density.json
+
+  # Scan with safe-path exclusions
+  python -m viper_health.cli.scan_directory_density C:/ --safe-path "C:/Windows/System32"
+        """,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
         "root",

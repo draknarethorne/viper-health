@@ -1,0 +1,86 @@
+# Viper Health Scan Presets
+# Pre-configured scan targets for common use cases
+
+presets:
+  full-system:
+    description: "Complete C: drive sweep with critical system exclusions"
+    targets:
+      - "C:\\"
+    exclusions:
+      # Core Windows system directories
+      - "C:\\Windows\\System32"
+      - "C:\\Windows\\SysWOW64"
+      - "C:\\Windows\\WinSxS"
+      # Program installation directories
+      - "C:\\Program Files"
+      - "C:\\Program Files (x86)"
+      # VS Code immutable paths
+      - "C:\\Users\\*\\AppData\\Local\\Programs\\Microsoft VS Code\\*\\resources\\app\\extensions"
+    tiny_file_warning: 20000
+    tiny_file_critical: 50000
+    dir_density_warning: 50000
+    dir_density_critical: 100000
+
+  user-data:
+    description: "All user AppData directories and temp locations"
+    targets:
+      - "%LOCALAPPDATA%"
+      - "%APPDATA%"
+      - "%TEMP%"
+    tiny_file_warning: 20000
+    tiny_file_critical: 50000
+    dir_density_warning: 50000
+    dir_density_critical: 100000
+
+  quick-check:
+    description: "Quick scan of high-risk areas (cache, temp, browser data)"
+    targets:
+      - "%LOCALAPPDATA%\\Temp"
+      - "%LOCALAPPDATA%\\Google\\Chrome"
+      - "%LOCALAPPDATA%\\Microsoft\\Edge"
+      - "%LOCALAPPDATA%\\Discord"
+      - "%LOCALAPPDATA%\\Slack"
+    tiny_file_warning: 15000
+    tiny_file_critical: 40000
+    dir_density_warning: 40000
+    dir_density_critical: 80000
+
+  workspace:
+    description: "Current working directory deep scan"
+    targets:
+      - "."
+    tiny_file_warning: 10000
+    tiny_file_critical: 30000
+    dir_density_warning: 30000
+    dir_density_critical: 60000
+
+  cloud-sync:
+    description: "Cloud storage sync folders (OneDrive, Dropbox, etc.)"
+    targets:
+      - "%USERPROFILE%\\OneDrive"
+      - "%USERPROFILE%\\Dropbox"
+      - "%USERPROFILE%\\Google Drive"
+    tiny_file_warning: 15000
+    tiny_file_critical: 40000
+
+  development:
+    description: "Development environment directories"
+    targets:
+      - "%USERPROFILE%\\.vscode"
+      - "%LOCALAPPDATA%\\nvim"
+      - "%LOCALAPPDATA%\\Programs\\Microsoft VS Code"
+      - "%APPDATA%\\Code"
+    exclusions:
+      # Protect VS Code built-in extensions
+      - "%LOCALAPPDATA%\\Programs\\Microsoft VS Code\\*\\resources\\app\\extensions"
+    tiny_file_warning: 10000
+    tiny_file_critical: 25000
+
+# Global defaults (used when not specified in preset)
+defaults:
+  tiny_file_max_bytes: 4096
+  tiny_file_warning: 20000
+  tiny_file_critical: 50000
+  dir_density_warning: 50000
+  dir_density_critical: 100000
+  mode: "observe"

@@ -38,7 +38,10 @@ It is designed to:
 | **Config Baseline** | ✅ Complete | baseline | [`config/`](config/) |
 | **Data Baseline Folders** | ✅ Complete | baseline | [`data/`](data/) |
 | **CI Workflow** | ✅ Complete | initial | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
-| **Detectors Implementation** | 🟡 In Progress | phase 1 next | `python/src/viper_health/collectors` + `analyzers` |
+| **Core Detectors** | ✅ Complete | tiny-file + density | `python/src/viper_health/` |
+| **Health Scoring** | ✅ Complete | weighted scoring | `python/src/viper_health/scoring/` |
+| **Reporters** | ✅ Complete | JSON + Markdown | `python/src/viper_health/reports/` |
+| **Suite Runner** | ✅ Complete | preset-based scans | `python/src/viper_health/cli/suite.py` |
 
 ---
 
@@ -80,7 +83,55 @@ viper-health/
 
 ## 🚀 Quick Start
 
-### Python contributors
+### Running Health Scans
+
+#### Option 1: Use the suite runner (recommended)
+
+List available presets:
+
+```bash
+python -m viper_health.cli.suite --list-presets
+```
+
+Run a preset scan:
+
+```bash
+# Quick check of high-risk areas
+python -m viper_health.cli.suite --preset quick-check --console-summary
+
+# Full C: drive sweep with reports
+python -m viper_health.cli.suite --preset full-system --output-dir reports/
+
+# User data scan
+python -m viper_health.cli.suite --preset user-data --output-dir reports/
+```
+
+#### Option 2: Direct scan CLI
+
+```bash
+# Scan a specific directory
+python -m viper_health.cli.scan C:/Users/scott/AppData/Local --console-summary
+
+# Scan with custom thresholds and output files
+python -m viper_health.cli.scan C:/Temp \
+  --tiny-warning 15000 \
+  --tiny-critical 40000 \
+  --output-json report.json \
+  --output-md report.md
+```
+
+### Available Presets
+
+- `full-system` — Complete C: drive sweep with system exclusions
+- `user-data` — All AppData and temp locations
+- `quick-check` — High-risk areas (cache, temp, browser data)
+- `workspace` — Current directory deep scan
+- `cloud-sync` — OneDrive, Dropbox, Google Drive
+- `development` — VS Code, nvim, dev tools
+
+See [`config/scan-presets.yaml`](config/scan-presets.yaml) for full preset definitions.
+
+### Python Development Setup
 
 1. Create/activate Python 3.12+
 2. Install in editable mode
@@ -89,7 +140,7 @@ viper-health/
 ```bash
 pip install -e python
 pip install -e python[dev]
-pytest -q python/tests
+pytest -v python/tests
 ```
 
 ### PowerShell contributors
@@ -143,6 +194,3 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for workflow, expectations, and safety 
 MIT — see [`LICENSE`](LICENSE).
 
 Built with care for long-term system health.
-
----
-

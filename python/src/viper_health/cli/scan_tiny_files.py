@@ -62,13 +62,53 @@ def build_tiny_file_report(
 
 
 def _parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Scan for tiny-file hotspot directories")
+    parser = argparse.ArgumentParser(
+        description="Scan for tiny-file hotspot directories",
+        epilog="""
+Examples:
+  # Scan with default thresholds
+  python -m viper_health.cli.scan_tiny_files C:/Users/scott/AppData/Local
+
+  # Scan with custom thresholds and save to JSON
+  python -m viper_health.cli.scan_tiny_files C:/Temp --warning-threshold 10000 --critical-threshold 30000 --output-json tiny-files.json
+
+  # Scan with safe-path exclusions
+  python -m viper_health.cli.scan_tiny_files C:/ --safe-path "C:/Windows" --safe-path "C:/Program Files"
+        """,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     parser.add_argument("root", help="Root directory to scan")
-    parser.add_argument("--tiny-max-bytes", type=int, default=4096)
-    parser.add_argument("--warning-threshold", type=int, default=20_000)
-    parser.add_argument("--critical-threshold", type=int, default=50_000)
-    parser.add_argument("--safe-path", action="append", dest="safe_paths", default=[])
-    parser.add_argument("--output-json", type=str, default="")
+    parser.add_argument(
+        "--tiny-max-bytes",
+        type=int,
+        default=4096,
+        help="Threshold for tiny-file classification in bytes (default: 4096)",
+    )
+    parser.add_argument(
+        "--warning-threshold",
+        type=int,
+        default=20_000,
+        help="Tiny-file count threshold for warning severity (default: 20000)",
+    )
+    parser.add_argument(
+        "--critical-threshold",
+        type=int,
+        default=50_000,
+        help="Tiny-file count threshold for critical severity (default: 50000)",
+    )
+    parser.add_argument(
+        "--safe-path",
+        action="append",
+        dest="safe_paths",
+        default=[],
+        help="Path to suppress from findings (can be specified multiple times)",
+    )
+    parser.add_argument(
+        "--output-json",
+        type=str,
+        default="",
+        help="Write JSON report to file (prints to stdout if not specified)",
+    )
     return parser
 
 

@@ -165,7 +165,21 @@ def run_full_scan(
 def main(argv: list[str] | None = None) -> int:
     """Main CLI entrypoint."""
     parser = argparse.ArgumentParser(
-        description="Viper Health unified scan - comprehensive SSD/filesystem diagnostics"
+        description="Viper Health unified scan - comprehensive SSD/filesystem diagnostics",
+        epilog="""
+Examples:
+  # Scan AppData with console summary
+  python -m viper_health.cli.scan C:/Users/scott/AppData/Local --console-summary
+
+  # Full scan with JSON and Markdown reports
+  python -m viper_health.cli.scan C:/Users/scott --output-json report.json --output-md report.md
+
+  # Scan with custom thresholds and safe-path exclusions
+  python -m viper_health.cli.scan C:/Temp --safe-path "C:/Temp/System" --console-summary
+
+  # Use --help-full for detailed parameter descriptions
+        """,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
         "root",
@@ -182,7 +196,32 @@ def main(argv: list[str] | None = None) -> int:
         "--tiny-max-bytes",
         type=int,
         default=4096,
-        help="Threshold for tiny-file classification (default: 4096)",
+        dest="tiny_max_bytes",
+        help="Threshold for tiny-file classification in bytes (default: 4096)",
+    )
+    parser.add_argument(
+        "--tiny-warning",
+        type=int,
+        default=20_000,
+        help="Warning threshold for tiny-file hotspots (default: 20000)",
+    )
+    parser.add_argument(
+        "--tiny-critical",
+        type=int,
+        default=50_000,
+        help="Critical threshold for tiny-file hotspots (default: 50000)",
+    )
+    parser.add_argument(
+        "--density-warning",
+        type=int,
+        default=50_000,
+        help="Warning threshold for directory density (default: 50000)",
+    )
+    parser.add_argument(
+        "--density-critical",
+        type=int,
+        default=100_000,
+        help="Critical threshold for directory density (default: 100000)",
     )
     parser.add_argument(
         "--safe-path",
@@ -219,6 +258,10 @@ def main(argv: list[str] | None = None) -> int:
         root=args.root,
         mode=args.mode,
         tiny_file_max_bytes=args.tiny_max_bytes,
+        tiny_file_warning=args.tiny_warning,
+        tiny_file_critical=args.tiny_critical,
+        dir_density_warning=args.density_warning,
+        dir_density_critical=args.density_critical,
         safe_paths=args.safe_paths,
     )
 
