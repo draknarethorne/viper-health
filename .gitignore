@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+
+# VS Code
+.vscode/
+
+# OS / logs
+*.log
+.DS_Store
+Thumbs.db
+
+# Project data outputs
+data/reports/*
+data/snapshots/*
+data/baselines/*
+!data/reports/.gitkeep
+!data/snapshots/.gitkeep
+!data/baselines/.gitkeep

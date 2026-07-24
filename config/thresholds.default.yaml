@@ -1,0 +1,8 @@
+# Default thresholds for detector families
+thresholds:
+  tiny_file_hotspot_warning: 20000
+  tiny_file_hotspot_critical: 50000
+  directory_density_warning: 50000
+  directory_density_critical: 100000
+  mft_size_gib_critical: 2.5
+  mft_fragments_critical: 10

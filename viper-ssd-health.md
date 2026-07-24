@@ -1,0 +1,518 @@
+# Viper SSD Health Specification (Draft v0.2)
+
+This document defines the implementation contract for SSD/filesystem health tooling in the `viper-health` workspace.
+
+> Status: **Draft, intentionally incomplete in a few decision areas** (see Section 14).
+
+---
+
+## 0) System Health & Filesystem Diagnostics — Background Summary
+
+Over time, the system exhibited stalls, slowdowns, and inconsistent latency (especially during boot, cloud sync, and filesystem-heavy workflows). The dominant root cause pattern was metadata pressure on a DRAM-less QLC SSD, driven by tiny-file proliferation, stale caches, cloud-sync churn, update artifacts, and installer residue. These behaviors increase MFT pressure and random-I/O cost over time.
+
+Cleanup outcomes (post-remediation state):
+
+- MFT fragmentation: zero
+- MFT size: healthy
+- tiny-file density: normal
+- directory hotspots: primarily expected Windows-heavy zones
+- latency behavior: stable baseline
+
+Incident learned from cleanup:
+
+- VS Code may install under `%LOCALAPPDATA%\Programs`
+- During cleanup, `resources/app/extensions` was removed from the VS Code install tree
+- That directory contains built-in extensions and core runtime dependencies
+- Result: authentication provider and core modules failed to load
+- Resolution: full VS Code reinstall restored integrity
+
+Why this spec exists:
+
+- Build diagnostic and maintenance tooling that preserves SSD health long-term
+- Detect hotspots/churn/pressure early
+- Enforce strict protection boundaries so cleanup cannot damage critical application paths
+- Produce reproducible reports and health scoring for decision support
+
+---
+
+## 1) Scope and Goals
+
+Build Python and PowerShell tooling that can:
+
+- detect filesystem churn and small-file pressure
+- identify risky growth trends before they become SSD performance issues
+- produce reproducible machine-readable and human-readable reports
+- remain **safe by default** (read-only unless explicitly run in maintenance mode)
+
+Primary outcomes:
+
+1. Baseline current system storage behavior
+2. Detect anomalies/trends over time
+3. Score health consistently (0–100)
+4. Surface targeted remediation recommendations
+
+---
+
+## 2) Repository Layout (adapted to `viper-health`)
+
+All generated files should live under the `viper-health` root, separated by subdirectories.
+
+```text
+viper-health/
+├── docs/
+│   ├── viper-ssd-health.md                 # this spec
+│   ├── architecture/
+│   └── runbooks/
+│
+├── python/
+│   ├── pyproject.toml
+│   ├── src/viper_health/
+│   │   ├── collectors/
+│   │   ├── analyzers/
+│   │   ├── scoring/
+│   │   ├── reports/
+│   │   ├── cli/
+│   │   └── utils/
+│   └── tests/
+│
+├── powershell/
+│   └── PSViperHealth/
+│       ├── PSViperHealth.psd1
+│       ├── PSViperHealth.psm1
+│       ├── Collectors/
+│       ├── Analyzers/
+│       ├── Scoring/
+│       └── Reports/
+│
+├── config/
+│   ├── thresholds.default.yaml
+│   ├── allowlist.paths.yaml
+│   └── profiles/
+│
+├── data/
+│   ├── baselines/
+│   ├── snapshots/
+│   └── reports/
+│
+└── scripts/
+    ├── invoke_scan.ps1
+    └── invoke_scan.py
+```
+
+---
+
+## 3) Execution Modes
+
+All tools must support two modes:
+
+- **Observe mode (default):** read-only, no cleanup/deletion
+- **Maintenance mode:** cleanup actions allowed only with explicit switches and audit logging
+
+PowerShell examples of intent:
+
+- `-Mode Observe`
+- `-Mode Maintenance -WhatIf`
+- `-Mode Maintenance -Confirm:$true`
+
+Python CLI examples of intent:
+
+- `scan --mode observe`
+- `scan --mode maintenance --dry-run`
+
+### 3.1 Safety invariants (mandatory)
+
+The following invariants are non-negotiable:
+
+1. No script performs delete/move actions in default execution.
+2. Maintenance mode must require explicit operator intent flags.
+3. Any mutating action must support a dry-run preview that lists exact candidate paths.
+4. Any mutating action must emit an action manifest before execution.
+5. Direct hard-delete is disallowed by default; quarantine-first policy applies.
+
+---
+
+## 3.2 Mutation Gating Model (anti-accidental-delete)
+
+A mutating operation is allowed only if **all** checks pass:
+
+1. Mode is maintenance
+2. Dry run has been executed in the current session
+3. Candidate paths are within approved cleanup roots
+4. Candidate paths are not in immutable/sensitive roots
+5. Operator confirmation token is supplied
+6. Action caps are not exceeded
+
+If any check fails, operation must abort with no filesystem changes.
+
+---
+
+## 3.3 Immutable and sensitive roots (never auto-clean)
+
+The following are protected by default and excluded from automated cleanup actions:
+
+- `%WINDIR%\System32`
+- `%WINDIR%\SysWOW64`
+- `%WINDIR%\WinSxS`
+- `%WINDIR%\servicing`
+- `%WINDIR%\Installer`
+- `%ProgramFiles%`
+- `%ProgramFiles(x86)%`
+- `%ProgramData%` (except explicitly approved transient subpaths)
+- `%LOCALAPPDATA%\Programs\Microsoft VS Code\resources\app`
+- `%LOCALAPPDATA%\Programs\Microsoft VS Code\resources\app\extensions`
+- user profile document/source roots (Desktop, Documents, source repos)
+
+Notes:
+
+- These may still be scanned and reported.
+- Cleanup in these roots is denied unless an explicit emergency override profile is used.
+
+---
+
+## 3.4 Approved cleanup roots (allowlist for mutation)
+
+Mutation candidates must fall under explicit approved roots, for example:
+
+- `%LOCALAPPDATA%\Temp`
+- browser cache directories
+- WebView2 temporary cache directories
+- known package-manager temp/cache roots
+- `SoftwareDistribution\Download` (with extra safeguards)
+
+Approved roots are centrally managed in `config/allowlist.paths.yaml` and must be canonicalized before matching.
+
+---
+
+## 4) Detector Families
+
+### 4.1 Tiny-file hotspots
+
+- Definition: high counts of files `< 4 KiB`
+- Warning: `> 20,000`
+- Critical: `> 50,000`
+
+### 4.2 Directory density
+
+- Definition: very high file counts in a single directory tree
+- Warning: `> 50,000`
+- Critical: `> 100,000`
+
+### 4.3 Metadata pressure
+
+Composite signal from:
+
+- tiny-file totals
+- directory counts
+- MFT size
+- MFT fragmentation
+- growth velocity (snapshot-over-snapshot)
+
+Default thresholds:
+
+- MFT size `> 2.5 GiB`
+- MFT fragments `> 10`
+- tiny files `> 500,000`
+- directories `> 200,000`
+
+### 4.4 Cloud-sync churn
+
+Targets:
+
+- OneDrive
+- Google Drive
+- Dropbox
+- VS Code `workspaceStorage`
+
+Indicators:
+
+- created/day `> 10,000`
+- deleted/day `> 5,000`
+- tiny files in sync roots `> 50,000`
+
+### 4.5 Browser/WebView2 cache churn
+
+Targets:
+
+- Edge WebView2 cache
+- Chrome cache
+- Discord code cache
+- Teams hashed assets
+
+Indicators:
+
+- file count in cache roots `> 50,000`
+- created/day `> 10,000`
+
+### 4.6 Update and installer residue
+
+Targets:
+
+- `SoftwareDistribution\Download`
+- installer cache roots
+- known temporary package staging areas
+
+Indicators:
+
+- update leftovers `> 5 GiB`
+- `SoftwareDistribution` file count `> 10,000`
+
+### 4.7 Telemetry/log churn
+
+Targets:
+
+- Diagnostics
+- WER
+- CBS logs
+- `%LOCALAPPDATA%\Temp`
+
+Indicators:
+
+- log files `> 10,000`
+- cumulative size `> 5 GiB`
+
+---
+
+## 5) Allowlist / Safe-zone Policy
+
+Detectors must support an allowlist to reduce false positives.
+
+Default safe zones (non-anomalous unless explicit override):
+
+- `WinSxS\Manifests`
+- `WinSxS\FileMaps`
+- `WinSxS\Backup`
+- `Windows\servicing\Packages`
+- `System32\CatRoot`
+- selected SDK/cache paths declared in `config/allowlist.paths.yaml`
+
+Rules:
+
+1. Allowlisted paths are still measured, but not auto-flagged critical by default
+2. Reports must show suppressed findings under a dedicated section
+3. Any maintenance action in system folders requires explicit `force` semantics
+
+---
+
+## 6) Health Score Contract (0–100)
+
+Initial weighted model:
+
+- tiny-file pressure: 20
+- directory density: 10
+- metadata pressure: 20
+- MFT health: 15
+- storage latency trend: 10
+- indexer health/churn: 10
+- cache/cloud churn: 15
+
+Scoring:
+
+- each component yields `0..100`
+- final score is weighted mean
+- severity bands:
+  - `85–100`: Good
+  - `70–84`: Watch
+  - `50–69`: Degraded
+  - `<50`: Critical
+
+---
+
+## 7) Output and Report Requirements
+
+### Required formats
+
+- JSON (machine-readable, canonical)
+- Markdown (human report)
+- Console summary
+
+### JSON schema requirements
+
+Minimum top-level fields:
+
+- `timestamp_utc`
+- `host`
+- `mode`
+- `scan_scope`
+- `metrics`
+- `findings`
+- `suppressed_findings`
+- `score`
+- `recommendations`
+
+---
+
+## 8) Logging and Audit Requirements
+
+Every run must log:
+
+- start/end timestamps
+- elapsed duration
+- files scanned
+- directories scanned
+- skipped paths and reason
+- findings by severity
+- threshold sources (default vs profile override)
+
+Maintenance mode must additionally log:
+
+- action intent
+- `what-if` result
+- confirmed execution events
+- post-action verification summary
+
+Maintenance mode must also persist:
+
+- pre-action candidate manifest (full canonical paths + size + reason)
+- post-action outcome manifest (success/failed/skipped)
+- quarantine location and retention expiry
+- rollback metadata (where applicable)
+
+---
+
+## 8.1 Quarantine, rollback, and limits
+
+To avoid destructive mistakes:
+
+1. **Quarantine-first**: default action is move to quarantine, not delete.
+2. **Retention window**: quarantined files are retained for a configured period before purge.
+3. **Per-run caps**: enforce max files moved and max bytes moved per run.
+4. **Per-path caps**: cap actions per top-level root to avoid runaway behavior.
+5. **Kill switch**: immediate stop when abnormal error rate or path mismatch is detected.
+
+---
+
+## 8.2 Symlink, junction, and reparse-point safety
+
+Mutating operations must:
+
+- detect symlinks/junctions/reparse points
+- avoid traversing or mutating through reparse boundaries by default
+- require explicit opt-in to follow links
+- log any skipped linked targets with reason
+
+---
+
+## 8.3 Process-awareness safety
+
+Before mutation in cache/temp targets:
+
+- detect active lock/use by critical processes when possible
+- skip in-use files and record as deferred
+- never force-stop application processes as part of automated cleanup
+
+---
+
+## 8.4 Test requirements for safety controls
+
+Safety behavior must be covered by tests:
+
+- deny mutation outside approved roots
+- deny mutation in immutable roots
+- verify dry-run-only behavior in observe mode
+- verify manifest generation before mutation
+- verify cap enforcement and kill-switch activation
+
+---
+
+## 9) Python Implementation Contract
+
+Python modules under `python/src/viper_health/`:
+
+- `collectors/`: gather raw metrics and snapshots
+- `analyzers/`: detector logic and classification
+- `scoring/`: score model + bands
+- `reports/`: JSON/MD/console renderers
+- `cli/`: command entrypoints (`scan`, `diff`, `report`)
+- `utils/`: path, logging, windows API adapters
+
+Testing requirements:
+
+- unit tests for each detector
+- snapshot-diff tests for churn detection
+- contract tests for report schema stability
+
+---
+
+## 10) PowerShell Implementation Contract
+
+PowerShell module under `powershell/PSViperHealth/`:
+
+- `Collectors/Get-*.ps1`
+- `Analyzers/Test-*.ps1`
+- `Scoring/Get-HealthScore.ps1`
+- `Reports/Write-*.ps1`
+
+Guidelines:
+
+- return `PSCustomObject` from collectors/analyzers
+- avoid formatted strings in core functions (format at output layer only)
+- support `-WhatIf` and `-Confirm` for mutating actions
+
+---
+
+## 11) Baselines and Trend Analysis
+
+Store snapshots in `data/snapshots/` and computed baselines in `data/baselines/`.
+
+Trend logic expectations:
+
+- compare current scan to prior snapshot
+- compute velocity (files/day, size/day)
+- detect acceleration (not only absolute threshold crossing)
+- emit “new risk” vs “existing risk” labels
+
+---
+
+## 12) Copilot Generation Rules
+
+When generating code from this spec:
+
+1. Use the directory layout in Section 2
+2. Default to observe/read-only behavior
+3. Load thresholds from config before applying defaults
+4. Emit structured JSON first, then derive Markdown/console
+5. Keep detector logic pure/testable
+6. Do not hard-delete files outside explicit maintenance flow
+
+---
+
+## 13) Implementation Phases (recommended)
+
+Phase 1:
+
+- inventory collector
+- tiny-file + directory-density detectors
+- JSON/MD reports
+
+Phase 2:
+
+- metadata/MFT detectors
+- cloud-sync + browser churn detectors
+- baseline snapshot diffing
+
+Phase 3:
+
+- scoring model calibration
+- maintenance workflows with safe guards
+- scheduling/runbook docs
+
+---
+
+## 14) Open Decisions (must be finalized before full implementation)
+
+1. **Supported Python version** (recommend `3.12+`)
+2. **Preferred config format** (`YAML` vs `JSON`)
+3. **Canonical path normalization strategy** for Windows short/long paths
+4. **Score calibration source** (fixed weights vs data-driven tuning)
+5. **Maximum scan scope defaults** (system-wide vs targeted roots)
+6. **Retention policy** for snapshots/reports
+7. **Maintenance action boundary** (what we will never auto-clean)
+8. **Quarantine retention default** (recommended: 14–30 days)
+9. **Per-run action caps** (recommended initial guardrails)
+10. **Emergency override process** (who can run it and when)
+
+---
+
+## 15) Immediate Next Step
+
+Before writing production scripts, create the directory skeleton in Section 2 and finalize Section 14 decisions. After that, implementation can begin in Phase 1 with minimal rework.

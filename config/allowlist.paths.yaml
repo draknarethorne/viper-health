@@ -1,0 +1,14 @@
+# Paths that may be scanned but are protected for cleanup by default
+immutable_roots:
+  - "%WINDIR%\\System32"
+  - "%WINDIR%\\SysWOW64"
+  - "%WINDIR%\\WinSxS"
+  - "%WINDIR%\\servicing"
+  - "%WINDIR%\\Installer"
+  - "%ProgramFiles%"
+  - "%ProgramFiles(x86)%"
+  - "%LOCALAPPDATA%\\Programs\\Microsoft VS Code\\resources\\app"
+  - "%LOCALAPPDATA%\\Programs\\Microsoft VS Code\\resources\\app\\extensions"
+
+approved_cleanup_roots:
+  - "%LOCALAPPDATA%\\Temp"
