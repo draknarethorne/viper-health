@@ -24,3 +24,7 @@ data/baselines/*
 !data/reports/.gitkeep
 !data/snapshots/.gitkeep
 !data/baselines/.gitkeep
+
+# Temporary/working files
+tmp/
+*.tmp
