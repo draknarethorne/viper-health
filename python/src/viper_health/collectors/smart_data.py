@@ -34,6 +34,9 @@ class DriveHealth:
     severity: str  # "good" | "warning" | "critical" | "unknown"
     bus_type: str = "Unknown"
     reliability_available: bool = False
+    read_latency_max_ms: float | None = None
+    write_latency_max_ms: float | None = None
+    flush_latency_max_ms: float | None = None
 
 
 # Bus types where NVMe/SATA SMART passthrough is commonly blocked by the
@@ -96,6 +99,10 @@ def _assess_severity(
     health_status: str,
     temperature_c: float | None,
     wear_percent: float | None,
+    read_errors_total: int | None = None,
+    write_errors_total: int | None = None,
+    read_latency_max_ms: float | None = None,
+    write_latency_max_ms: float | None = None,
 ) -> str:
     """Combine health signals into an overall severity."""
     severities: list[str] = []
@@ -125,6 +132,22 @@ def _assess_severity(
             severities.append("warning")
         else:
             severities.append("good")
+
+    for error_count in (read_errors_total, write_errors_total):
+        if error_count is None:
+            continue
+        if error_count >= 10:
+            severities.append("critical")
+        elif error_count > 0:
+            severities.append("warning")
+
+    for latency_ms in (read_latency_max_ms, write_latency_max_ms):
+        if latency_ms is None:
+            continue
+        if latency_ms >= 1_000:
+            severities.append("critical")
+        elif latency_ms >= 100:
+            severities.append("warning")
 
     if "critical" in severities:
         return "critical"
@@ -179,7 +202,10 @@ def get_drive_health() -> list[DriveHealth]:
         "Temperature=$c.Temperature; Wear=$c.Wear; "
         "PowerOnHours=$c.PowerOnHours; "
         "ReadErrorsTotal=$c.ReadErrorsTotal; "
-        "WriteErrorsTotal=$c.WriteErrorsTotal } } | ConvertTo-Json -Compress"
+        "WriteErrorsTotal=$c.WriteErrorsTotal; "
+        "ReadLatencyMax=$c.ReadLatencyMax; "
+        "WriteLatencyMax=$c.WriteLatencyMax; "
+        "FlushLatencyMax=$c.FlushLatencyMax } } | ConvertTo-Json -Compress"
     )
     rel_out = _run_powershell(rel_script)
 
@@ -211,6 +237,9 @@ def get_drive_health() -> list[DriveHealth]:
         power_on_hours = _to_int(rel.get("PowerOnHours"))
         read_errors_total = _to_int(rel.get("ReadErrorsTotal"))
         write_errors_total = _to_int(rel.get("WriteErrorsTotal"))
+        read_latency_max_ms = _to_float(rel.get("ReadLatencyMax"))
+        write_latency_max_ms = _to_float(rel.get("WriteLatencyMax"))
+        flush_latency_max_ms = _to_float(rel.get("FlushLatencyMax"))
 
         # Reliability counters (temperature/wear/power-on) are only readable
         # with admin rights and when the bus exposes SMART passthrough.
@@ -219,7 +248,15 @@ def get_drive_health() -> list[DriveHealth]:
             for v in (temperature_c, wear_percent, power_on_hours)
         )
 
-        severity = _assess_severity(health_status, temperature_c, wear_percent)
+        severity = _assess_severity(
+            health_status,
+            temperature_c,
+            wear_percent,
+            read_errors_total,
+            write_errors_total,
+            read_latency_max_ms,
+            write_latency_max_ms,
+        )
 
         results.append(
             DriveHealth(
@@ -235,6 +272,9 @@ def get_drive_health() -> list[DriveHealth]:
                 severity=severity,
                 bus_type=bus_type,
                 reliability_available=reliability_available,
+                read_latency_max_ms=read_latency_max_ms,
+                write_latency_max_ms=write_latency_max_ms,
+                flush_latency_max_ms=flush_latency_max_ms,
             )
         )
 

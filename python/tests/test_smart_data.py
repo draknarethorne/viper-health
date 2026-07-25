@@ -35,6 +35,15 @@ def test_assess_severity_unknown():
     assert _assess_severity("Unknown", None, None) == "unknown"
 
 
+def test_assess_severity_error_counters_override_healthy_summary():
+    assert _assess_severity("Healthy", 40.0, 5.0, 13, 0) == "critical"
+    assert _assess_severity("Healthy", 40.0, 5.0, 1, 0) == "warning"
+
+
+def test_assess_severity_latency_overrides_healthy_summary():
+    assert _assess_severity("Healthy", 40.0, 5.0, 0, 0, 9_000, 4_000) == "critical"
+
+
 def test_get_drive_health_no_data():
     # Both PowerShell calls return None -> no disks
     with patch.object(smart_data, "_run_powershell", return_value=None):
@@ -56,6 +65,9 @@ def test_get_drive_health_parses_disks():
         "PowerOnHours": 1000,
         "ReadErrorsTotal": 0,
         "WriteErrorsTotal": 0,
+        "ReadLatencyMax": 25,
+        "WriteLatencyMax": 35,
+        "FlushLatencyMax": 45,
     })
 
     def fake_ps(script: str):
@@ -73,6 +85,9 @@ def test_get_drive_health_parses_disks():
     assert drive.temperature_c == 45.0
     assert drive.wear_percent == 5.0
     assert drive.power_on_hours == 1000
+    assert drive.read_latency_max_ms == 25.0
+    assert drive.write_latency_max_ms == 35.0
+    assert drive.flush_latency_max_ms == 45.0
     assert drive.severity == "good"
 
 
