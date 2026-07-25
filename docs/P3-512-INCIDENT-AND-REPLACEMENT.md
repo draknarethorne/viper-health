@@ -293,3 +293,8 @@ The machine has one 16 GB DDR4-2667 DIMM, so memory operates single-channel.
 That can reduce general responsiveness and game performance but cannot explain
 Disk 0 retries, `storahci` resets, or storage bugchecks. Address memory only
 after storage is stable.
+
+## Historical records
+
+The [documentation history index](history/README.md) preserves the original
+2026-07-24 assessment and session handoff with prominent superseding notices.

@@ -7,7 +7,7 @@
 > and DRAM configuration remain unknown. Retained evidence includes 75
 > `storahci` resets, 21 Disk 0 retries, storage bugchecks, 13 read errors, and a
 > raw SMART attribute 5 value of 13. The first retained failure was 2026-04-30.
-> Follow [`docs/P3-512-INCIDENT-AND-REPLACEMENT.md`](../docs/P3-512-INCIDENT-AND-REPLACEMENT.md).
+> Follow [`docs/P3-512-INCIDENT-AND-REPLACEMENT.md`](../P3-512-INCIDENT-AND-REPLACEMENT.md).
 > Autonomous session summary + my honest assessment of your Windows storage
 > health. Generated after building out the remaining spec detectors and scanning
 > your live system. All findings below are from real scans run this session.

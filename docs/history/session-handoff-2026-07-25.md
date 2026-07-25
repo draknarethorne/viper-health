@@ -4,12 +4,13 @@
 > assumptions below are incorrect. `P3-512` is a SATA SSD of unconfirmed vendor,
 > NAND, and DRAM configuration. Retained Windows logs show storage failures
 > beginning 2026-04-30. Do not run benchmarks on it. Current guidance:
-> [`docs/P3-512-INCIDENT-AND-REPLACEMENT.md`](../docs/P3-512-INCIDENT-AND-REPLACEMENT.md).
+> [`docs/P3-512-INCIDENT-AND-REPLACEMENT.md`](../P3-512-INCIDENT-AND-REPLACEMENT.md).
 
 **Last Updated:** 2026-07-25
 **Status:** Disk 0 / P3-512 storage path is unreliable; backup and replacement are urgent.
 
-> Read `tmp/complete-analysis-07242026-1730.md` for the full analysis + assessment.
+> Read [the 2026-07-24 complete analysis](complete-analysis-2026-07-24.md) for
+> the full original analysis and its superseding correction.
 
 ## CURRENT STATE (2026-07-24 17:30)
 
