@@ -6,6 +6,7 @@ from unittest.mock import patch
 from viper_health.cli.system_report import _collect, build_system_health_report, main
 from viper_health.collectors.system_inventory import SystemInventory
 from viper_health.collectors.windows_events import EventLogSnapshot, WindowsEvent
+from viper_health.reports.system_health_reporter import build_system_health_markdown
 
 
 def _inventory():
@@ -107,6 +108,37 @@ def test_collect_marks_empty_critical_section_unavailable():
         "available": False,
         "error": "physical_drives returned no records",
     }
+
+
+def test_markdown_formats_storage_and_successful_collection_status():
+    report = {
+        "assessment": {"severity": "good", "confidence": "high", "conclusion": "Stable."},
+        "system_inventory": {"available": False, "error": "not requested"},
+        "storage": {
+            "drives": [],
+            "disk_space": {
+                "drive": "C:",
+                "free_bytes": 300 * 1024**3,
+                "total_bytes": 500 * 1024**3,
+                "free_percent": 60.0,
+                "severity": "good",
+            },
+            "trim": {"drive": "C:", "trim_enabled": True, "raw_value": 0, "severity": "good"},
+            "mft": {"drive": "C:", "mft_size_gb": 1.5, "mft_fragments": 1, "overall_severity": "good"},
+        },
+        "event_log": {},
+        "event_analysis": {},
+        "collection_status": {"disk_space": {"available": True, "error": None}},
+        "recommendations": [],
+    }
+
+    markdown = build_system_health_markdown(report)
+
+    assert "**Disk space (C:):** 300.00 GiB free / 500.00 GiB total (60.0%) — GOOD" in markdown
+    assert "**TRIM (C:):** Enabled, raw value 0 — GOOD" in markdown
+    assert "**MFT (C:):** 1.5 GiB, 1 fragment(s) — GOOD" in markdown
+    assert "| disk_space | True | None |" in markdown
+    assert "{'drive':" not in markdown
 
 
 @patch("viper_health.cli.system_report.collect_system_events")

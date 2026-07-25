@@ -31,6 +31,39 @@ def _bytes_gib(value: object) -> str:
         return "Unknown"
 
 
+def _storage_summary(label: str, value: object) -> str:
+    """Render a storage subsection without leaking Python representations."""
+    if not isinstance(value, dict):
+        return f"- **{label}:** {_escape(value, limit=500)}"
+    if value.get("available") is False or value.get("error"):
+        return f"- **{label}:** Unavailable — {_escape(value.get('error'))}"
+
+    drive = _escape(value.get("drive"))
+    if label == "Disk space":
+        return (
+            f"- **Disk space ({drive}):** {_bytes_gib(value.get('free_bytes'))} free / "
+            f"{_bytes_gib(value.get('total_bytes'))} total "
+            f"({value.get('free_percent', '?')}%) — {_escape(value.get('severity')).upper()}"
+        )
+    if label == "TRIM":
+        enabled = value.get("trim_enabled")
+        state = "Enabled" if enabled is True else "Disabled" if enabled is False else "Unknown"
+        raw = value.get("raw_value")
+        raw_note = f", raw value {raw}" if raw is not None else ""
+        return (
+            f"- **TRIM ({drive}):** {state}{raw_note} — "
+            f"{_escape(value.get('severity')).upper()}"
+        )
+
+    size = value.get("mft_size_gb")
+    size_text = f"{size} GiB" if size is not None else _bytes_gib(value.get("mft_size_bytes"))
+    fragments = value.get("mft_fragments", "Unknown")
+    return (
+        f"- **MFT ({drive}):** {size_text}, {fragments} fragment(s) — "
+        f"{_escape(value.get('overall_severity')).upper()}"
+    )
+
+
 def build_system_health_markdown(report: dict[str, Any]) -> str:
     """Render a comprehensive JSON report as AI-friendly Markdown."""
     assessment = report["assessment"]
@@ -165,7 +198,7 @@ def build_system_health_markdown(report: dict[str, Any]) -> str:
     for label, key in (("Disk space", "disk_space"), ("TRIM", "trim"), ("MFT", "mft")):
         value = storage.get(key)
         if value is not None:
-            lines.append(f"- **{label}:** `{_escape(value, limit=500)}`")
+            lines.append(_storage_summary(label, value))
     lines.append("")
 
     event_log = report.get("event_log", {})
@@ -199,7 +232,7 @@ def build_system_health_markdown(report: dict[str, Any]) -> str:
     lines.extend(["## Collection status", "", "| Section | Available | Error / limitation |", "| --- | --- | --- |"])
     for name, status in report.get("collection_status", {}).items():
         lines.append(
-            f"| {_escape(name)} | {status.get('available', False)} | {_escape(status.get('error'))} |"
+            f"| {_escape(name)} | {status.get('available', False)} | {_escape(status.get('error') or 'None')} |"
         )
     lines.append("")
 
