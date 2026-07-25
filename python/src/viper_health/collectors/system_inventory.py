@@ -99,7 +99,7 @@ try {
             Ready = $tpmRaw.TpmReady
             Enabled = $tpmRaw.TpmEnabled
             Activated = $tpmRaw.TpmActivated
-            ManufacturerVersion = $tpmRaw.ManufacturerVersion
+            ManufacturerVersion = ([string]$tpmRaw.ManufacturerVersion).Trim([char]0)
         }
     } catch {}
     [PSCustomObject]@{

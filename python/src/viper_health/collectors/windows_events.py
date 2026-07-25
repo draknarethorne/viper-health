@@ -128,7 +128,10 @@ try {{
     $oldest = Get-WinEvent -LogName System -Oldest -MaxEvents 1 -ErrorAction SilentlyContinue
     $newest = Get-WinEvent -LogName System -MaxEvents 1 -ErrorAction SilentlyContinue
     $events = Get-WinEvent -FilterHashtable @{{LogName='System'; StartTime=$start; Id=$ids}} -ErrorAction SilentlyContinue |
-        Where-Object {{ $providers -contains $_.ProviderName }} |
+        Where-Object {{
+            ($providers -contains $_.ProviderName) -and
+            -not (($_.Id -eq 98) -and ($_.Level -eq 4))
+        }} |
         Sort-Object TimeCreated |
         ForEach-Object {{
             [PSCustomObject]@{{

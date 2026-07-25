@@ -22,6 +22,7 @@ def _inventory():
             "Cpu": [{"Name": "CPU", "Cores": 6, "LogicalProcessors": 12}],
             "MemoryModules": [{"CapacityBytes": 16 * 1024**3}],
             "Gpus": [{"Name": "GPU"}],
+            "SecureBootEnabled": False,
         },
     )
 
@@ -130,5 +131,6 @@ def test_main_writes_json_and_markdown(mock_inventory, mock_events, tmp_path):
     assert json.loads(json_path.read_text(encoding="utf-8"))["report_type"] == "comprehensive_system_health"
     markdown = md_path.read_text(encoding="utf-8")
     assert "# Viper Health Comprehensive System Report" in markdown
+    assert "**Secure Boot:** False" in markdown
     assert "No benchmarks or mutating operations" not in markdown
     assert "## AI review guidance" in markdown

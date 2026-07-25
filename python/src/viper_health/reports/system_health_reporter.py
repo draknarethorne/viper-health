@@ -15,7 +15,10 @@ _SEVERITY_ICON = {
 
 
 def _escape(value: object, *, limit: int = 220) -> str:
-    text = " ".join(str(value or "").split())
+    if value is None or value == "":
+        text = "Unknown"
+    else:
+        text = " ".join(str(value).split())
     if len(text) > limit:
         text = text[: limit - 1] + "…"
     return text.replace("|", "\\|")

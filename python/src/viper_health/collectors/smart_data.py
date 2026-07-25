@@ -103,6 +103,7 @@ def _assess_severity(
     write_errors_total: int | None = None,
     read_latency_max_ms: float | None = None,
     write_latency_max_ms: float | None = None,
+    bus_type: str | None = None,
 ) -> str:
     """Combine health signals into an overall severity."""
     severities: list[str] = []
@@ -141,13 +142,17 @@ def _assess_severity(
         elif error_count > 0:
             severities.append("warning")
 
-    for latency_ms in (read_latency_max_ms, write_latency_max_ms):
-        if latency_ms is None:
-            continue
-        if latency_ms >= 1_000:
-            severities.append("critical")
-        elif latency_ms >= 100:
-            severities.append("warning")
+    # USB bridges and rotating external media can report lifetime maxima that
+    # include spin-up, sleep/wake, disconnect, or bridge delays. Preserve those
+    # facts in the report, but only classify latency for direct internal buses.
+    if (bus_type or "").strip().casefold() in {"sata", "nvme", "sas"}:
+        for latency_ms in (read_latency_max_ms, write_latency_max_ms):
+            if latency_ms is None:
+                continue
+            if latency_ms >= 1_000:
+                severities.append("critical")
+            elif latency_ms >= 100:
+                severities.append("warning")
 
     if "critical" in severities:
         return "critical"
@@ -256,6 +261,7 @@ def get_drive_health() -> list[DriveHealth]:
             write_errors_total,
             read_latency_max_ms,
             write_latency_max_ms,
+            bus_type,
         )
 
         results.append(

@@ -120,3 +120,23 @@ def test_analysis_reports_unavailable_coverage_as_unknown():
     assert analysis.overall_severity == "unknown"
     assert analysis.coverage_status == "unavailable"
     assert analysis.findings == ()
+
+
+def test_analysis_ignores_informational_ntfs_health_check():
+    analysis = analyze_system_events(
+        _snapshot(
+            WindowsEvent(
+                record_id=8,
+                timestamp_utc="2026-06-01T00:00:00Z",
+                provider="Microsoft-Windows-Ntfs",
+                event_id=98,
+                level="Information",
+                message="Localized healthy-volume message",
+                properties=(),
+            )
+        )
+    )
+
+    assert analysis.overall_severity == "info"
+    assert analysis.findings == ()
+    assert analysis.unclassified_event_count == 1

@@ -41,7 +41,15 @@ def test_assess_severity_error_counters_override_healthy_summary():
 
 
 def test_assess_severity_latency_overrides_healthy_summary():
-    assert _assess_severity("Healthy", 40.0, 5.0, 0, 0, 9_000, 4_000) == "critical"
+    assert _assess_severity(
+        "Healthy", 40.0, 5.0, 0, 0, 9_000, 4_000, "SATA"
+    ) == "critical"
+
+
+def test_assess_severity_does_not_diagnose_usb_from_lifetime_latency():
+    assert _assess_severity(
+        "Healthy", 40.0, 5.0, 0, 0, 9_000, 4_000, "USB"
+    ) == "good"
 
 
 def test_get_drive_health_no_data():

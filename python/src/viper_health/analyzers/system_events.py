@@ -56,6 +56,12 @@ def _domain_for(event: WindowsEvent) -> str | None:
         return "hardware_whea"
     if "memorydiagnostics" in provider:
         return "memory_diagnostics"
+    if (
+        provider in {"ntfs", "microsoft-windows-ntfs"}
+        and event.event_id == 98
+        and event.level.casefold() in {"information", "informational", "info"}
+    ):
+        return None
     if provider in {"storahci", "stornvme", "disk", "ntfs", "microsoft-windows-ntfs"}:
         return "storage"
     if provider in {
