@@ -8,9 +8,11 @@
 
 ## Detect the churn • Protect the system • Keep the SSD healthy
 
-Filesystem and SSD-health diagnostics toolkit focused on metadata pressure, tiny-file hotspots, churn detection, and safe maintenance boundaries.
+Filesystem and SSD-health diagnostics toolkit focused on metadata pressure,
+tiny-file hotspots, churn detection, storage-event evidence, and safe
+maintenance boundaries.
 
-[📘 Spec](viper-ssd-health.md) • [🧱 Project Structure](#-project-structure) • [🚀 Quick Start](#-quick-start) • [🛡️ Safety Model](#️-safety-model) • [🧪 CI](#-ci)
+[📘 Spec](viper-ssd-health.md) • [🚨 P3-512 Incident & Replacement Plan](docs/P3-512-INCIDENT-AND-REPLACEMENT.md) • [🧱 Project Structure](#-project-structure) • [🚀 Quick Start](#-quick-start) • [🛡️ Safety Model](#️-safety-model) • [🧪 CI](#-ci)
 
 ---
 
@@ -45,7 +47,7 @@ It is designed to:
 | **I/O Benchmarks** | ✅ Complete | seq/random read/write | `python/src/viper_health/benchmarks/` |
 | **MFT Analysis** | ✅ Complete | size + fragmentation | `python/src/viper_health/collectors/mft_info.py` |
 | **TRIM Status** | ✅ Complete | SSD TRIM verification | `python/src/viper_health/collectors/trim_status.py` |
-| **Free Space Monitor** | ✅ Complete | QLC-specific thresholds | `python/src/viper_health/collectors/disk_space.py` |
+| **Free Space Monitor** | ✅ Complete | SSD headroom thresholds | `python/src/viper_health/collectors/disk_space.py` |
 | **Baseline Comparison** | ✅ Complete | trend analysis | `python/src/viper_health/analyzers/baseline_comparison.py` |
 | **Metadata Pressure** | ✅ Complete | composite signal (4.3) | `python/src/viper_health/analyzers/metadata_pressure.py` |
 | **Churn/Cache Detectors** | ✅ Complete | cloud/browser/update/telemetry (4.4-4.7) | `python/src/viper_health/analyzers/category_pressure.py` |
@@ -146,7 +148,13 @@ See [`config/scan-presets.yaml`](config/scan-presets.yaml) for full preset defin
 
 ### Running I/O Performance Benchmarks
 
-Measure SSD read/write performance to detect degradation:
+> **Safety warning:** Benchmarks generate sustained reads and writes. Do not run
+> them on a disk with recent controller resets, I/O retries, SMART/media errors,
+> unexpected storage bugchecks, or an incomplete backup. On the affected
+> P3-512 system, `benchmark_io` and `profile_machine --benchmark` are prohibited
+> until the disk has been replaced and the replacement path is stable.
+
+Benchmarks are optional diagnostics for known-stable storage, not health tests:
 
 ```bash
 # Quick benchmark on default temp directory
@@ -165,10 +173,13 @@ python -m viper_health.cli.benchmark_io --output data/benchmarks/baseline.json
 - Random write/read throughput and IOPS
 - Color-coded health assessment (✅ GOOD, ⚠️ WARNING, ❌ CRITICAL)
 
-**Thresholds calibrated for DRAM-less QLC SSDs:**
+**Current generic thresholds (workload guidance, not failure prediction):**
 
 - Sequential write: <100 MB/s = CRITICAL, 100-200 = WARNING, >200 = GOOD
-- Random write: <20 MB/s = CRITICAL, 20-50 = WARNING (typical DRAM-less QLC), >50 = GOOD
+- Random write: <20 MB/s = CRITICAL, 20-50 = WARNING, >50 = GOOD
+
+Throughput cannot clear a drive as healthy. Windows storage events and raw SMART
+errors take precedence over a green benchmark or `HealthStatus=Healthy` result.
 
 ---
 
@@ -209,6 +220,7 @@ python -m viper_health.cli.check_trim
 ```
 
 **What it reports:**
+
 - TRIM enabled/disabled status
 - Critical if disabled (drive will continuously degrade without TRIM)
 - Fix commands if disabled: `fsutil behavior set DisableDeleteNotify 0`
@@ -230,17 +242,21 @@ python -m viper_health.cli.check_space --output space_check.json
 ```
 
 **Thresholds:**
+
 - <10% free = CRITICAL (immediate action needed)
 - 10-20% free = WARNING (clean up soon)
 - >20% free = GOOD (healthy)
 
-**Why it matters:** QLC SSDs need 15-20% free space for wear leveling, garbage collection, and SLC cache capacity.
+**Why it matters:** SSDs need free-space headroom for wear leveling, garbage
+collection, and dynamic cache capacity. More free space is beneficial, but it
+does not rule out media, cable, controller, firmware, or power faults.
 
 ---
 
 ### Comparing to Baseline (Trend Analysis)
 
-Track performance degradation over time:
+Track profile and performance changes over time on known-stable storage. Omit
+benchmark sections when storage health is uncertain:
 
 ```bash
 # Save baseline after cleanup
@@ -252,12 +268,14 @@ python -m viper_health.cli.compare_baseline --baseline data/baselines/baseline.j
 ```
 
 **What it detects:**
+
 - Benchmark throughput degradation (>10% = WARNING, >20% = CRITICAL)
 - MFT size growth
 - Health score changes
 - Improvements after cleanup
 
-**Recommended:** Run weekly comparisons to catch gradual degradation early.
+**Recommended:** Compare read-only profile metrics regularly. Run benchmarks
+only after backup and storage-event preflight checks show no instability.
 
 ---
 
@@ -323,6 +341,11 @@ python -m viper_health.cli.check_smart --output data/reports/smart.json
 Reports health status, temperature (°C), wear %, power-on hours, and error
 counts per physical disk. For detailed vendor SMART attributes, use
 CrystalDiskInfo or `smartctl`.
+
+> `HealthStatus=Healthy` and `PredictFailure=False` are threshold summaries, not
+> guarantees. Any nonzero read/media/reallocation counters, repeated Event 129
+> or 153 records, or storage-related bugchecks require investigation even when
+> the summary remains green.
 
 ---
 

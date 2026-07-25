@@ -25,9 +25,11 @@ a small temporary file to measure I/O and always cleans it up.
 from __future__ import annotations
 
 import argparse
+import ctypes
 import json
 import platform
 import socket
+import statistics
 import sys
 from dataclasses import asdict
 from datetime import datetime, timezone
@@ -52,7 +54,103 @@ except ImportError:  # pragma: no cover - color is cosmetic
         BRIGHT = RESET_ALL = ""
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
+
+
+def _collect_total_memory_bytes() -> int | None:
+    """Return installed physical memory on Windows, if available."""
+    try:
+        class MemoryStatus(ctypes.Structure):
+            _fields_ = [
+                ("length", ctypes.c_ulong),
+                ("memory_load", ctypes.c_ulong),
+                ("total_physical", ctypes.c_ulonglong),
+                ("available_physical", ctypes.c_ulonglong),
+                ("total_page_file", ctypes.c_ulonglong),
+                ("available_page_file", ctypes.c_ulonglong),
+                ("total_virtual", ctypes.c_ulonglong),
+                ("available_virtual", ctypes.c_ulonglong),
+                ("available_extended_virtual", ctypes.c_ulonglong),
+            ]
+
+        status = MemoryStatus()
+        status.length = ctypes.sizeof(MemoryStatus)
+        if ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(status)):
+            return int(status.total_physical)
+    except (AttributeError, OSError):
+        pass
+    return None
+
+
+def _summarize_benchmark_runs(runs: list[list]) -> list[dict]:
+    """Summarize repeated benchmark runs using medians and spread metrics."""
+    if not runs:
+        return []
+
+    by_test: dict[str, list] = {}
+    test_order: list[str] = []
+    for run in runs:
+        for result in run:
+            if result.test_name not in by_test:
+                by_test[result.test_name] = []
+                test_order.append(result.test_name)
+            by_test[result.test_name].append(result)
+
+    summaries: list[dict] = []
+    for test_name in test_order:
+        samples = by_test[test_name]
+        first = samples[0]
+        throughputs = [sample.throughput_mb_s for sample in samples]
+        iops_values = [sample.iops for sample in samples]
+        durations = [sample.duration_seconds for sample in samples]
+        median_throughput = statistics.median(throughputs)
+        median_iops = statistics.median(iops_values)
+
+        # Assessment only depends on operation/pattern/throughput, so a small
+        # duck-typed object keeps the benchmark module contract unchanged.
+        assessment_result = type(
+            "BenchmarkAssessment",
+            (),
+            {
+                "operation": first.operation,
+                "pattern": first.pattern,
+                "throughput_mb_s": median_throughput,
+                "iops": median_iops,
+            },
+        )()
+        assessment = assess_benchmark_performance(assessment_result)
+
+        summaries.append(
+            {
+                "test_name": test_name,
+                "operation": first.operation,
+                "pattern": first.pattern,
+                "block_size": first.block_size,
+                "total_bytes": first.total_bytes,
+                "sample_count": len(samples),
+                "duration_seconds": round(statistics.median(durations), 6),
+                "duration_seconds_min": round(min(durations), 6),
+                "duration_seconds_max": round(max(durations), 6),
+                "throughput_mb_s": round(median_throughput, 2),
+                "throughput_mb_s_min": round(min(throughputs), 2),
+                "throughput_mb_s_max": round(max(throughputs), 2),
+                "throughput_mb_s_stdev": round(
+                    statistics.pstdev(throughputs) if len(throughputs) > 1 else 0.0,
+                    2,
+                ),
+                "iops": round(median_iops, 0),
+                "iops_min": round(min(iops_values), 0),
+                "iops_max": round(max(iops_values), 0),
+                "iops_stdev": round(
+                    statistics.pstdev(iops_values) if len(iops_values) > 1 else 0.0,
+                    0,
+                ),
+                "severity": assessment["severity"],
+                "message": assessment["message"],
+            }
+        )
+
+    return summaries
 
 
 def _collect_machine_info() -> dict:
@@ -73,6 +171,7 @@ def _collect_machine_info() -> dict:
         "processor": platform.processor(),
         "python_version": platform.python_version(),
         "cpu_count": cpu_count,
+        "total_memory_bytes": _collect_total_memory_bytes(),
     }
 
 
@@ -82,8 +181,12 @@ def build_machine_profile(
     drive: str = "C:",
     include_drives: bool = True,
     include_trim: bool = True,
+    include_mft: bool | None = None,
+    include_volumes: bool | None = None,
     run_benchmark: bool = False,
     benchmark_size_mb: int = 100,
+    benchmark_block_size_kb: int = 4,
+    benchmark_runs: int = 3,
     exclude_paths: list[str] | None = None,
     show_progress: bool = False,
 ) -> dict:
@@ -94,8 +197,12 @@ def build_machine_profile(
         drive: Drive letter to inspect for space/TRIM (default ``C:``).
         include_drives: Query drive/SMART health (PowerShell; may be slow).
         include_trim: Query TRIM status (fsutil; may need admin).
+        include_mft: Query MFT health; defaults to include_trim.
+        include_volumes: Inventory mounted volumes; defaults to include_drives.
         run_benchmark: Run a small I/O benchmark and include results.
         benchmark_size_mb: Test-file size for the benchmark, in MB.
+        benchmark_block_size_kb: I/O block size used for all benchmark tests.
+        benchmark_runs: Number of benchmark repetitions; medians are reported.
         exclude_paths: Paths/globs to prune from the filesystem walk.
         show_progress: Emit progress updates during the scan.
 
@@ -111,6 +218,10 @@ def build_machine_profile(
         "scan_root": str(root),
         "drive": drive,
     }
+    if include_mft is None:
+        include_mft = include_trim
+    if include_volumes is None:
+        include_volumes = include_drives
 
     # --- Elevation (best-effort; drives/TRIM depend on it) ------------------
     try:
@@ -147,6 +258,21 @@ def build_machine_profile(
     profile["directories_scanned"] = inventory.directories_scanned
     profile["total_bytes"] = inventory.total_bytes
     profile["findings_count"] = len(scan["findings"])
+    profile["suppressed_findings_count"] = len(scan["suppressed"])
+    profile["finding_counts"] = {
+        "warning": sum(1 for finding in scan["findings"] if finding["severity"] == "warning"),
+        "critical": sum(1 for finding in scan["findings"] if finding["severity"] == "critical"),
+        "tiny_file_hotspots": sum(
+            1 for finding in scan["findings"] if finding["detector"] == "tiny_file_hotspots"
+        ),
+        "directory_density": sum(
+            1 for finding in scan["findings"] if finding["detector"] == "directory_density"
+        ),
+    }
+    profile["scan_config"] = {
+        "tiny_file_max_bytes": inventory.tiny_file_max_bytes,
+        "exclude_paths": list(exclude_paths or []),
+    }
     profile["health_score"] = {
         "overall_score": round(health.overall_score, 1),
         "severity_band": health.severity_band,
@@ -162,6 +288,15 @@ def build_machine_profile(
         except Exception as exc:  # pragma: no cover - environment dependent
             profile["drives"] = {"available": False, "error": str(exc)}
 
+    # --- Mounted volumes ---------------------------------------------------
+    if include_volumes:
+        try:
+            from viper_health.collectors.volume_info import get_volume_info
+
+            profile["volumes"] = [asdict(volume) for volume in get_volume_info()]
+        except Exception as exc:  # pragma: no cover - environment dependent
+            profile["volumes"] = {"available": False, "error": str(exc)}
+
     # --- TRIM ---------------------------------------------------------------
     if include_trim:
         try:
@@ -172,24 +307,40 @@ def build_machine_profile(
         except Exception as exc:  # environment/permission dependent
             profile["trim"] = {"available": False, "error": str(exc)}
 
+    # --- MFT health --------------------------------------------------------
+    if include_mft:
+        try:
+            from viper_health.collectors.mft_info import analyze_mft_health, get_mft_info
+
+            mft = get_mft_info(drive)
+            profile["mft"] = analyze_mft_health(mft)
+            # Flat compatibility fields used by compare_baseline.
+            profile["mft_size_bytes"] = mft.mft_size_bytes
+            profile["mft_fragments"] = mft.mft_fragments
+        except Exception as exc:  # environment/permission dependent
+            profile["mft"] = {"available": False, "error": str(exc)}
+
     # --- I/O benchmark (optional; writes a temp file) -----------------------
     if run_benchmark:
         try:
-            results = run_io_benchmark(
-                target_dir=root if root.is_dir() else None,
-                test_file_size_mb=benchmark_size_mb,
-            )
-            profile["benchmark_results"] = [
-                {
-                    "test_name": r.test_name,
-                    "operation": r.operation,
-                    "pattern": r.pattern,
-                    "throughput_mb_s": round(r.throughput_mb_s, 2),
-                    "iops": round(r.iops, 0),
-                    "severity": assess_benchmark_performance(r)["severity"],
-                }
-                for r in results
+            if benchmark_runs < 1:
+                raise ValueError("benchmark_runs must be at least 1")
+            benchmark_target = root if root.is_dir() else None
+            profile["benchmark_config"] = {
+                "target_dir": str(benchmark_target) if benchmark_target else None,
+                "test_file_size_mb": benchmark_size_mb,
+                "block_size_kb": benchmark_block_size_kb,
+                "runs": benchmark_runs,
+            }
+            runs = [
+                run_io_benchmark(
+                    target_dir=benchmark_target,
+                    test_file_size_mb=benchmark_size_mb,
+                    block_size_kb=benchmark_block_size_kb,
+                )
+                for _ in range(benchmark_runs)
             ]
+            profile["benchmark_results"] = _summarize_benchmark_runs(runs)
         except Exception as exc:  # pragma: no cover - environment dependent
             profile["benchmark_results"] = {"available": False, "error": str(exc)}
 
@@ -253,6 +404,18 @@ Examples:
         help="Benchmark test-file size in MB (default: 100)",
     )
     parser.add_argument(
+        "--benchmark-block-size",
+        type=int,
+        default=4,
+        help="Benchmark I/O block size in KB (default: 4)",
+    )
+    parser.add_argument(
+        "--benchmark-runs",
+        type=int,
+        default=3,
+        help="Benchmark repetitions; profile reports medians (default: 3)",
+    )
+    parser.add_argument(
         "--no-drives",
         action="store_true",
         help="Skip drive/SMART health collection (faster, no PowerShell)",
@@ -261,6 +424,16 @@ Examples:
         "--no-trim",
         action="store_true",
         help="Skip TRIM status collection",
+    )
+    parser.add_argument(
+        "--no-mft",
+        action="store_true",
+        help="Skip MFT health collection",
+    )
+    parser.add_argument(
+        "--no-volumes",
+        action="store_true",
+        help="Skip mounted-volume inventory",
     )
     parser.add_argument(
         "--exclude",
@@ -283,15 +456,22 @@ Examples:
     print(f"{Fore.CYAN}{Style.BRIGHT}🧭 Building machine profile...{Style.RESET_ALL}")
     print(f"   Root: {args.root}")
     if args.benchmark:
-        print(f"   Benchmark: enabled ({args.benchmark_size} MB)")
+        print(
+            f"   Benchmark: enabled ({args.benchmark_size} MB, "
+            f"{args.benchmark_block_size} KB blocks, {args.benchmark_runs} runs)"
+        )
 
     profile = build_machine_profile(
         root=args.root,
         drive=args.drive,
         include_drives=not args.no_drives,
         include_trim=not args.no_trim,
+        include_mft=not args.no_mft,
+        include_volumes=not args.no_volumes,
         run_benchmark=args.benchmark,
         benchmark_size_mb=args.benchmark_size,
+        benchmark_block_size_kb=args.benchmark_block_size,
+        benchmark_runs=args.benchmark_runs,
         exclude_paths=args.exclude_paths,
         show_progress=args.progress,
     )
@@ -314,6 +494,11 @@ Examples:
     print(f"  Directories:   {profile['directories_scanned']:,}")
     if "free_percent" in profile:
         print(f"  Free space:    {profile['free_percent']:.1f}%")
+    if isinstance(profile.get("mft"), dict) and profile["mft"].get("available", True):
+        print(
+            f"  MFT:           {profile['mft']['mft_size_gb']:.2f} GB, "
+            f"{profile['mft']['mft_fragments']} fragment(s)"
+        )
     print(f"  Health score:  {hs['overall_score']:.1f} / 100 "
           f"({hs['severity_band'].upper()})")
     if isinstance(profile.get("benchmark_results"), list):

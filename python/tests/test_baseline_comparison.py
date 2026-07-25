@@ -161,6 +161,9 @@ def test_compare_to_baseline_benchmark_results(tmp_path):
     assert comparison.overall_severity == "critical"
     assert len(comparison.alerts) > 0
     assert any("sequential_write" in alert for alert in comparison.alerts)
+    metric_names = {change.metric_name for change in comparison.changes}
+    assert "sequential_write_throughput" in metric_names
+    assert "sequential_write_iops" in metric_names
 
 
 def test_compare_to_baseline_mft_growth(tmp_path):
@@ -184,6 +187,63 @@ def test_compare_to_baseline_mft_growth(tmp_path):
     
     assert comparison.overall_severity == "critical"
     assert any("MFT size" in alert for alert in comparison.alerts)
+
+
+def test_compare_to_baseline_mft_fragment_thresholds(tmp_path):
+    """Fragment changes only degrade after crossing health thresholds."""
+    baseline_path = tmp_path / "baseline.json"
+    baseline_path.write_text(json.dumps({"mft_fragments": 1}))
+
+    stable = compare_to_baseline({"mft_fragments": 2}, baseline_path)
+    stable_change = next(c for c in stable.changes if c.metric_name == "mft_fragments")
+    assert stable_change.severity == "stable"
+
+    degraded = compare_to_baseline({"mft_fragments": 6}, baseline_path)
+    degraded_change = next(c for c in degraded.changes if c.metric_name == "mft_fragments")
+    assert degraded_change.severity == "degraded"
+    assert any("MFT fragmentation" in alert for alert in degraded.alerts)
+
+
+def test_compare_to_baseline_skips_incompatible_benchmark_blocks(tmp_path):
+    """Benchmark values with different block sizes are not compared."""
+    baseline_path = tmp_path / "baseline.json"
+    baseline_path.write_text(json.dumps({
+        "benchmark_results": [{
+            "test_name": "random_read",
+            "block_size": 4096,
+            "throughput_mb_s": 100,
+            "iops": 25_600,
+        }],
+    }))
+    current = {
+        "benchmark_results": [{
+            "test_name": "random_read",
+            "block_size": 8192,
+            "throughput_mb_s": 100,
+            "iops": 12_800,
+        }],
+    }
+
+    comparison = compare_to_baseline(current, baseline_path)
+
+    assert comparison.changes == []
+    assert comparison.overall_severity == "stable"
+
+
+def test_compare_to_baseline_skips_unavailable_benchmarks(tmp_path):
+    """Graceful-degradation objects are not treated as result lists."""
+    baseline_path = tmp_path / "baseline.json"
+    baseline_path.write_text(json.dumps({
+        "benchmark_results": {"available": False, "error": "unavailable"},
+    }))
+
+    comparison = compare_to_baseline(
+        {"benchmark_results": {"available": False, "error": "unavailable"}},
+        baseline_path,
+    )
+
+    assert comparison.changes == []
+    assert comparison.overall_severity == "stable"
 
 
 def test_compare_to_baseline_health_score_drop(tmp_path):

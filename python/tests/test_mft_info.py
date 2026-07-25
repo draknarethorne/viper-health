@@ -6,6 +6,7 @@ import pytest
 
 from viper_health.collectors.mft_info import (
     MFTInfo,
+    _parse_fsutil_size,
     analyze_mft_health,
     get_mft_info,
 )
@@ -104,6 +105,20 @@ def test_get_mft_info_invalid_drive():
         get_mft_info("C")
 
 
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        ("0x0000000040000000", 1024**3),
+        ("1.45 GB", int(1.45 * 1024**3)),
+        ("200.13 MB", int(200.13 * 1024**2)),
+        ("1,024 KB", 1024 * 1024),
+    ],
+)
+def test_parse_fsutil_size_formats(value, expected):
+    """Modern and legacy fsutil size formats both parse to bytes."""
+    assert _parse_fsutil_size(value) == expected
+
+
 @patch("subprocess.run")
 def test_get_mft_info_success(mock_run):
     """Test get_mft_info with successful fsutil output."""
@@ -147,6 +162,27 @@ Folders:                         45678
     assert mft.mft_fragments == 1  # Fallback
     assert mft.total_files == 524288
     assert mft.total_folders == 45678
+
+
+@patch("subprocess.run")
+def test_get_mft_info_modern_human_readable_size(mock_run):
+    """Modern Windows emits MFT sizes as human-readable values."""
+    mock_ntfsinfo = Mock()
+    mock_ntfsinfo.returncode = 0
+    mock_ntfsinfo.stdout = """
+Mft Valid Data Length :            1.45 GB
+MFT Zone Size  :                   200.13 MB
+"""
+
+    mock_frag = Mock()
+    mock_frag.returncode = 5
+    mock_frag.stdout = ""
+    mock_run.side_effect = [mock_ntfsinfo, mock_frag]
+
+    mft = get_mft_info("C:")
+
+    assert mft.mft_size_bytes == int(1.45 * 1024**3)
+    assert mft.mft_fragments == 1
 
 
 @patch("subprocess.run")

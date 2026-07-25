@@ -4,8 +4,10 @@ Compare storage health across your machines (e.g. **laptop vs desktop**) using
 git as the transport. Each machine captures a *profile* JSON and commits it;
 any machine can then diff two profiles to see exactly why one feels faster.
 
-This workflow is **read-only** (observe mode). The optional `--benchmark` flag
-writes and deletes a small temporary file to measure I/O.
+Profile capture is read-only unless the optional `--benchmark` flag is used.
+That flag writes and deletes temporary files and is prohibited on any storage
+path with recent Event 129/153 records, media/reallocation errors, storage
+bugchecks, or an incomplete backup.
 
 ---
 
@@ -13,7 +15,7 @@ writes and deletes a small temporary file to measure I/O.
 
 ```bash
 # 1. On EACH machine (laptop, desktop):
-python -m viper_health.cli.profile_machine --benchmark
+python -m viper_health.cli.profile_machine
 git add data/profiles/<HOSTNAME>.json
 git commit -m "profile: <machine> storage snapshot"
 git push
@@ -39,11 +41,11 @@ Run this on every machine you want to compare. It writes
 # Default: scans your user home, no benchmark
 python -m viper_health.cli.profile_machine
 
-# Recommended: include the I/O benchmark for full comparison
+# Optional on known-stable, backed-up storage only
 python -m viper_health.cli.profile_machine --benchmark
 
 # Scan a specific root and show progress on large trees
-python -m viper_health.cli.profile_machine C:/Users/scott --benchmark --progress
+python -m viper_health.cli.profile_machine C:/Users/scott --progress
 ```
 
 Useful flags:
@@ -57,6 +59,8 @@ Useful flags:
 | `--exclude <path/glob>` | Prune paths from the walk (repeatable) |
 | `--progress` | Live progress during the scan |
 
+> **Do not benchmark the affected P3-512 system.** See
+> [P3-512 Storage Incident and Replacement Plan](P3-512-INCIDENT-AND-REPLACEMENT.md).
 > **Tip:** For the most complete drive data (wear / TBW / power-on hours), run
 > from an **elevated** terminal. On drives behind Intel RST / VMD, SMART
 > passthrough may still be blocked — see `check_smart` output for guidance.
@@ -113,8 +117,9 @@ surfaced by this comparison, are:
 2. **Low free space** — under ~20% free, SSD garbage collection and SLC cache
    suffer; `free_percent` will flag it.
 3. **Drive class / bus** — check each profile's `drives[].bus_type` and
-   `media_type`. A DRAM-less QLC drive, or one behind RAID (Intel RST / VMD),
-   behaves differently from a simpler SATA/DRAM SSD.
+   `media_type`, but do not infer NAND type, vendor, or DRAM configuration from
+   a model-name resemblance. Controller events and detailed error counters take
+   precedence over a green summary.
 4. **Benchmark deltas** — if random-write throughput is far lower on the slow
    machine, that points at metadata pressure or a weaker drive.
 
@@ -128,22 +133,29 @@ python -m viper_health.cli.scan_metadata
 
 ---
 
-## Profile schema (v1)
+## Profile schema (v2)
 
 Top-level keys used for comparison are intentionally flat so `compare_baseline`
 can diff them directly:
 
 ```jsonc
 {
-  "schema_version": 1,
+   "schema_version": 2,
   "profile_type": "machine_profile",
   "timestamp": "2026-07-24T...Z",
-  "machine": { "hostname": "...", "os": "...", "cpu_count": 8, ... },
+   "machine": {
+      "hostname": "...",
+      "os": "...",
+      "cpu_count": 8,
+      "total_memory_bytes": 17179869184,
+      "...": "..."
+   },
   "scan_root": "C:/Users/scott",
   "elevated": true,
 
   "free_percent": 32.9,
   "total_files": 363587,
+   "total_bytes": 123456789,
   "tiny_files": 12345,
   "tiny_file_ratio": 3.40,
   "directories_scanned": 59091,
@@ -151,9 +163,19 @@ can diff them directly:
   "health_score": { "overall_score": 100.0, "severity_band": "good" },
 
   "disk_space": { "...": "..." },
-  "drives":     [ { "bus_type": "...", "media_type": "...", "...": "..." } ],
+   "drives":     [ { "bus_type": "...", "media_type": "...", "...": "..." } ],
+   "volumes":    [ { "drive_letter": "C:", "file_system": "NTFS", "...": "..." } ],
   "trim":       { "...": "..." },
-  "benchmark_results": [ { "test_name": "...", "throughput_mb_s": 0.0, "severity": "..." } ]
+   "mft":        { "available": true, "size_bytes": 0, "fragments": 1, "...": "..." },
+   "benchmark_results": [
+      {
+         "test_name": "...",
+         "throughput_mb_s": 0.0,
+         "throughput_stats": { "median": 0.0, "min": 0.0, "max": 0.0, "stddev": 0.0 },
+         "iops_stats": { "median": 0.0, "min": 0.0, "max": 0.0, "stddev": 0.0 },
+         "severity": "..."
+      }
+   ]
 }
 ```
 

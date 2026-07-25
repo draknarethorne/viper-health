@@ -8,7 +8,24 @@ This document defines the implementation contract for SSD/filesystem health tool
 
 ## 0) System Health & Filesystem Diagnostics — Background Summary
 
-Over time, the system exhibited stalls, slowdowns, and inconsistent latency (especially during boot, cloud sync, and filesystem-heavy workflows). The dominant root cause pattern was metadata pressure on a DRAM-less QLC SSD, driven by tiny-file proliferation, stale caches, cloud-sync churn, update artifacts, and installer residue. These behaviors increase MFT pressure and random-I/O cost over time.
+Over time, the system exhibited stalls, slowdowns, and inconsistent latency
+(especially during boot and filesystem-heavy workflows). The original working
+hypothesis attributed these symptoms to metadata pressure on a DRAM-less QLC
+SSD. That hardware identification and root-cause conclusion were incorrect.
+
+The installed system disk identifies only as `P3-512`, firmware `SN18398`, and
+Windows reports it as a **512 GB SATA SSD** on the AMD 400-Series chipset SATA
+controller. The model string does not establish vendor, NAND type, or DRAM
+configuration. Historical Windows events later showed that the primary failure
+signal was a long-running Disk 0/SATA-path fault: `storahci` Event 129 resets,
+Disk Event 153 retries, storage-oriented bugchecks, read errors, and reported
+reallocated blocks. The first retained reset predates this toolkit's benchmark
+work by nearly three months.
+
+Tiny-file proliferation, stale caches, cloud-sync churn, update artifacts, and
+installer residue can still create metadata pressure and random-I/O cost. They
+must not be presented as explanations for controller resets, media errors, or
+storage bugchecks without supporting evidence.
 
 Cleanup outcomes (post-remediation state):
 
@@ -16,7 +33,10 @@ Cleanup outcomes (post-remediation state):
 - MFT size: healthy
 - tiny-file density: normal
 - directory hotspots: primarily expected Windows-heavy zones
-- latency behavior: stable baseline
+- filesystem-pressure metrics: stable baseline
+
+These outcomes describe filesystem state only. They do not certify physical
+disk, cable, controller, firmware, or power health.
 
 Incident learned from cleanup:
 
@@ -128,6 +148,11 @@ The following invariants are non-negotiable:
 3. Any mutating action must support a dry-run preview that lists exact candidate paths.
 4. Any mutating action must emit an action manifest before execution.
 5. Direct hard-delete is disallowed by default; quarantine-first policy applies.
+6. Write benchmarks must be opt-in and must refuse to run when preflight finds
+   recent storage resets/retries, storage bugchecks, or media/reallocation
+   errors unless a future explicit override is deliberately implemented.
+7. A green SMART summary, free-space result, MFT result, or filesystem score
+   must never overrule concrete storage-event or raw-error evidence.
 
 ---
 
@@ -339,6 +364,17 @@ Minimum top-level fields:
 - `score`
 - `recommendations`
 
+Hardware-health reports must distinguish:
+
+- filesystem pressure and capacity
+- drive firmware summary status
+- raw reliability/error counters
+- operating-system storage/controller events
+- unavailable or unsupported evidence
+
+A report must not emit a global “healthy drive” conclusion when only a subset
+of those evidence classes was collected.
+
 ---
 
 ## 8) Logging and Audit Requirements
@@ -542,6 +578,11 @@ Phase 3:
 - Drive health / SMART / temperature — ✅ `collectors/smart_data.py`
 - Process I/O — ✅ `collectors/io_processes.py`
 - I/O benchmarks — ✅ `benchmarks/io_bench.py`
+
+> **Known safety gap (2026-07-25):** `benchmark_io` remains implemented, but it
+> does not yet enforce Windows storage-event preflight. It must not be run on
+> the affected P3-512 system. Documentation treats benchmarks as optional and
+> prohibited on unstable storage until code-level gating is added.
 
 **Maintenance mode (Sections 3, 8): intentionally deferred.**
 

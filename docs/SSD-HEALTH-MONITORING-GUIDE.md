@@ -1,411 +1,212 @@
-# SSD Health Monitoring Guide for DRAM-less QLC Drives
+# SSD and Filesystem Health Monitoring Guide
 
-## Table of Contents
-1. [What We Have](#what-we-have-current-toolkit)
-2. [What We're Missing](#what-were-missing-critical-gaps)
-3. [Recommended Monitoring Workflow](#recommended-monitoring-workflow)
-4. [Understanding "Calm Phase"](#understanding-calm-phase)
-5. [Troubleshooting Slow Performance](#troubleshooting-slow-performance)
+## Purpose
 
----
+Viper Health measures several distinct layers of storage behavior:
 
-## What We Have (Current Toolkit)
+- filesystem pressure, including tiny files and directory density
+- churn in cloud, browser, update, and telemetry locations
+- NTFS metadata size and fragmentation
+- free-space and TRIM state
+- Windows drive-summary and reliability counters
+- process I/O and optional performance measurements
+- baseline and snapshot changes over time
 
-### ✅ Implemented Analyzers
+These layers complement one another, but they are not interchangeable. Healthy
+free space, TRIM, MFT, or filesystem pressure does not certify an SSD, cable,
+controller, firmware, power supply, or motherboard.
 
-| Tool | Purpose | Status |
-|------|---------|--------|
-| **I/O Benchmarks** | Measure seq/random read/write performance | ✅ Complete |
-| **MFT Analysis** | Track MFT size and fragmentation | ✅ Complete |
-| **Tiny-File Hotspots** | Identify metadata pressure from small files | ✅ Complete |
-| **Directory Density** | Find directories with excessive file counts | ✅ Complete |
-| **Metadata Pressure Composite** | Combine tiny-file/dir/MFT/growth signals (4.3) | ✅ Complete |
-| **Cloud-Sync Churn** | OneDrive/Google Drive/Dropbox/workspaceStorage (4.4) | ✅ Complete |
-| **Browser/WebView Cache** | Edge/Chrome/Discord/Teams cache pressure (4.5) | ✅ Complete |
-| **Update/Installer Residue** | SoftwareDistribution/Package Cache (4.6) | ✅ Complete |
-| **Telemetry/Log Churn** | WER/CBS/Temp log pressure (4.7) | ✅ Complete |
-| **Snapshot & Churn Velocity** | Files/day + acceleration trends (Sec 11) | ✅ Complete |
-| **TRIM Status** | Verify TRIM enabled (fsutil) | ✅ Complete |
-| **Free Space Monitor** | QLC-aware free-space thresholds | ✅ Complete |
-| **Drive Health / SMART / Temp** | Physical disk health via Storage cmdlets | ✅ Complete |
-| **Process I/O Monitor** | Top disk-I/O processes | ✅ Complete |
-| **Baseline Comparison** | Trend analysis vs saved baselines | ✅ Complete |
-| **Health Scoring** | Weighted overall health assessment | ✅ Complete |
-| **Suite Runner** | Preset-based multi-target scanning | ✅ Complete |
+## Current P3-512 incident
 
-### Current Capabilities
+The installed system disk identifies as `P3-512`, firmware `SN18398`, and
+Windows reports it as a 512 GB **SATA** SSD on Disk 0. The model string does not
+establish its vendor, NAND type, or DRAM configuration.
 
-- **Filesystem Pressure Detection:** Tiny-file proliferation, directory bloat, composite metadata pressure
-- **Churn Detection:** Cloud-sync, browser/cache, update residue, telemetry/log families + snapshot velocity
-- **Performance Baseline:** I/O throughput and IOPS with DRAM-less QLC thresholds
-- **Metadata Health:** MFT size and fragmentation
-- **Drive Health:** SMART/temperature/wear via Windows Storage cmdlets
-- **TRIM & Free Space:** Critical SSD-longevity checks
-- **Trend Tracking:** Snapshot-over-snapshot churn + baseline comparison
-- **Safety-First Design:** Read-only defaults, immutable path protection
-- **Multi-Format Reports:** JSON, Markdown, console output with color coding
+The earlier Crucial P3 / NVMe / QLC identification was incorrect. Retained
+Windows evidence includes:
 
----
+- 75 `storahci` Event 129 resets targeting `RaidPort0`
+- 21 Disk 0 Event 153 I/O retries
+- storage bugchecks `0x154` and `0x7A`
+- 13 total read errors
+- raw SMART attribute 5 value of 13
+- maximum observed read and write latency measured in seconds
 
-## What We're Missing (Remaining Gaps)
+The first retained storage reset occurred on 2026-04-30, nearly three months
+before the benchmark-enabled profile crash. The benchmark did not create the
+underlying fault, but sustained I/O likely provoked the unstable path.
 
-The core detector families and drive-health checks from the spec are now
-implemented. Remaining items are lower-value or better served by mature
-external tools.
+Do not benchmark or stress the P3-512. See the
+[P3-512 incident and replacement plan](P3-512-INCIDENT-AND-REPLACEMENT.md).
 
-### ⚠️ Medium Priority (Useful for Deep Diagnostics)
+## Evidence model
 
-#### 1. Detailed SMART Attribute Parsing
-**Status:** Partially covered by `check_smart` (health, temperature, wear,
-power-on hours, error counts via Storage cmdlets).
+Use this order when assessing a machine:
 
-**Gap:** Raw vendor SMART attributes (reallocated sectors, write amplification,
-total LBAs written). Best served by **CrystalDiskInfo** or `smartctl`
-(smartmontools), which already parse vendor-specific attributes reliably.
+1. Backup status and user-visible symptoms
+2. Storage-oriented bugchecks and unexpected shutdowns
+3. Controller resets and disk retries in the Windows System log
+4. Raw media, reallocation, pending, uncorrectable, CRC, and timeout counters
+5. Vendor summary status, temperature, wear, and power-on hours
+6. Free space, TRIM, MFT, and filesystem-pressure metrics
+7. Optional performance results on known-stable storage
 
----
+A lower-priority green result cannot override higher-priority error evidence.
+For example, `HealthStatus=Healthy` is a firmware/driver summary threshold; it
+can coexist with meaningful read errors, retries, and controller resets.
 
-#### 2. Write Amplification Tracking
-**Why It Matters:**
-- Ratio of NAND writes to host writes
-- High write amplification = excessive garbage collection overhead
-- Indicates fragmentation or small write patterns
+## Toolkit coverage
 
-**Data Source:**
-- SMART attribute F1 (Total LBAs Written) / F2 (Total LBAs Read)
-- Compare to filesystem write tracking
+| Area | Tool | Scope |
+| --- | --- | --- |
+| Tiny-file hotspots | `scan_tiny_files` | Filesystem pressure |
+| Directory density | `scan_directory_density` | Filesystem pressure |
+| Composite metadata pressure | `scan_metadata` | Filesystem and optional MFT signals |
+| Churn/cache categories | `scan_targets` | Cloud, browser, update, telemetry |
+| Snapshot velocity | `scan_snapshot` | Change over time |
+| MFT health | `scan_mft` | NTFS metadata |
+| TRIM | `check_trim` | OS delete-notification state |
+| Free space | `check_space` | Capacity headroom |
+| Drive summary | `check_smart` | Windows Storage counters |
+| Active process I/O | `check_io` | Current process activity |
+| Machine profile | `profile_machine` | Cross-machine facts |
+| Baseline comparison | `compare_baseline` | Metric deltas |
+| I/O benchmark | `benchmark_io` | Optional workload measurement |
 
-**Implementation:**
-Integrate with detailed SMART attribute parsing (item #1 above)
+## Known gaps
 
----
+### Windows storage-event integration
 
-#### 3. Indexing Service Detection
-**Why It Matters:**
-- Windows Search indexing hammers SSDs with tiny-file reads
-- Can cause sustained 100% disk usage
-- Should be disabled on high-churn folders
+Normal reports do not yet automatically collect and score Event 129, Event 153,
+Kernel-Power events, or bugcheck payloads. This is a critical gap because the
+P3-512 incident demonstrated that filesystem metrics and summary SMART status
+can look green while the operating system repeatedly resets the storage path.
 
-**What to Build:**
-```python
-# python/src/viper_health/analyzers/indexing_check.py
-def check_indexing_status(path: Path) -> dict:
-    """
-    Check if Windows Search indexing is enabled for path.
-    Returns: {indexed: bool, recommendation: str}
-    """
-```
+### Raw vendor SMART interpretation
 
-**Recommendation Engine:**
-- If tiny-file hotspot AND indexed → suggest disabling indexing
-- Folders to consider: node_modules, .git, cache, temp
+Windows Storage cmdlets expose useful counters but do not fully interpret every
+vendor-specific SATA or NVMe attribute. Use CrystalDiskInfo or `smartctl` to
+review:
 
----
+- reallocated sectors or blocks
+- pending and offline-uncorrectable sectors
+- reported uncorrectable errors
+- command timeouts
+- SATA UDMA CRC errors
+- unsafe shutdowns or unexpected power loss
+- percentage used and total host writes
 
-#### 4. Defragmentation Scheduler
-**Why It Matters:**
-- MFT defragmentation should be scheduled after cleanup
-- SSDs don't need traditional defrag, but MFT defrag is valuable
-- QLC benefits from occasional filesystem optimization
+### Benchmark preflight
 
-**What to Build:**
+`benchmark_io` is implemented but does not yet refuse execution based on recent
+storage events or media errors. Until code-level gating exists, operators must
+perform the safety decision manually.
+
+## Benchmark safety policy
+
+A benchmark is a workload measurement, not a drive-health test. Do not run one
+when any of the following is true:
+
+- important data is not backed up
+- Windows recently logged Event 129 or Event 153
+- the system had a storage-oriented bugcheck or unexplained reset
+- SMART or reliability counters show media, read, reallocation, pending,
+  uncorrectable, CRC, or timeout errors
+- the drive recently disappeared from firmware or entered BIOS unexpectedly
+- the machine is the affected P3-512 system
+
+Even on known-stable storage, use benchmarks sparingly and never interpret a
+high throughput score as proof of hardware health.
+
+## Recommended monitoring workflow
+
+### Weekly read-only checks
+
 ```powershell
-# powershell/PSViperHealth/Maintenance/Invoke-MFTDefrag.ps1
-function Invoke-MFTDefrag {
-    param([string]$Drive = "C:")
-    
-    # Check if admin
-    # Run defrag C: /U /V
-    # Monitor progress
-    # Re-check MFT fragmentation after
-}
+.venv\Scripts\python.exe -m viper_health.cli.check_space --drive C:
+.venv\Scripts\python.exe -m viper_health.cli.scan_targets --category all
+.venv\Scripts\python.exe -m viper_health.cli.check_smart
 ```
 
----
+Also review Windows System events for new controller resets, disk retries, and
+unexpected shutdowns.
 
-### 💡 Low Priority (Nice to Have)
+### Monthly trend checks
 
-#### 5. SSD Firmware Version Check
-- Outdated firmware may have performance bugs
-- Check manufacturer's site for updates
-
-#### 6. Over-Provisioning Calculator
-- Recommend over-provisioning space for QLC drives
-- Improves endurance and performance
-
-#### 7. Power Loss Protection Check
-- Detect if drive has power-loss protection (PLP)
-- DRAM-less drives often lack PLP
-
----
-
-## Recommended Monitoring Workflow
-
-### Daily/After Cleanup
-```bash
-# 1. Run filesystem scan
-python -m viper_health.cli.suite --preset user-data --console-summary
-
-# 2. Check for critical findings
-# If warnings/criticals, clean up identified hotspots
-
-# 3. Let drive idle 30-60 minutes (calm phase)
-# Windows runs TRIM, SSD runs garbage collection
-```
-
-### Weekly
-```bash
-# 1. Run full I/O benchmark
-python -m viper_health.cli.benchmark_io --output data/benchmarks/week.json
-
-# 2. Compare to baseline
-python -m viper_health.cli.compare_baseline --baseline data/baselines/baseline.json --current data/benchmarks/week.json
-
-# 3. Check MFT health (requires admin)
-python -m viper_health.cli.scan_mft --drive C: --output data/reports/mft_week.json
-
-# 4. Check churn/cache pressure
-python -m viper_health.cli.scan_targets --category all
-
-# 5. Capture a churn snapshot and diff vs last week
-python -m viper_health.cli.scan_snapshot capture --output data/snapshots/week.json
-python -m viper_health.cli.scan_snapshot diff --previous data/snapshots/last_week.json --current data/snapshots/week.json
-```
-
-### Monthly
-```bash
-# 1. Run full system scan
-python -m viper_health.cli.suite --preset full-system --output-dir reports/monthly/
-
-# 2. Review SMART data
-# Use CrystalDiskInfo or smartctl -a /dev/sdX
-
-# 3. Check drive temperature trends
-# Use HWiNFO64 sensor log
-
-# 4. Plan cleanup based on findings
-```
-
-### After Major Cleanup
-```bash
-# 1. Save new baseline
-python -m viper_health.cli.benchmark_io --output data/baselines/post_cleanup_$(date +%Y%m%d).json
-
-# 2. Wait 60 minutes for calm phase
-
-# 3. Re-run benchmark to see improvement
-python -m viper_health.cli.benchmark_io
-
-# 4. Compare before/after
-```
-
----
-
-## Understanding "Calm Phase"
-
-### What Happens During Calm Phase?
-
-**Windows Side (TRIM):**
-1. OS sends TRIM commands for deleted blocks
-2. File system updates MFT to reflect deletions
-3. Prefetch cache clears and rebuilds
-
-**SSD Side (Garbage Collection):**
-1. Controller marks TRIM'd blocks as free
-2. Garbage collection consolidates valid data
-3. SLC cache reorganizes and recovers capacity
-4. Wear leveling redistributes writes
-
-### How Long to Wait?
-- **Minimum:** 30 minutes of idle time
-- **Recommended:** 60 minutes
-- **Heavy cleanup:** 2-3 hours or overnight
-
-### What is "Idle"?
-- No active file operations (copying, installing, etc.)
-- Light browsing/email is fine
-- Avoid: video editing, gaming, large downloads, software compilation
-
-### How to Verify Calm Phase Completed?
-```bash
-# Before calm phase
-python -m viper_health.cli.benchmark_io --output before_calm.json
-
-# Wait 60 minutes (idle)
-
-# After calm phase
-python -m viper_health.cli.benchmark_io --output after_calm.json
-
-# Compare throughput - should see improvement if drive was stressed
-```
-
----
-
-## Troubleshooting Slow Performance
-
-### If Sequential Write <100 MB/s (CRITICAL)
-
-**Step 1: Check Free Space**
 ```powershell
-Get-PSDrive C | Select-Object Used,Free
-```
-- Ensure >20% free space
-- If <15%, this is your primary problem
-
-**Step 2: Check Background Processes**
-```powershell
-# Open Resource Monitor
-resmon.exe
-# Go to Disk tab, sort by Total (B/sec)
-```
-- Or use the built-in monitor: `python -m viper_health.cli.check_io`
-- Look for sustained high I/O (Windows Search, antivirus, cloud sync)
-- Temporarily disable/pause to test
-
-**Step 3: Check TRIM Status**
-```powershell
-fsutil behavior query DisableDeleteNotify
-```
-- Should show: `DisableDeleteNotify = 0` (TRIM enabled)
-- If disabled: `fsutil behavior set DisableDeleteNotify 0`
-
-**Step 4: Check Drive Temperature**
-- Run: `python -m viper_health.cli.check_smart`
-- Or download CrystalDiskInfo / HWiNFO64 for vendor SMART attributes
-- If >70°C, improve cooling or reduce workload
-
-**Step 5: Scan for Tiny-File Hotspots**
-```bash
-python -m viper_health.cli.suite --preset full-system --console-summary
-```
-- Clean up identified hotspots (browser cache, temp, etc.)
-
-**Step 6: Check MFT Health**
-```bash
-python -m viper_health.cli.scan_mft --drive C:
-```
-- If fragmented, run: `defrag C: /U /V` (requires admin)
-
-**Step 7: Allow Calm Phase**
-- Let system idle for 60+ minutes
-- Re-run benchmark to see if performance recovers
-
----
-
-### If Performance Doesn't Recover
-
-**Hardware Issues:**
-1. **Failing Drive:** Check SMART data for reallocated sectors, errors
-2. **Thermal Throttling:** Improve case airflow, add heatsink
-3. **Power Delivery:** Ensure adequate PSU, check power cables
-4. **Interface Issues:** Re-seat M.2/SATA connection, test different port
-
-**Software Issues:**
-1. **Driver Problems:** Update chipset/storage drivers
-2. **Firmware Outdated:** Check manufacturer for firmware updates
-3. **Write Caching Disabled:** Ensure write caching enabled in Device Manager
-4. **AHCI Mode:** Ensure SATA mode is AHCI (not IDE) in BIOS
-
-**Configuration Issues:**
-1. **Insufficient Over-Provisioning:** Consider leaving 10-15% unpartitioned
-2. **4K Alignment:** Check partition alignment (should be 2048 sectors)
-3. **TRIM Disabled:** Verify TRIM is working
-4. **Page File on SSD:** Move page file to secondary drive if low space
-
----
-
-## Next Steps for This Project
-
-### ✅ Completed (Core Detector Families & Drive Health)
-
-1. TRIM status checker — `check_trim`
-2. Free space monitor with thresholds — `check_space`
-3. Baseline comparison / trend tracking — `compare_baseline`
-4. Metadata pressure composite — `scan_metadata`
-5. Cloud-sync / browser / update / telemetry churn — `scan_targets`
-6. Snapshot & churn velocity — `scan_snapshot`
-7. Drive health / SMART / temperature — `check_smart`
-8. Process I/O monitor — `check_io`
-
-### Remaining (Lower Priority / External Tools)
-
-1. Detailed vendor SMART attribute parsing (use CrystalDiskInfo / smartctl)
-2. Write-amplification tracking
-3. Indexing-service detection + recommendations
-4. Scheduled health checks (Task Scheduler integration)
-5. PowerShell parity for the new analyzers
-
-### Note on Maintenance Mode
-
-The spec's maintenance/cleanup mode (Sections 3, 8) is **intentionally deferred**.
-viper-health is deliberately **observe-only**: it reports cleanup candidates but
-never mutates the filesystem. Manual cleanup guided by these reports is safer
-for a system where a prior automated cleanup damaged VS Code's built-in
-extensions. If maintenance mode is ever added, it must implement the full
-quarantine-first, dry-run, mutation-gating, and kill-switch safeguards in the spec.
-
----
-
-## Quick Reference Commands
-
-### Essential Health Checks (Run These First)
-```bash
-# Free space
-fsutil volume diskfree C:
-
-# TRIM status (0 = enabled, 1 = disabled)
-fsutil behavior query DisableDeleteNotify
-
-# Drive info
-wmic diskdrive get model,size,status
-
-# MFT info (requires admin)
-fsutil fsinfo ntfsinfo C:
+.venv\Scripts\python.exe -m viper_health.cli.scan_mft --drive C:
+.venv\Scripts\python.exe -m viper_health.cli.scan_snapshot capture --output data\snapshots\month.json
+.venv\Scripts\python.exe -m viper_health.cli.profile_machine --output data\profiles\current.json
 ```
 
-### If Drive is Slow Right Now
-```powershell
-# 1. Check what's using the disk
-resmon.exe  # Resource Monitor → Disk tab
+Do not add `--benchmark` unless storage is known-stable, backed up, and clear of
+recent error evidence.
 
-# 2. Check free space
-Get-PSDrive C | Select-Object Used,Free,@{Name="Free%";Expression={[math]::Round($_.Free/$($_.Used+$_.Free)*100,1)}}
+### After cleanup or heavy writes
 
-# 3. Run quick viper-health check
-python -m viper_health.cli.suite --preset quick-check --console-summary
-```
+Allow idle time for TRIM, garbage collection, and dynamic cache recovery. Then
+compare read-only snapshots and normal application behavior. Do not force a
+before/after benchmark when investigating suspected hardware instability.
 
-### After Cleanup
-```bash
-# 1. Let drive calm down (wait 60 min)
-# 2. Re-run benchmark
-python -m viper_health.cli.benchmark_io
+## Troubleshooting slow or stalled storage
 
-# 3. Check MFT (admin required)
-python -m viper_health.cli.scan_mft --drive C:
+1. Back up important data.
+2. Check Event 129, Event 153, Kernel-Power, and bugcheck history.
+3. Review detailed SMART and Windows reliability counters.
+4. If errors target one SATA disk, replace its data cable and change its SATA
+   port and power connector after the data is safe.
+5. Test with a known-good replacement disk under ordinary workloads.
+6. Investigate motherboard, PSU, RAM, BIOS, and PCIe only if errors persist with
+   the suspect disk and link removed.
+7. Use process-I/O sampling to identify background load only after hardware-path
+   errors have been addressed.
+8. Use free-space, TRIM, MFT, and filesystem scans to optimize a stable system,
+   not to dismiss controller or media failures.
 
-# 4. Defrag MFT if fragmented (admin required)
-defrag C: /U /V
-```
+## Interpreting common findings
 
----
+### Low free space
 
-## Conclusion
+Low free space can reduce SSD cache headroom and increase garbage-collection
+work. It cannot cause the controller to report a healthy disk if media errors
+exist, nor does abundant free space rule out failure.
 
-Your viper-health toolkit provides excellent **filesystem pressure detection**, but needs additional **hardware health monitoring** to get the complete picture of SSD health.
+### High tiny-file or directory pressure
 
-**Critical Missing Pieces:**
-1. ✅ TRIM status verification
-2. ✅ Free space thresholds
-3. ✅ Trend/baseline tracking
-4. ⚠️ Temperature monitoring (use external tools for now)
-5. ⚠️ SMART data analysis (use CrystalDiskInfo for now)
+Metadata pressure can increase random-I/O cost and application latency. It does
+not explain SATA controller resets, disk retries, device disappearance, or
+storage bugchecks by itself.
 
-**Immediate Action Items:**
-1. Run elevated prompt for MFT scan
-2. Check TRIM status: `fsutil behavior query DisableDeleteNotify`
-3. Verify >20% free space: `fsutil volume diskfree C:`
-4. Save current benchmark as baseline
-5. Install CrystalDiskInfo for SMART/temp monitoring
+### Active search indexing
 
-After your cleanup today, **wait 60 minutes**, then re-run benchmarks to measure improvement.
+Search indexing can produce legitimate background I/O. A healthy storage path
+must tolerate it. Indexing may expose a marginal device but does not explain
+months of controller resets as a software-only issue.
+
+### Green SMART summary
+
+Treat green summary status as one data point. Firmware thresholds are designed
+to declare predicted failure, not to guarantee error-free operation.
+
+## Replacement acceptance criteria
+
+After replacement:
+
+- keep the P3-512 disconnected for initial validation
+- use ordinary workloads for one to two weeks
+- verify no new Event 129/153 or storage bugchecks appear
+- update replacement SSD firmware using its vendor utility
+- verify backups and restored data
+- capture a read-only machine profile without `--benchmark`
+
+If the machine is stable on NVMe, the fault was within the old SATA path. If a
+known-good SATA disk repeats Event 129, investigate the SATA cable, port,
+controller, power connector, and PSU. If failures continue with SATA removed,
+expand the investigation to motherboard, PCIe, RAM, BIOS, and power.
+
+## Related documentation
+
+- [P3-512 incident and replacement plan](P3-512-INCIDENT-AND-REPLACEMENT.md)
+- [Quick reference](QUICK-REFERENCE.md)
+- [Cross-machine comparison](CROSS-MACHINE-COMPARISON.md)
+- [Authoritative specification](../viper-ssd-health.md)

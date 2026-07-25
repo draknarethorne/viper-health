@@ -66,7 +66,10 @@ def compare_to_baseline(
     alerts = []
     
     # Compare benchmark metrics if present
-    if "benchmark_results" in baseline_data and "benchmark_results" in current_data:
+    if (
+        isinstance(baseline_data.get("benchmark_results"), list)
+        and isinstance(current_data.get("benchmark_results"), list)
+    ):
         baseline_results = baseline_data["benchmark_results"]
         current_results = current_data["benchmark_results"]
         
@@ -80,32 +83,41 @@ def compare_to_baseline(
                 None
             )
             
-            if current_test:
-                # Compare throughput
-                baseline_throughput = baseline_test["throughput_mb_s"]
-                current_throughput = current_test["throughput_mb_s"]
-                
+            if not current_test:
+                continue
+
+            # Schema v2 records benchmark context. Different block sizes are
+            # not directly comparable; schema v1 lacks this field and remains
+            # supported using its historical 4 KiB default.
+            baseline_block = baseline_test.get("block_size")
+            current_block = current_test.get("block_size")
+            if baseline_block and current_block and baseline_block != current_block:
+                continue
+
+            for key, suffix, label, unit in (
+                ("throughput_mb_s", "throughput", "throughput", "MB/s"),
+                ("iops", "iops", "IOPS", "IOPS"),
+            ):
+                try:
+                    baseline_value = float(baseline_test[key])
+                    current_value = float(current_test[key])
+                except (KeyError, TypeError, ValueError):
+                    continue
+
                 change = calculate_change(
-                    f"{test_name}_throughput",
-                    baseline_throughput,
-                    current_throughput,
-                    threshold_warning=10,  # >10% degradation = warning
-                    threshold_critical=20,  # >20% degradation = critical
+                    f"{test_name}_{suffix}",
+                    baseline_value,
+                    current_value,
+                    threshold_warning=10,
+                    threshold_critical=20,
                     higher_is_better=True,
                 )
-                
                 changes.append(change)
-                
-                # Generate alerts for significant degradation
-                if change.severity == "critical":
+
+                if change.severity in ("degraded", "critical"):
                     alerts.append(
-                        f"{test_name}: {abs(change.change_percent):.1f}% throughput decrease "
-                        f"({baseline_throughput:.0f} → {current_throughput:.0f} MB/s)"
-                    )
-                elif change.severity == "degraded":
-                    alerts.append(
-                        f"{test_name}: {abs(change.change_percent):.1f}% throughput decrease "
-                        f"({baseline_throughput:.0f} → {current_throughput:.0f} MB/s)"
+                        f"{test_name}: {abs(change.change_percent):.1f}% {label} decrease "
+                        f"({baseline_value:.0f} → {current_value:.0f} {unit})"
                     )
     
     # Compare MFT metrics if present
@@ -129,6 +141,44 @@ def compare_to_baseline(
                 f"MFT size increased {abs(change.change_percent):.1f}% "
                 f"({change.baseline_value:.2f} → {change.current_value:.2f} GB)"
             )
+
+    # Fragment count is interpreted against the same absolute health
+    # thresholds as the MFT analyzer. A harmless change from one to two
+    # fragments must not become a critical percentage-change alert.
+    if "mft_fragments" in baseline_data and "mft_fragments" in current_data:
+        try:
+            baseline_fragments = float(baseline_data["mft_fragments"])
+            current_fragments = float(current_data["mft_fragments"])
+        except (TypeError, ValueError):
+            pass
+        else:
+            percent = (
+                ((current_fragments - baseline_fragments) / baseline_fragments) * 100
+                if baseline_fragments
+                else 0.0
+            )
+            if current_fragments >= 10 and current_fragments > baseline_fragments:
+                severity = "critical"
+            elif current_fragments >= 5 and current_fragments > baseline_fragments:
+                severity = "degraded"
+            elif current_fragments < baseline_fragments and baseline_fragments >= 5:
+                severity = "improved"
+            else:
+                severity = "stable"
+            changes.append(
+                MetricChange(
+                    metric_name="mft_fragments",
+                    baseline_value=baseline_fragments,
+                    current_value=current_fragments,
+                    change_percent=round(percent, 1),
+                    severity=severity,
+                )
+            )
+            if severity in ("degraded", "critical"):
+                alerts.append(
+                    "MFT fragmentation increased "
+                    f"({baseline_fragments:.0f} → {current_fragments:.0f} fragments)"
+                )
     
     # Compare health scores if present
     if "health_score" in baseline_data and "health_score" in current_data:

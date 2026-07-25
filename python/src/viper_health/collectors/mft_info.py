@@ -11,6 +11,29 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
+_SIZE_MULTIPLIERS = {
+    "B": 1,
+    "KB": 1024,
+    "MB": 1024**2,
+    "GB": 1024**3,
+    "TB": 1024**4,
+}
+
+
+def _parse_fsutil_size(value: str) -> int:
+    """Parse legacy hex or modern human-readable fsutil size output."""
+    cleaned = value.strip().replace(",", "")
+    first_token = cleaned.split()[0]
+    if first_token.lower().startswith("0x"):
+        return int(first_token, 16)
+
+    parts = cleaned.split()
+    if len(parts) >= 2 and parts[1].upper() in _SIZE_MULTIPLIERS:
+        return int(float(parts[0]) * _SIZE_MULTIPLIERS[parts[1].upper()])
+
+    return int(first_token, 0)
+
+
 @dataclass(frozen=True)
 class MFTInfo:
     """MFT (Master File Table) health information."""
@@ -69,19 +92,17 @@ def get_mft_info(drive: str = "C:") -> MFTInfo:
             line = line.strip()
             
             if "Mft Valid Data Length" in line:
-                # Format: "Mft Valid Data Length :       0x0000000012345678"
+                # Legacy: hex bytes. Modern Windows: e.g. "1.45 GB".
                 parts = line.split(":")
                 if len(parts) >= 2:
-                    hex_value = parts[1].strip()
-                    mft_size = int(hex_value, 16)
+                    mft_size = _parse_fsutil_size(parts[1])
             
             elif "Mft Zone Size" in line:
                 # Fallback if Valid Data Length not found
                 if mft_size == 0:
                     parts = line.split(":")
                     if len(parts) >= 2:
-                        hex_value = parts[1].strip()
-                        mft_size = int(hex_value, 16)
+                        mft_size = _parse_fsutil_size(parts[1])
             
             elif "File Records" in line and "In Use" not in line:
                 # Format: "File Records                 :       123456"
