@@ -8,7 +8,12 @@ import sys
 from dataclasses import asdict
 from pathlib import Path
 
-from viper_health.collectors.smart_data import DriveHealth, get_drive_health
+from viper_health.collectors.smart_data import (
+    LIMITED_PASSTHROUGH_BUSES,
+    DriveHealth,
+    get_drive_health,
+    is_elevated,
+)
 
 try:
     from colorama import Fore, Style, init as colorama_init
@@ -41,6 +46,7 @@ def _print_drive(d: DriveHealth) -> None:
     print("=" * 70)
     print(f"  Device ID:     {d.device_id}")
     print(f"  Media Type:    {d.media_type}")
+    print(f"  Bus Type:      {d.bus_type}")
     print(f"  Health Status: {d.health_status}")
 
     if d.temperature_c is not None:
@@ -60,6 +66,19 @@ def _print_drive(d: DriveHealth) -> None:
         print(f"  Read Errors:   {d.read_errors_total:,}")
     if d.write_errors_total is not None:
         print(f"  Write Errors:  {d.write_errors_total:,}")
+
+    # Explain why the deeper metrics are missing rather than silently hiding it.
+    if not d.reliability_available:
+        limited_bus = d.bus_type.strip().lower() in LIMITED_PASSTHROUGH_BUSES
+        print(
+            f"  {Fore.YELLOW}Reliability:   wear/temp/power-on unavailable"
+            f"{Style.RESET_ALL}"
+        )
+        if limited_bus:
+            print(
+                f"                 {Fore.YELLOW}drive is behind {d.bus_type} "
+                f"(Intel RST/VMD) — SMART passthrough limited{Style.RESET_ALL}"
+            )
 
     print(f"  {color}{icon} Status: {d.severity.upper()}{Style.RESET_ALL}")
     print("=" * 70 + "\n")
@@ -131,10 +150,49 @@ unavailable depending on drive/firmware. Run elevated for best results.
     else:
         print(f"\n{Fore.GREEN}✅ All drives report healthy.{Style.RESET_ALL}")
 
+    # Explain how to unlock wear/temperature/power-on data when it's missing.
+    missing_reliability = [d for d in drives if not d.reliability_available]
+    if missing_reliability:
+        elevated = is_elevated()
+        limited_buses = sorted({
+            d.bus_type for d in missing_reliability
+            if d.bus_type.strip().lower() in LIMITED_PASSTHROUGH_BUSES
+        })
+
+        print(
+            f"\n{Fore.YELLOW}{Style.BRIGHT}ℹ️  Wear / temperature / power-on data "
+            f"unavailable for {len(missing_reliability)} drive(s).{Style.RESET_ALL}"
+        )
+        print("   These NVMe/SATA reliability counters are not readable here because:")
+        if elevated is False:
+            print(f"   • {Fore.YELLOW}Not running as Administrator{Style.RESET_ALL} "
+                  "— reliability counters require elevation.")
+            print("     Re-run from an elevated terminal:")
+            print("       python -m viper_health.cli.check_smart")
+        elif elevated is None:
+            print("   • Elevation status could not be determined; try an "
+                  "elevated terminal.")
+        else:
+            print(f"   • {Fore.GREEN}Running elevated{Style.RESET_ALL}, so the "
+                  "storage driver itself is not exposing the counters.")
+        if limited_buses:
+            print(f"   • One or more drives sit behind "
+                  f"{Fore.YELLOW}{', '.join(limited_buses)}{Style.RESET_ALL} "
+                  "(Intel RST / VMD).")
+            print("     RAID/VMD controllers commonly block SMART passthrough,")
+            print("     so wear/TBW may be unreadable even when elevated.")
+        print(
+            f"\n   {Fore.CYAN}To confirm drive age/wear (Power-On Hours, TBW, "
+            f"Health %):{Style.RESET_ALL}"
+        )
+        print("   • CrystalDiskInfo or `smartctl -d nvme` read SMART through the "
+              "RST driver.")
+
     if args.output:
         payload = {
             "drives": [asdict(d) for d in drives],
             "overall_severity": worst,
+            "elevated": is_elevated(),
         }
         args.output.parent.mkdir(parents=True, exist_ok=True)
         with open(args.output, "w", encoding="utf-8") as fh:

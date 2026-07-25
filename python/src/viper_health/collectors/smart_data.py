@@ -32,6 +32,27 @@ class DriveHealth:
     read_errors_total: int | None
     write_errors_total: int | None
     severity: str  # "good" | "warning" | "critical" | "unknown"
+    bus_type: str = "Unknown"
+    reliability_available: bool = False
+
+
+# Bus types where NVMe/SATA SMART passthrough is commonly blocked by the
+# storage driver (Intel RST / VMD present the disk as a RAID member).
+LIMITED_PASSTHROUGH_BUSES = frozenset({"raid", "vmd", "nvme raid"})
+
+
+def is_elevated() -> bool | None:
+    """Return True if the current process has Windows admin rights.
+
+    Returns None when elevation cannot be determined (e.g. non-Windows).
+    """
+    try:
+        import ctypes
+
+        return bool(ctypes.windll.shell32.IsUserAnAdmin())  # type: ignore[attr-defined]
+    except Exception:
+        return None
+
 
 
 # Temperature thresholds (Celsius)
@@ -139,7 +160,7 @@ def get_drive_health() -> list[DriveHealth]:
     # Collect physical disks with health + media type
     disk_script = (
         "Get-PhysicalDisk | Select-Object DeviceId,FriendlyName,MediaType,"
-        "HealthStatus | ConvertTo-Json -Compress"
+        "BusType,HealthStatus | ConvertTo-Json -Compress"
     )
     disk_out = _run_powershell(disk_script)
 
@@ -184,6 +205,20 @@ def get_drive_health() -> list[DriveHealth]:
         media_raw = disk.get("MediaType", "Unknown")
         media_type = {3: "HDD", 4: "SSD", 5: "SCM"}.get(media_raw, str(media_raw))
 
+        # BusType is typically a string ("NVMe", "SATA", "RAID", "USB").
+        bus_type = str(disk.get("BusType", "Unknown"))
+
+        power_on_hours = _to_int(rel.get("PowerOnHours"))
+        read_errors_total = _to_int(rel.get("ReadErrorsTotal"))
+        write_errors_total = _to_int(rel.get("WriteErrorsTotal"))
+
+        # Reliability counters (temperature/wear/power-on) are only readable
+        # with admin rights and when the bus exposes SMART passthrough.
+        reliability_available = any(
+            v is not None
+            for v in (temperature_c, wear_percent, power_on_hours)
+        )
+
         severity = _assess_severity(health_status, temperature_c, wear_percent)
 
         results.append(
@@ -194,10 +229,12 @@ def get_drive_health() -> list[DriveHealth]:
                 health_status=health_status,
                 temperature_c=temperature_c,
                 wear_percent=wear_percent,
-                power_on_hours=_to_int(rel.get("PowerOnHours")),
-                read_errors_total=_to_int(rel.get("ReadErrorsTotal")),
-                write_errors_total=_to_int(rel.get("WriteErrorsTotal")),
+                power_on_hours=power_on_hours,
+                read_errors_total=read_errors_total,
+                write_errors_total=write_errors_total,
                 severity=severity,
+                bus_type=bus_type,
+                reliability_available=reliability_available,
             )
         )
 

@@ -7,6 +7,7 @@ from viper_health.collectors import smart_data
 from viper_health.collectors.smart_data import (
     _assess_severity,
     get_drive_health,
+    is_elevated,
 )
 
 
@@ -97,3 +98,68 @@ def test_get_drive_health_hot_drive_critical():
         result = get_drive_health()
 
     assert result[0].severity == "critical"
+
+
+def test_get_drive_health_parses_bus_type_and_reliability_available():
+    disk_json = json.dumps({
+        "DeviceId": "0",
+        "FriendlyName": "NVMe SSD",
+        "MediaType": 4,
+        "BusType": "NVMe",
+        "HealthStatus": "Healthy",
+    })
+    rel_json = json.dumps({
+        "DeviceId": "0",
+        "Temperature": 40,
+        "Wear": 3,
+        "PowerOnHours": 500,
+    })
+
+    def fake_ps(script: str):
+        if "ForEach-Object" in script:
+            return rel_json
+        return disk_json
+
+    with patch.object(smart_data, "_run_powershell", side_effect=fake_ps):
+        result = get_drive_health()
+
+    assert result[0].bus_type == "NVMe"
+    assert result[0].reliability_available is True
+
+
+def test_get_drive_health_reliability_unavailable_behind_raid():
+    """RAID/VMD drive with null reliability counters (non-admin scenario)."""
+    disk_json = json.dumps({
+        "DeviceId": "0",
+        "FriendlyName": "SAMSUNG MZVLB1T0HALR-000L2",
+        "MediaType": 4,
+        "BusType": "RAID",
+        "HealthStatus": "Healthy",
+    })
+    rel_json = json.dumps({
+        "DeviceId": "0",
+        "Temperature": None,
+        "Wear": None,
+        "PowerOnHours": None,
+    })
+
+    def fake_ps(script: str):
+        if "ForEach-Object" in script:
+            return rel_json
+        return disk_json
+
+    with patch.object(smart_data, "_run_powershell", side_effect=fake_ps):
+        result = get_drive_health()
+
+    drive = result[0]
+    assert drive.bus_type == "RAID"
+    assert drive.reliability_available is False
+    # Health status alone still classifies the drive.
+    assert drive.severity == "good"
+    assert drive.bus_type.lower() in smart_data.LIMITED_PASSTHROUGH_BUSES
+
+
+def test_is_elevated_returns_bool_or_none():
+    # Must never raise; returns True/False on Windows, None elsewhere.
+    assert is_elevated() in (True, False, None)
+
