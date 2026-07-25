@@ -83,6 +83,7 @@ def run_full_scan(
     dir_density_warning: int = 50_000,
     dir_density_critical: int = 100_000,
     safe_paths: list[Path] | None = None,
+    exclude_paths: list[Path | str] | None = None,
     show_progress: bool = False,
 ) -> dict:
     """
@@ -97,6 +98,7 @@ def run_full_scan(
         dir_density_warning: Warning threshold for directory density
         dir_density_critical: Critical threshold for directory density
         safe_paths: Optional list of paths to suppress from findings
+        exclude_paths: Optional paths/globs to prune from the walk entirely
         show_progress: Show progress updates during scan
 
     Returns:
@@ -111,6 +113,7 @@ def run_full_scan(
         tiny_file_max_bytes=tiny_file_max_bytes,
         progress_callback=progress.update if show_progress else None,
         progress_interval=100,
+        exclude_paths=exclude_paths,
     )
     
     progress.finish(inventory.directories_scanned, inventory.total_files)
@@ -283,6 +286,12 @@ Examples:
         help="Path to suppress from findings (can be specified multiple times)",
     )
     parser.add_argument(
+        "--exclude",
+        action="append",
+        dest="exclude_paths",
+        help="Path or glob to skip entirely during the walk (can be specified multiple times)",
+    )
+    parser.add_argument(
         "--output-json",
         type=Path,
         help="Write JSON report to file",
@@ -321,6 +330,7 @@ Examples:
         dir_density_warning=args.density_warning,
         dir_density_critical=args.density_critical,
         safe_paths=args.safe_paths,
+        exclude_paths=args.exclude_paths,
         show_progress=args.progress,
     )
 

@@ -177,6 +177,7 @@ def run_preset_scan(
                 dir_density_warning=dir_density_warning,
                 dir_density_critical=dir_density_critical,
                 safe_paths=exclusions if exclusions else None,
+                exclude_paths=exclusions if exclusions else None,
                 show_progress=show_progress,
             )
             result["scan_target"] = str(target)

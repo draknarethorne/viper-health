@@ -55,6 +55,44 @@ def test_check_trim_status_disabled(mock_run):
 
 
 @patch("subprocess.run")
+def test_check_trim_status_modern_multiline(mock_run):
+    """Modern fsutil output: per-filesystem lines with trailing descriptions."""
+    mock_result = Mock()
+    mock_result.returncode = 0
+    mock_result.stdout = (
+        "NTFS DisableDeleteNotify = 0  (Allows TRIM operations to be sent "
+        "to the storage device)\n"
+        "ReFS DisableDeleteNotify = 1  (Disables TRIM operations)\n"
+    )
+    mock_run.return_value = mock_result
+
+    status = check_trim_status("C:")
+
+    # NTFS line takes priority; its value 0 means TRIM enabled.
+    assert status.trim_enabled is True
+    assert status.raw_value == 0
+    assert status.severity == "good"
+
+
+@patch("subprocess.run")
+def test_check_trim_status_modern_multiline_disabled(mock_run):
+    """Modern fsutil output where NTFS reports TRIM disabled."""
+    mock_result = Mock()
+    mock_result.returncode = 0
+    mock_result.stdout = (
+        "NTFS DisableDeleteNotify = 1  (Disables TRIM operations)\n"
+        "ReFS DisableDeleteNotify = 0  (Allows TRIM operations)\n"
+    )
+    mock_run.return_value = mock_result
+
+    status = check_trim_status("C:")
+
+    assert status.trim_enabled is False
+    assert status.raw_value == 1
+    assert status.severity == "critical"
+
+
+@patch("subprocess.run")
 def test_check_trim_status_access_denied(mock_run):
     """Test TRIM status with access denied."""
     mock_result = Mock()

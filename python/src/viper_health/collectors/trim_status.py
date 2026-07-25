@@ -7,6 +7,7 @@ are no longer in use so garbage collection can reclaim them efficiently.
 
 from __future__ import annotations
 
+import re
 import subprocess
 from dataclasses import dataclass
 
@@ -56,29 +57,42 @@ def check_trim_status(drive: str = "C:") -> TRIMStatus:
             raise RuntimeError(f"fsutil command failed with exit code {result.returncode}")
         
         # Parse output
-        # Expected format: "DisableDeleteNotify = 0" or "DisableDeleteNotify = 1"
+        # Modern Windows fsutil emits one line per filesystem with a trailing
+        # description, e.g.:
+        #   NTFS DisableDeleteNotify = 0  (Allows TRIM operations ...)
+        #   ReFS DisableDeleteNotify = 1  (Disables TRIM operations ...)
+        # Older Windows emits a single bare line:
+        #   DisableDeleteNotify = 0
         output = result.stdout.strip()
-        
-        # Extract value
-        if "DisableDeleteNotify" in output:
-            # Split on = and get the value
-            parts = output.split("=")
-            if len(parts) >= 2:
-                value_str = parts[1].strip()
-                raw_value = int(value_str)
-                
-                # 0 = TRIM enabled (DeleteNotify NOT disabled)
-                # 1 = TRIM disabled (DeleteNotify IS disabled)
-                trim_enabled = (raw_value == 0)
-                severity = "good" if trim_enabled else "critical"
-                
-                return TRIMStatus(
-                    drive=drive,
-                    trim_enabled=trim_enabled,
-                    raw_value=raw_value,
-                    severity=severity,
-                )
-        
+
+        # Collect (filesystem, value) pairs, extracting only the leading
+        # integer after '=' so trailing descriptive text is ignored.
+        matches = re.findall(
+            r"(?:(\w+)\s+)?DisableDeleteNotify\s*=\s*(\d+)",
+            output,
+        )
+
+        if matches:
+            # Prefer the NTFS line when present (primary filesystem for TRIM),
+            # otherwise fall back to the first parseable value.
+            selected = next(
+                (m for m in matches if (m[0] or "").upper() == "NTFS"),
+                matches[0],
+            )
+            raw_value = int(selected[1])
+
+            # 0 = TRIM enabled (DeleteNotify NOT disabled)
+            # 1 = TRIM disabled (DeleteNotify IS disabled)
+            trim_enabled = (raw_value == 0)
+            severity = "good" if trim_enabled else "critical"
+
+            return TRIMStatus(
+                drive=drive,
+                trim_enabled=trim_enabled,
+                raw_value=raw_value,
+                severity=severity,
+            )
+
         # If we couldn't parse, raise error
         raise RuntimeError(f"Could not parse fsutil output: {output}")
     

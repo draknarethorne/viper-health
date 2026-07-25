@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+import fnmatch
+import os
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -37,12 +39,56 @@ def _increment_stats(existing: DirectoryStats, *, size_bytes: int, is_tiny: bool
     )
 
 
+def _normalize_excludes(
+    exclude_paths: Sequence[Path | str] | None,
+) -> tuple[frozenset[str], tuple[str, ...]]:
+    """Split excludes into literal path prefixes and glob patterns.
+
+    Returns a tuple of (literal_prefixes, glob_patterns) where both are
+    normalized with os.path.normcase for case-insensitive matching on Windows.
+    Literal excludes are stored as resolved, normcased strings; any directory
+    equal to or nested under one is pruned. Glob patterns (those containing
+    ``*`` or ``?``) are matched against the normcased directory path.
+    """
+
+    literals: set[str] = set()
+    globs: list[str] = []
+    if not exclude_paths:
+        return frozenset(), ()
+
+    for raw in exclude_paths:
+        text = os.path.expandvars(str(raw))
+        if "*" in text or "?" in text:
+            globs.append(os.path.normcase(text))
+        else:
+            literals.add(os.path.normcase(str(Path(text).resolve())))
+
+    return frozenset(literals), tuple(globs)
+
+
+def _is_excluded(
+    path_norm: str,
+    literal_prefixes: frozenset[str],
+    glob_patterns: tuple[str, ...],
+) -> bool:
+    """Return True if a normcased directory path is excluded."""
+
+    for prefix in literal_prefixes:
+        if path_norm == prefix or path_norm.startswith(prefix + os.sep):
+            return True
+    for pattern in glob_patterns:
+        if fnmatch.fnmatch(path_norm, pattern):
+            return True
+    return False
+
+
 def scan_file_inventory(
     root: Path | str,
     *,
     tiny_file_max_bytes: int = 4096,
     progress_callback: Callable[[int, int, str], None] | None = None,
     progress_interval: int = 100,
+    exclude_paths: Sequence[Path | str] | None = None,
 ) -> InventoryResult:
     """Scan a directory tree and aggregate tiny-file statistics.
 
@@ -56,6 +102,10 @@ def scan_file_inventory(
         Optional callback(directories_scanned, files_scanned, current_dir) for progress reporting.
     progress_interval:
         How often to call progress_callback (every N directories).
+    exclude_paths:
+        Optional paths/glob patterns to prune from the walk entirely. Excluded
+        directories (and their descendants) are never traversed, which avoids
+        wasting time on large immutable trees (e.g. WinSxS, Program Files).
     """
 
     root_path = Path(root).resolve()
@@ -64,13 +114,29 @@ def scan_file_inventory(
     if not root_path.is_dir():
         raise NotADirectoryError(f"Root path is not a directory: {root_path}")
 
+    literal_prefixes, glob_patterns = _normalize_excludes(exclude_paths)
+    has_excludes = bool(literal_prefixes or glob_patterns)
+
     total_files = 0
     tiny_files = 0
     total_bytes = 0
     per_directory: dict[str, DirectoryStats] = {}
     directories_scanned = 0
 
-    for dirpath, _, filenames in root_path.walk():
+    for dirpath, dirnames, filenames in root_path.walk():
+        # Prune excluded subdirectories in place so walk() never descends into
+        # them. Modifying dirnames is only honoured with top-down traversal.
+        if has_excludes and dirnames:
+            dirnames[:] = [
+                name
+                for name in dirnames
+                if not _is_excluded(
+                    os.path.normcase(str(dirpath / name)),
+                    literal_prefixes,
+                    glob_patterns,
+                )
+            ]
+
         directories_scanned += 1
         dir_key = str(dirpath.resolve())
         per_directory.setdefault(dir_key, DirectoryStats())

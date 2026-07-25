@@ -39,3 +39,29 @@ def test_scan_file_inventory_raises_for_missing_root(tmp_path: Path) -> None:
         pass
     else:
         raise AssertionError("Expected FileNotFoundError")
+
+
+def test_scan_file_inventory_prunes_literal_exclude(tmp_path: Path) -> None:
+    _write_file(tmp_path / "keep" / "a.bin", 10)
+    _write_file(tmp_path / "skip" / "b.bin", 10)
+    _write_file(tmp_path / "skip" / "nested" / "c.bin", 10)
+
+    excluded = tmp_path / "skip"
+    result = scan_file_inventory(tmp_path, exclude_paths=[excluded])
+
+    assert result.total_files == 1
+    keep_dir = str((tmp_path / "keep").resolve())
+    assert keep_dir in result.per_directory
+    # Excluded directory and its descendants must not be traversed.
+    assert not any("skip" in Path(d).parts for d in result.per_directory)
+
+
+def test_scan_file_inventory_prunes_glob_exclude(tmp_path: Path) -> None:
+    _write_file(tmp_path / "app" / "data" / "keep.bin", 10)
+    _write_file(tmp_path / "app" / "cache" / "drop.bin", 10)
+
+    result = scan_file_inventory(tmp_path, exclude_paths=[str(tmp_path / "*" / "cache")])
+
+    assert result.total_files == 1
+    assert not any("cache" in Path(d).parts for d in result.per_directory)
+
