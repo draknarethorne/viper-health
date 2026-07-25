@@ -1,4 +1,4 @@
-# Viper SSD Health Specification (Draft v0.2)
+# Viper System and SSD Health Specification (Draft v0.3)
 
 This document defines the implementation contract for SSD/filesystem health tooling in the `viper-health` workspace.
 
@@ -59,6 +59,8 @@ Why this spec exists:
 
 Build Python and PowerShell tooling that can:
 
+- inventory machine, firmware, CPU, memory, GPU, and storage specifications
+- detect retained storage, crash, WHEA, memory, and display event evidence
 - detect filesystem churn and small-file pressure
 - identify risky growth trends before they become SSD performance issues
 - produce reproducible machine-readable and human-readable reports

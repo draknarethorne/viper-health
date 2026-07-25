@@ -69,18 +69,20 @@ can coexist with meaningful read errors, retries, and controller resets.
 | Free space | `check_space` | Capacity headroom |
 | Drive summary | `check_smart` | Windows Storage counters |
 | Active process I/O | `check_io` | Current process activity |
+| Whole-machine report | `system_report` | Specs, storage, crashes, WHEA, memory, display |
 | Machine profile | `profile_machine` | Cross-machine facts |
 | Baseline comparison | `compare_baseline` | Metric deltas |
 | I/O benchmark | `benchmark_io` | Optional workload measurement |
 
 ## Known gaps
 
-### Windows storage-event integration
+### Windows event integration
 
-Normal reports do not yet automatically collect and score Event 129, Event 153,
-Kernel-Power events, or bugcheck payloads. This is a critical gap because the
-P3-512 incident demonstrated that filesystem metrics and summary SMART status
-can look green while the operating system repeatedly resets the storage path.
+`system_report` collects and classifies storage resets/retries, unexpected
+shutdowns, bugchecks, WHEA hardware errors, memory-diagnostic results, and
+display-driver recoveries. It records actual System-log retention coverage and
+excludes informational NTFS healthy-volume records. See
+[Comprehensive System Health Reports](SYSTEM-HEALTH-REPORTS.md).
 
 ### Raw vendor SMART interpretation
 
@@ -119,6 +121,8 @@ when any of the following is true:
   uncorrectable, CRC, or timeout errors
 - the drive recently disappeared from firmware or entered BIOS unexpectedly
 - the machine is the affected P3-512 system
+- you are considering manual SSD defragmentation; leave routine SSD optimization
+   to Windows scheduled Optimize Drives on known-stable storage
 
 Even on known-stable storage, use benchmarks sparingly and never interpret a
 high throughput score as proof of hardware health.
@@ -200,6 +204,7 @@ After replacement:
 - keep the P3-512 disconnected for initial validation
 - use ordinary workloads for one to two weeks
 - verify no new Event 129/153 or storage bugchecks appear
+- do not manually defragment the replacement SSD
 - update replacement SSD firmware using its vendor utility
 - verify backups and restored data
 - capture a read-only machine profile without `--benchmark`

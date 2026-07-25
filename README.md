@@ -6,25 +6,28 @@
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![CI](https://img.shields.io/badge/CI-GitHub%20Actions-black?logo=githubactions)
 
-## Detect the churn • Protect the system • Keep the SSD healthy
+## Detect faults • Protect data • Understand the whole machine
 
-Filesystem and SSD-health diagnostics toolkit focused on metadata pressure,
-tiny-file hotspots, churn detection, storage-event evidence, and safe
-maintenance boundaries.
+Windows system-health diagnostics toolkit focused on hardware/event evidence,
+storage reliability, crashes, machine specifications, filesystem pressure, and
+safe maintenance boundaries.
 
-[📘 Spec](viper-ssd-health.md) • [🚨 P3-512 Incident & Replacement Plan](docs/P3-512-INCIDENT-AND-REPLACEMENT.md) • [🧱 Project Structure](#-project-structure) • [🚀 Quick Start](#-quick-start) • [🛡️ Safety Model](#️-safety-model) • [🧪 CI](#-ci)
+[📘 Spec](viper-ssd-health.md) • [🩺 System Reports](docs/SYSTEM-HEALTH-REPORTS.md) • [🚨 P3-512 Incident & Replacement Plan](docs/P3-512-INCIDENT-AND-REPLACEMENT.md) • [🧱 Project Structure](#-project-structure) • [🚀 Quick Start](#-quick-start) • [🛡️ Safety Model](#️-safety-model) • [🧪 CI](#-ci)
 
 ---
 
 ## 🎯 What is viper-health?
 
-`viper-health` is a dual-stack diagnostics project (Python + PowerShell) built to identify and prevent long-term storage degradation patterns on Windows systems, especially where heavy metadata churn impacts SSD responsiveness.
+`viper-health` is a Python-led, PowerShell-assisted diagnostics project for
+evidence-based Windows system and storage health assessment.
 
 It is designed to:
 
 - detect tiny-file hotspots and directory density anomalies
 - detect metadata pressure and churn acceleration over time
 - detect cache explosions, cloud-sync churn, and update leftovers
+- collect hardware, firmware, OS, drive, event-log, crash, WHEA, memory, and
+  display-recovery evidence
 - preserve critical paths through strict maintenance guardrails
 - produce actionable reports (JSON, Markdown, console)
 
@@ -34,7 +37,7 @@ It is designed to:
 
 | Component | Status | Progress | Location |
 | --- | --- | --- | --- |
-| **Specification** | ✅ Complete (drafted) | v0.2 | [`viper-ssd-health.md`](viper-ssd-health.md) |
+| **Specification** | ✅ Complete (drafted) | v0.3 | [`viper-ssd-health.md`](viper-ssd-health.md) |
 | **Python Package Scaffold** | ✅ Complete | baseline | [`python/`](python/) |
 | **PowerShell Module Scaffold** | ✅ Complete | baseline | [`powershell/PSViperHealth/`](powershell/PSViperHealth/) |
 | **Config Baseline** | ✅ Complete | baseline | [`config/`](config/) |
@@ -43,6 +46,8 @@ It is designed to:
 | **Core Detectors** | ✅ Complete | tiny-file + density | `python/src/viper_health/` |
 | **Health Scoring** | ✅ Complete | weighted scoring | `python/src/viper_health/scoring/` |
 | **Reporters** | ✅ Complete | JSON + Markdown | `python/src/viper_health/reports/` |
+| **Comprehensive System Report** | ✅ Complete | specs + events + storage + JSON/Markdown | `python/src/viper_health/cli/system_report.py` |
+| **Benchmark Preflight** | ✅ Complete | mandatory fail-closed evidence gate | `python/src/viper_health/analyzers/benchmark_preflight.py` |
 | **Suite Runner** | ✅ Complete | preset-based scans | `python/src/viper_health/cli/suite.py` |
 | **I/O Benchmarks** | ✅ Complete | seq/random read/write | `python/src/viper_health/benchmarks/` |
 | **MFT Analysis** | ✅ Complete | size + fragmentation | `python/src/viper_health/collectors/mft_info.py` |
@@ -96,6 +101,19 @@ viper-health/
 
 ## 🚀 Quick Start
 
+### Generate a Comprehensive Passive Report
+
+Run from an elevated PowerShell terminal for the best event and reliability
+coverage. This does not run a benchmark or filesystem sweep:
+
+```powershell
+.venv\Scripts\python.exe -m viper_health.cli.system_report --lookback-days 90
+```
+
+Paired JSON and Markdown artifacts are written under
+`data/profiles/<HOSTNAME>/`. See
+[Comprehensive System Health Reports](docs/SYSTEM-HEALTH-REPORTS.md).
+
 ### Running Health Scans
 
 #### Option 1: Use the suite runner (recommended)
@@ -112,7 +130,7 @@ Run a preset scan:
 # Quick check of high-risk areas
 python -m viper_health.cli.suite --preset quick-check --console-summary
 
-# Full C: drive sweep with reports
+# Full C: drive sweep with reports (known-stable storage only)
 python -m viper_health.cli.suite --preset full-system --output-dir reports/
 
 # User data scan
@@ -178,13 +196,10 @@ python -m viper_health.cli.benchmark_io --output data/benchmarks/baseline.json
 - Random write/read throughput and IOPS
 - Informational measurements for same-machine baseline comparison
 
-**Current generic thresholds (workload guidance, not failure prediction):**
-
-- Sequential write: <100 MB/s = CRITICAL, 100-200 = WARNING, >200 = GOOD
-- Random write: <20 MB/s = CRITICAL, 20-50 = WARNING, >50 = GOOD
-
-Throughput cannot clear a drive as healthy. Windows storage events and raw SMART
-errors take precedence over a green benchmark or `HealthStatus=Healthy` result.
+Interpret throughput only against a same-machine, same-configuration baseline.
+Generic speed bands are not hardware-health severity thresholds. Windows
+storage events and raw SMART errors take precedence over a fast benchmark or
+`HealthStatus=Healthy` result.
 
 ---
 

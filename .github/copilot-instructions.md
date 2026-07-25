@@ -2,11 +2,15 @@
 
 ## Project Overview
 
-**viper-health** is a Windows-focused SSD/filesystem health toolkit built with Python and PowerShell.
+**viper-health** is a Windows-focused whole-machine, SSD, and filesystem health
+toolkit built with Python and PowerShell.
 
 Primary goals:
 - Detect filesystem pressure signals before performance degrades
 - Track trends over time (tiny-file growth, churn acceleration, metadata stress)
+- Collect machine specifications and passive storage, crash, WHEA, memory, and
+   display-driver event evidence
+- Produce paired JSON/Markdown reports suitable for Git transport and AI review
 - Preserve safety via strict cleanup guardrails (read-only default, immutable paths, dry-run/manifest requirements)
 
 Authoritative spec:
@@ -51,7 +55,8 @@ mode (spec Sections 3, 8) is intentionally deferred.
 | `check_space` | Free-space thresholds |
 | `check_smart` | Drive health / SMART / temperature |
 | `check_io` | Top disk-I/O processes |
-| `benchmark_io` | Sequential/random I/O benchmarks |
+| `system_report` | Comprehensive passive machine specs, events, storage, JSON/Markdown |
+| `benchmark_io` | Safety-gated comparative I/O measurements |
 | `compare_baseline` | Trend analysis vs saved baseline |
 
 ---
@@ -111,6 +116,10 @@ viper-health/
 - Require dry-run and manifest generation before mutating operations.
 - Include action caps/kill-switch behavior in maintenance logic.
 - Preserve explicit protection for VS Code built-in extension paths.
+- Active benchmarks must fail closed unless event-log and drive-reliability
+   preflight coverage is available and clean; no override is permitted.
+- Missing data must be reported as unavailable/unknown, never converted into a
+   green result.
 
 ---
 

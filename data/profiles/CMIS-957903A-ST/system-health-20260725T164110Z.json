@@ -1,0 +1,2344 @@
+{
+  "schema_version": 1,
+  "report_type": "comprehensive_system_health",
+  "timestamp_utc": "2026-07-25T16:41:10.991042+00:00",
+  "host": "CMIS-957903A-ST",
+  "mode": "observe",
+  "event_lookback_days": 120,
+  "assessment": {
+    "severity": "critical",
+    "confidence": "high",
+    "conclusion": "Critical fault evidence was detected; resolve concrete errors before performance testing."
+  },
+  "system_inventory": {
+    "available": true,
+    "collected_at_utc": "2026-07-25T16:41:12.8118403Z",
+    "ComputerSystem": {
+      "Manufacturer": "STGAUBRON",
+      "Model": "STGAUBRON",
+      "SystemType": "x64-based PC",
+      "TotalPhysicalMemoryBytes": 17065123840
+    },
+    "OperatingSystem": {
+      "Caption": "Microsoft Windows 11 Pro",
+      "Version": "10.0.26200",
+      "BuildNumber": "26200",
+      "Architecture": "64-bit",
+      "InstallDateUtc": "2025-06-24T02:20:18.0000000Z",
+      "LastBootUtc": "2026-07-25T15:48:58.5000000Z",
+      "TotalVisibleMemoryKb": 16665160,
+      "FreePhysicalMemoryKb": 8570468
+    },
+    "Baseboard": {
+      "Manufacturer": "STGAUBRON",
+      "Product": "B450M-ST",
+      "Version": "1006"
+    },
+    "Bios": {
+      "Manufacturer": "American Megatrends International, LLC.",
+      "Name": "5.17",
+      "SMBIOSVersion": "5.17",
+      "ReleaseDateUtc": "2024-12-16T00:00:00.0000000Z"
+    },
+    "Cpu": [
+      {
+        "Name": "AMD Ryzen 5 5500                               ",
+        "Manufacturer": "AuthenticAMD",
+        "Cores": 6,
+        "LogicalProcessors": 12,
+        "MaxClockMhz": 3600,
+        "CurrentClockMhz": 3600,
+        "LoadPercent": 17,
+        "Status": "OK"
+      }
+    ],
+    "MemoryModules": [
+      {
+        "Manufacturer": "Unknown",
+        "PartNumber": "",
+        "CapacityBytes": 17179869184,
+        "SpeedMhz": 2667,
+        "ConfiguredSpeedMhz": 2667,
+        "BankLabel": "P0 CHANNEL B",
+        "DeviceLocator": "DIMM 1"
+      }
+    ],
+    "Gpus": [
+      {
+        "Name": "NVIDIA GeForce RTX 3050",
+        "DriverVersion": "32.0.16.1074",
+        "DriverDate": "2026-07-02T00:00:00.0000000Z",
+        "AdapterRamBytes": 4293918720,
+        "Status": "OK",
+        "VideoMode": "1920 x 1080 x 4294967296 colors"
+      }
+    ],
+    "Batteries": [],
+    "AcpiThermalZones": [],
+    "SecureBootEnabled": false,
+    "Tpm": {
+      "Present": true,
+      "Ready": true,
+      "Enabled": true,
+      "Activated": true,
+      "ManufacturerVersion": "3.87.0.5"
+    },
+    "error": null
+  },
+  "storage": {
+    "drives": [
+      {
+        "device_id": "2",
+        "friendly_name": "TOSHIBA External USB 3.0",
+        "media_type": "Unspecified",
+        "health_status": "Healthy",
+        "temperature_c": 34.0,
+        "wear_percent": 0.0,
+        "power_on_hours": 106151,
+        "read_errors_total": 0,
+        "write_errors_total": null,
+        "severity": "good",
+        "bus_type": "USB",
+        "reliability_available": true,
+        "read_latency_max_ms": 3085.0,
+        "write_latency_max_ms": 709.0,
+        "flush_latency_max_ms": 0.0
+      },
+      {
+        "device_id": "3",
+        "friendly_name": "WD Elements 25A1",
+        "media_type": "HDD",
+        "health_status": "Healthy",
+        "temperature_c": 36.0,
+        "wear_percent": 0.0,
+        "power_on_hours": 29097,
+        "read_errors_total": 0,
+        "write_errors_total": null,
+        "severity": "good",
+        "bus_type": "USB",
+        "reliability_available": true,
+        "read_latency_max_ms": 5767.0,
+        "write_latency_max_ms": 328.0,
+        "flush_latency_max_ms": 0.0
+      },
+      {
+        "device_id": "0",
+        "friendly_name": "P3-512",
+        "media_type": "SSD",
+        "health_status": "Healthy",
+        "temperature_c": 31.0,
+        "wear_percent": 0.0,
+        "power_on_hours": 6797,
+        "read_errors_total": 13,
+        "write_errors_total": null,
+        "severity": "critical",
+        "bus_type": "SATA",
+        "reliability_available": true,
+        "read_latency_max_ms": 9047.0,
+        "write_latency_max_ms": 4041.0,
+        "flush_latency_max_ms": 750.0
+      },
+      {
+        "device_id": "1",
+        "friendly_name": "Samsung PSSD T7",
+        "media_type": "SSD",
+        "health_status": "Healthy",
+        "temperature_c": 0.0,
+        "wear_percent": 0.0,
+        "power_on_hours": null,
+        "read_errors_total": null,
+        "write_errors_total": null,
+        "severity": "good",
+        "bus_type": "USB",
+        "reliability_available": true,
+        "read_latency_max_ms": 1.0,
+        "write_latency_max_ms": null,
+        "flush_latency_max_ms": null
+      }
+    ],
+    "disk_space": {
+      "drive": "C:",
+      "total_bytes": 511043432448,
+      "used_bytes": 173421445120,
+      "free_bytes": 337621987328,
+      "free_percent": 66.1,
+      "severity": "good"
+    },
+    "elevated": true,
+    "volumes": [
+      {
+        "drive": "B:",
+        "label": "My Games",
+        "filesystem": "exFAT",
+        "drive_type": "Fixed",
+        "health_status": "Healthy",
+        "total_bytes": 1000169668608,
+        "free_bytes": 541234167808,
+        "free_percent": 54.1
+      },
+      {
+        "drive": "C:",
+        "label": "My Drive",
+        "filesystem": "NTFS",
+        "drive_type": "Fixed",
+        "health_status": "Healthy",
+        "total_bytes": 511043432448,
+        "free_bytes": 337621987328,
+        "free_percent": 66.1
+      },
+      {
+        "drive": "D:",
+        "label": "My Data",
+        "filesystem": "NTFS",
+        "drive_type": "Fixed",
+        "health_status": "Healthy",
+        "total_bytes": 750135398400,
+        "free_bytes": 252996501504,
+        "free_percent": 33.7
+      },
+      {
+        "drive": "F:",
+        "label": "",
+        "filesystem": "Unknown",
+        "drive_type": "CD-ROM",
+        "health_status": "Healthy",
+        "total_bytes": 0,
+        "free_bytes": 0,
+        "free_percent": 0.0
+      },
+      {
+        "drive": "K:",
+        "label": "My Backup",
+        "filesystem": "NTFS",
+        "drive_type": "Fixed",
+        "health_status": "Healthy",
+        "total_bytes": 4000750497792,
+        "free_bytes": 2082612948992,
+        "free_percent": 52.1
+      }
+    ],
+    "trim": {
+      "drive": "C:",
+      "trim_enabled": true,
+      "raw_value": 0,
+      "severity": "good"
+    },
+    "mft": {
+      "drive": "C:",
+      "mft_size_bytes": 1556925644,
+      "mft_size_gb": 1.45,
+      "mft_fragments": 1,
+      "total_files": 0,
+      "total_folders": 0,
+      "size_severity": "good",
+      "fragmentation_severity": "good",
+      "overall_severity": "good"
+    }
+  },
+  "event_log": {
+    "available": true,
+    "lookback_days": 120,
+    "query_start_utc": "2026-03-27T16:41:13.0442552Z",
+    "collected_at_utc": "2026-07-25T16:41:18.2124967Z",
+    "log_oldest_utc": "2026-04-07T21:24:17.2825096Z",
+    "log_newest_utc": "2026-07-25T16:28:28.9333843Z",
+    "log_record_count": 42396,
+    "event_count": 121,
+    "events": [
+      {
+        "record_id": 66400,
+        "timestamp_utc": "2026-04-30T21:57:37.1441388Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0x613110 for Disk 0 (PDO name: \\Device\\0000003b) was retried.",
+        "properties": [
+          "\\Device\\Harddisk0\\DR0",
+          "0x613110",
+          "0",
+          "\\Device\\0000003b",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 42"
+        ]
+      },
+      {
+        "record_id": 66399,
+        "timestamp_utc": "2026-04-30T21:57:37.1441388Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 66427,
+        "timestamp_utc": "2026-05-01T03:08:31.4333563Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0x62aa78 for Disk 0 (PDO name: \\Device\\0000003b) was retried.",
+        "properties": [
+          "\\Device\\Harddisk0\\DR0",
+          "0x62aa78",
+          "0",
+          "\\Device\\0000003b",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 42"
+        ]
+      },
+      {
+        "record_id": 66426,
+        "timestamp_utc": "2026-05-01T03:08:31.4333563Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 66448,
+        "timestamp_utc": "2026-05-01T06:02:34.2870456Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 66463,
+        "timestamp_utc": "2026-05-01T07:50:04.1452148Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 66466,
+        "timestamp_utc": "2026-05-01T08:21:47.6176882Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 66929,
+        "timestamp_utc": "2026-05-01T13:48:43.3827573Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 66943,
+        "timestamp_utc": "2026-05-01T15:26:07.3996146Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0x92baf40 for Disk 0 (PDO name: \\Device\\0000003b) was retried.",
+        "properties": [
+          "\\Device\\Harddisk0\\DR0",
+          "0x92baf40",
+          "0",
+          "\\Device\\0000003b",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 40"
+        ]
+      },
+      {
+        "record_id": 66942,
+        "timestamp_utc": "2026-05-01T15:26:07.3996146Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 66949,
+        "timestamp_utc": "2026-05-01T18:56:54.4503054Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 66950,
+        "timestamp_utc": "2026-05-01T18:56:54.4513240Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0x9f50a0 for Disk 0 (PDO name: \\Device\\0000003b) was retried.",
+        "properties": [
+          "\\Device\\Harddisk0\\DR0",
+          "0x9f50a0",
+          "0",
+          "\\Device\\0000003b",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 42"
+        ]
+      },
+      {
+        "record_id": 66998,
+        "timestamp_utc": "2026-05-01T21:46:42.8759787Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 66999,
+        "timestamp_utc": "2026-05-01T21:52:12.8871447Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 67027,
+        "timestamp_utc": "2026-05-02T02:33:03.6114717Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0x12577040 for Disk 0 (PDO name: \\Device\\0000003b) was retried.",
+        "properties": [
+          "\\Device\\Harddisk0\\DR0",
+          "0x12577040",
+          "0",
+          "\\Device\\0000003b",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 40"
+        ]
+      },
+      {
+        "record_id": 67026,
+        "timestamp_utc": "2026-05-02T02:33:03.6114717Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 67028,
+        "timestamp_utc": "2026-05-02T02:52:54.4383953Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0x0 for Disk 1 (PDO name: \\Device\\0000004e) was retried.",
+        "properties": [
+          "\\Device\\Harddisk1\\DR1",
+          "0x0",
+          "1",
+          "\\Device\\0000004e",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 40"
+        ]
+      },
+      {
+        "record_id": 67032,
+        "timestamp_utc": "2026-05-02T02:52:54.8383507Z",
+        "provider": "disk",
+        "event_id": 51,
+        "level": "Warning",
+        "message": "An error was detected on device \\Device\\Harddisk1\\DR1 during a paging operation.",
+        "properties": [
+          "\\Device\\Harddisk1\\DR1",
+          "3 0 128 0 1 0 0 0 0 0 0 0 51 0 4 128 45 1 0 0 14 0 0 192 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 112 15 48 0 0 0 0 0 255 255 255 255 1 0 0 0 88 0 0 8 0 0 0 0 27 32 10 18 66 3 32 64 0 16 0 0 15 0 0 0 0 0 0 0 0 0 0 0 40 173 37 152 132 161 255 255 0 0 0 0 0 0 0 0 32 204 199 150 132 161 255 255 0 0 0 0 0 0 0 0 0 9 1 0 0 0 0 0 40 0 0 1 9 0 0 0 8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 67033,
+        "timestamp_utc": "2026-05-02T02:52:54.8383507Z",
+        "provider": "disk",
+        "event_id": 51,
+        "level": "Warning",
+        "message": "An error was detected on device \\Device\\Harddisk1\\DR1 during a paging operation.",
+        "properties": [
+          "\\Device\\Harddisk1\\DR1",
+          "3 0 128 0 1 0 0 0 0 0 0 0 51 0 4 128 45 1 0 0 14 0 0 192 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 112 15 48 0 0 0 0 0 255 255 255 255 1 0 0 0 88 0 0 8 0 0 0 0 27 32 10 18 66 3 32 64 0 16 0 0 15 0 0 0 0 0 0 0 0 0 0 0 40 173 37 152 132 161 255 255 0 0 0 0 0 0 0 0 32 204 199 150 132 161 255 255 0 0 0 0 0 0 0 0 0 9 1 0 0 0 0 0 40 0 0 1 9 0 0 0 8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 67031,
+        "timestamp_utc": "2026-05-02T02:52:54.8383507Z",
+        "provider": "disk",
+        "event_id": 51,
+        "level": "Warning",
+        "message": "An error was detected on device \\Device\\Harddisk1\\DR1 during a paging operation.",
+        "properties": [
+          "\\Device\\Harddisk1\\DR1",
+          "3 0 128 0 1 0 0 0 0 0 0 0 51 0 4 128 45 1 0 0 14 0 0 192 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 112 15 48 0 0 0 0 0 255 255 255 255 1 0 0 0 88 0 0 8 0 0 0 0 27 32 10 18 66 3 32 64 0 16 0 0 15 0 0 0 0 0 0 0 0 0 0 0 40 173 37 152 132 161 255 255 0 0 0 0 0 0 0 0 32 204 199 150 132 161 255 255 0 0 0 0 0 0 0 0 0 9 1 0 0 0 0 0 40 0 0 1 9 0 0 0 8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 67029,
+        "timestamp_utc": "2026-05-02T02:52:54.8383507Z",
+        "provider": "disk",
+        "event_id": 51,
+        "level": "Warning",
+        "message": "An error was detected on device \\Device\\Harddisk1\\DR1 during a paging operation.",
+        "properties": [
+          "\\Device\\Harddisk1\\DR1",
+          "3 1 128 0 1 0 0 0 0 0 0 0 51 0 4 128 45 1 0 0 14 0 0 192 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 112 15 48 0 0 0 0 0 255 255 255 255 1 0 0 0 88 0 0 8 0 0 0 0 27 32 10 18 66 3 32 64 0 16 0 0 15 0 0 0 0 0 0 0 0 0 0 0 40 173 37 152 132 161 255 255 0 0 0 0 0 0 0 0 32 204 199 150 132 161 255 255 0 0 0 0 0 0 0 0 0 9 1 0 0 0 0 0 40 0 0 1 9 0 0 0 8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 67030,
+        "timestamp_utc": "2026-05-02T02:52:54.8383507Z",
+        "provider": "disk",
+        "event_id": 51,
+        "level": "Warning",
+        "message": "An error was detected on device \\Device\\Harddisk1\\DR1 during a paging operation.",
+        "properties": [
+          "\\Device\\Harddisk1\\DR1",
+          "3 0 128 0 1 0 0 0 0 0 0 0 51 0 4 128 45 1 0 0 14 0 0 192 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 112 15 48 0 0 0 0 0 255 255 255 255 1 0 0 0 88 0 0 8 0 0 0 0 27 32 10 18 66 3 32 64 0 16 0 0 15 0 0 0 0 0 0 0 0 0 0 0 40 173 37 152 132 161 255 255 0 0 0 0 0 0 0 0 32 204 199 150 132 161 255 255 0 0 0 0 0 0 0 0 0 9 1 0 0 0 0 0 40 0 0 1 9 0 0 0 8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 67097,
+        "timestamp_utc": "2026-05-02T23:50:08.9524385Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 67098,
+        "timestamp_utc": "2026-05-02T23:50:08.9539949Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0xf7af4a8 for Disk 0 (PDO name: \\Device\\0000003b) was retried.",
+        "properties": [
+          "\\Device\\Harddisk0\\DR0",
+          "0xf7af4a8",
+          "0",
+          "\\Device\\0000003b",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 42"
+        ]
+      },
+      {
+        "record_id": 67099,
+        "timestamp_utc": "2026-05-02T23:52:19.1302700Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 67100,
+        "timestamp_utc": "2026-05-03T00:01:47.8286126Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 67101,
+        "timestamp_utc": "2026-05-03T00:01:47.8302161Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0x60aec18 for Disk 0 (PDO name: \\Device\\0000003b) was retried.",
+        "properties": [
+          "\\Device\\Harddisk0\\DR0",
+          "0x60aec18",
+          "0",
+          "\\Device\\0000003b",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 42"
+        ]
+      },
+      {
+        "record_id": 67116,
+        "timestamp_utc": "2026-05-03T01:02:24.7970552Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 67117,
+        "timestamp_utc": "2026-05-03T01:02:24.7980780Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0x2b047540 for Disk 0 (PDO name: \\Device\\0000003b) was retried.",
+        "properties": [
+          "\\Device\\Harddisk0\\DR0",
+          "0x2b047540",
+          "0",
+          "\\Device\\0000003b",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 42"
+        ]
+      },
+      {
+        "record_id": 67118,
+        "timestamp_utc": "2026-05-03T02:09:53.2334243Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 71038,
+        "timestamp_utc": "2026-05-25T22:12:06.2939408Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0xfff for Disk 4 (PDO name: \\Device\\00001faa) was retried.",
+        "properties": [
+          "\\Device\\Harddisk4\\DR5",
+          "0xfff",
+          "4",
+          "\\Device\\00001faa",
+          "15 1 24 0 4 0 64 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 4 40 112 0 11 0 0 0 0 10 0 0 0 0 71 1 0 0 0 0 45 45"
+        ]
+      },
+      {
+        "record_id": 82389,
+        "timestamp_utc": "2026-06-22T16:25:19.6713977Z",
+        "provider": "disk",
+        "event_id": 157,
+        "level": "Warning",
+        "message": "Disk 1 has been surprise removed.",
+        "properties": [
+          "\\Device\\Harddisk1\\DR1",
+          "1",
+          "0 0 0 0 2 0 48 0 0 0 0 0 157 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 82635,
+        "timestamp_utc": "2026-06-22T23:20:34.2567699Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 82677,
+        "timestamp_utc": "2026-06-23T03:14:41.3850613Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 82678,
+        "timestamp_utc": "2026-06-23T03:14:41.3860621Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0x29c6ac48 for Disk 0 (PDO name: \\Device\\0000003c) was retried.",
+        "properties": [
+          "\\Device\\Harddisk0\\DR0",
+          "0x29c6ac48",
+          "0",
+          "\\Device\\0000003c",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 42"
+        ]
+      },
+      {
+        "record_id": 82679,
+        "timestamp_utc": "2026-06-23T03:23:04.6098475Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 82683,
+        "timestamp_utc": "2026-06-23T03:36:36.9707858Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 82688,
+        "timestamp_utc": "2026-06-23T08:18:51.5430469Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 82689,
+        "timestamp_utc": "2026-06-23T08:18:51.5440660Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0x19379fb8 for Disk 0 (PDO name: \\Device\\0000003c) was retried.",
+        "properties": [
+          "\\Device\\Harddisk0\\DR0",
+          "0x19379fb8",
+          "0",
+          "\\Device\\0000003c",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 40"
+        ]
+      },
+      {
+        "record_id": 82869,
+        "timestamp_utc": "2026-06-23T13:51:49.8561935Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 82870,
+        "timestamp_utc": "2026-06-23T14:48:24.1837783Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 82871,
+        "timestamp_utc": "2026-06-23T14:58:56.2534343Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 84380,
+        "timestamp_utc": "2026-06-25T23:46:42.7257833Z",
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "event_id": 41,
+        "level": "Critical",
+        "message": "The system has rebooted without cleanly shutting down first. This error could be caused if the system stopped responding, crashed, or lost power unexpectedly.",
+        "properties": [
+          "340",
+          "18446714424190795776",
+          "18446694625728040576",
+          "2",
+          "0",
+          "0",
+          "0",
+          "0",
+          "16",
+          "False",
+          "1",
+          "20",
+          "False",
+          "0",
+          "20",
+          "False",
+          "False",
+          "0",
+          "0",
+          "3",
+          "0"
+        ]
+      },
+      {
+        "record_id": 84354,
+        "timestamp_utc": "2026-06-25T23:47:09.6163485Z",
+        "provider": "EventLog",
+        "event_id": 6008,
+        "level": "Error",
+        "message": "The previous system shutdown at 6:29:01 PM on ?6/?25/?2026 was unexpected.",
+        "properties": [
+          "6:29:01 PM",
+          "?6/?25/?2026",
+          "",
+          "",
+          "285654",
+          "",
+          "",
+          "234 7 6 0 4 0 25 0 18 0 29 0 1 0 128 2 234 7 6 0 4 0 25 0 23 0 29 0 1 0 128 2 96 9 0 0 60 0 0 0 1 0 0 0 96 9 0 0 1 0 0 0 176 4 0 0 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 84513,
+        "timestamp_utc": "2026-06-25T23:47:42.1717311Z",
+        "provider": "Microsoft-Windows-WER-SystemErrorReporting",
+        "event_id": 1001,
+        "level": "Error",
+        "message": "The computer has rebooted from a bugcheck.  The bugcheck was: 0x00000154 (0xffffe508aef78000, 0xffffd306fea08e80, 0x0000000000000002, 0x0000000000000000). A dump was saved in: C:\\WINDOWS\\MEMORY.DMP. Report Id: 31deed84-3573-4740-a341-8378c7e242db.",
+        "properties": [
+          "0x00000154 (0xffffe508aef78000, 0xffffd306fea08e80, 0x0000000000000002, 0x0000000000000000)",
+          "C:\\WINDOWS\\MEMORY.DMP",
+          "31deed84-3573-4740-a341-8378c7e242db"
+        ]
+      },
+      {
+        "record_id": 87865,
+        "timestamp_utc": "2026-07-19T16:42:34.8148405Z",
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "event_id": 41,
+        "level": "Critical",
+        "message": "The system has rebooted without cleanly shutting down first. This error could be caused if the system stopped responding, crashed, or lost power unexpectedly.",
+        "properties": [
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "6",
+          "0",
+          "3221225684",
+          "16",
+          "False",
+          "1",
+          "13",
+          "False",
+          "0",
+          "13",
+          "False",
+          "False",
+          "0",
+          "0",
+          "3",
+          "0"
+        ]
+      },
+      {
+        "record_id": 87840,
+        "timestamp_utc": "2026-07-19T16:43:20.4933823Z",
+        "provider": "EventLog",
+        "event_id": 6008,
+        "level": "Error",
+        "message": "The previous system shutdown at 10:26:15 AM on ?7/?11/?2026 was unexpected.",
+        "properties": [
+          "10:26:15 AM",
+          "?7/?11/?2026",
+          "",
+          "",
+          "261636",
+          "",
+          "",
+          "234 7 7 0 6 0 11 0 10 0 26 0 15 0 71 2 234 7 7 0 6 0 11 0 15 0 26 0 15 0 71 2 96 9 0 0 60 0 0 0 1 0 0 0 96 9 0 0 1 0 0 0 176 4 0 0 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 88764,
+        "timestamp_utc": "2026-07-19T20:48:08.8294047Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 88767,
+        "timestamp_utc": "2026-07-20T02:45:58.2786351Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 88768,
+        "timestamp_utc": "2026-07-20T02:46:40.3442964Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 88769,
+        "timestamp_utc": "2026-07-20T02:46:40.3453020Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0xb4df8c0 for Disk 0 (PDO name: \\Device\\0000003c) was retried.",
+        "properties": [
+          "\\Device\\Harddisk0\\DR0",
+          "0xb4df8c0",
+          "0",
+          "\\Device\\0000003c",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 40"
+        ]
+      },
+      {
+        "record_id": 89380,
+        "timestamp_utc": "2026-07-20T15:55:00.5027034Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 89392,
+        "timestamp_utc": "2026-07-20T16:15:28.5214081Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 89500,
+        "timestamp_utc": "2026-07-20T17:31:44.0506841Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 89501,
+        "timestamp_utc": "2026-07-20T17:31:44.0517061Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0x1e7dd980 for Disk 0 (PDO name: \\Device\\0000003b) was retried.",
+        "properties": [
+          "\\Device\\Harddisk0\\DR0",
+          "0x1e7dd980",
+          "0",
+          "\\Device\\0000003b",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 40"
+        ]
+      },
+      {
+        "record_id": 89553,
+        "timestamp_utc": "2026-07-20T17:47:07.8966686Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 89554,
+        "timestamp_utc": "2026-07-20T17:53:58.5081028Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 89555,
+        "timestamp_utc": "2026-07-20T17:55:20.2000237Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 89556,
+        "timestamp_utc": "2026-07-20T18:16:29.5959553Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 89558,
+        "timestamp_utc": "2026-07-20T18:49:06.9714225Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 89560,
+        "timestamp_utc": "2026-07-20T19:21:51.5713748Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 89570,
+        "timestamp_utc": "2026-07-20T21:28:02.0776255Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 89571,
+        "timestamp_utc": "2026-07-20T21:32:15.6775766Z",
+        "provider": "disk",
+        "event_id": 157,
+        "level": "Warning",
+        "message": "Disk 1 has been surprise removed.",
+        "properties": [
+          "\\Device\\Harddisk1\\DR1",
+          "1",
+          "0 0 0 0 2 0 48 0 0 0 0 0 157 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 90217,
+        "timestamp_utc": "2026-07-21T04:14:02.0187156Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 90222,
+        "timestamp_utc": "2026-07-21T05:48:34.8990954Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0x1e8014a0 for Disk 0 (PDO name: \\Device\\0000003c) was retried.",
+        "properties": [
+          "\\Device\\Harddisk0\\DR0",
+          "0x1e8014a0",
+          "0",
+          "\\Device\\0000003c",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 40"
+        ]
+      },
+      {
+        "record_id": 90221,
+        "timestamp_utc": "2026-07-21T05:48:34.8990954Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 90223,
+        "timestamp_utc": "2026-07-21T05:51:01.1745652Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 90356,
+        "timestamp_utc": "2026-07-22T03:58:14.9344345Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 90414,
+        "timestamp_utc": "2026-07-22T04:07:41.8380024Z",
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "event_id": 41,
+        "level": "Critical",
+        "message": "The system has rebooted without cleanly shutting down first. This error could be caused if the system stopped responding, crashed, or lost power unexpectedly.",
+        "properties": [
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "6",
+          "0",
+          "3221225684",
+          "16",
+          "False",
+          "1",
+          "4",
+          "False",
+          "0",
+          "4",
+          "False",
+          "False",
+          "0",
+          "0",
+          "3",
+          "0"
+        ]
+      },
+      {
+        "record_id": 90389,
+        "timestamp_utc": "2026-07-22T04:09:12.0433118Z",
+        "provider": "EventLog",
+        "event_id": 6008,
+        "level": "Error",
+        "message": "The previous system shutdown at 10:53:02 PM on ?7/?21/?2026 was unexpected.",
+        "properties": [
+          "10:53:02 PM",
+          "?7/?21/?2026",
+          "",
+          "",
+          "91275",
+          "",
+          "",
+          "234 7 7 0 2 0 21 0 22 0 53 0 2 0 64 3 234 7 7 0 3 0 22 0 3 0 53 0 2 0 64 3 96 9 0 0 60 0 0 0 1 0 0 0 96 9 0 0 1 0 0 0 176 4 0 0 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 90903,
+        "timestamp_utc": "2026-07-22T05:33:28.5319878Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 90904,
+        "timestamp_utc": "2026-07-22T05:33:28.5330021Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0x613108 for Disk 0 (PDO name: \\Device\\0000003c) was retried.",
+        "properties": [
+          "\\Device\\Harddisk0\\DR0",
+          "0x613108",
+          "0",
+          "\\Device\\0000003c",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 42"
+        ]
+      },
+      {
+        "record_id": 90938,
+        "timestamp_utc": "2026-07-22T13:22:02.0517197Z",
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "event_id": 41,
+        "level": "Critical",
+        "message": "The system has rebooted without cleanly shutting down first. This error could be caused if the system stopped responding, crashed, or lost power unexpectedly.",
+        "properties": [
+          "340",
+          "18446662174414675968",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "True",
+          "0",
+          "1",
+          "True",
+          "0",
+          "1",
+          "False",
+          "False",
+          "0",
+          "0",
+          "3",
+          "0"
+        ]
+      },
+      {
+        "record_id": 90912,
+        "timestamp_utc": "2026-07-22T13:22:43.4477595Z",
+        "provider": "EventLog",
+        "event_id": 6008,
+        "level": "Error",
+        "message": "The previous system shutdown at 3:09:13 AM on ?7/?22/?2026 was unexpected.",
+        "properties": [
+          "3:09:13 AM",
+          "?7/?22/?2026",
+          "",
+          "",
+          "14494",
+          "",
+          "",
+          "234 7 7 0 3 0 22 0 3 0 9 0 13 0 176 2 234 7 7 0 3 0 22 0 8 0 9 0 13 0 176 2 96 9 0 0 60 0 0 0 1 0 0 0 96 9 0 0 1 0 0 0 176 4 0 0 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 93211,
+        "timestamp_utc": "2026-07-22T16:53:23.1418067Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 93212,
+        "timestamp_utc": "2026-07-22T16:53:23.1428059Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0x613188 for Disk 0 (PDO name: \\Device\\0000003c) was retried.",
+        "properties": [
+          "\\Device\\Harddisk0\\DR0",
+          "0x613188",
+          "0",
+          "\\Device\\0000003c",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 42"
+        ]
+      },
+      {
+        "record_id": 93221,
+        "timestamp_utc": "2026-07-22T16:54:17.6653356Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 93875,
+        "timestamp_utc": "2026-07-22T17:47:36.5898274Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 94833,
+        "timestamp_utc": "2026-07-22T18:44:42.3888261Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 95344,
+        "timestamp_utc": "2026-07-22T19:05:45.5672269Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 95365,
+        "timestamp_utc": "2026-07-22T19:07:52.0875772Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 95416,
+        "timestamp_utc": "2026-07-22T19:13:25.1397188Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 95525,
+        "timestamp_utc": "2026-07-22T19:26:01.1066974Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 96458,
+        "timestamp_utc": "2026-07-22T19:57:43.2938307Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 96939,
+        "timestamp_utc": "2026-07-22T20:31:38.5875309Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 96940,
+        "timestamp_utc": "2026-07-22T20:33:20.8207614Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 96941,
+        "timestamp_utc": "2026-07-22T20:33:20.8217914Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0xd1d000 for Disk 0 (PDO name: \\Device\\0000003c) was retried.",
+        "properties": [
+          "\\Device\\Harddisk0\\DR0",
+          "0xd1d000",
+          "0",
+          "\\Device\\0000003c",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 42"
+        ]
+      },
+      {
+        "record_id": 99287,
+        "timestamp_utc": "2026-07-22T21:47:13.5215027Z",
+        "provider": "disk",
+        "event_id": 157,
+        "level": "Warning",
+        "message": "Disk 1 has been surprise removed.",
+        "properties": [
+          "\\Device\\Harddisk1\\DR1",
+          "1",
+          "0 0 0 0 2 0 48 0 0 0 0 0 157 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 100964,
+        "timestamp_utc": "2026-07-23T00:20:19.6331475Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 102189,
+        "timestamp_utc": "2026-07-23T02:28:25.3702727Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 102194,
+        "timestamp_utc": "2026-07-23T02:29:53.6691470Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 102476,
+        "timestamp_utc": "2026-07-23T02:45:32.8762437Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 102480,
+        "timestamp_utc": "2026-07-23T03:02:48.7445742Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 102779,
+        "timestamp_utc": "2026-07-23T05:10:04.3113320Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 102992,
+        "timestamp_utc": "2026-07-23T17:07:27.7594155Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 102993,
+        "timestamp_utc": "2026-07-23T17:07:27.7604417Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0x1125a210 for Disk 0 (PDO name: \\Device\\0000003c) was retried.",
+        "properties": [
+          "\\Device\\Harddisk0\\DR0",
+          "0x1125a210",
+          "0",
+          "\\Device\\0000003c",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 40"
+        ]
+      },
+      {
+        "record_id": 103085,
+        "timestamp_utc": "2026-07-23T20:08:23.2489693Z",
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "event_id": 41,
+        "level": "Critical",
+        "message": "The system has rebooted without cleanly shutting down first. This error could be caused if the system stopped responding, crashed, or lost power unexpectedly.",
+        "properties": [
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "6",
+          "0",
+          "3221225684",
+          "16",
+          "False",
+          "1",
+          "4",
+          "False",
+          "0",
+          "4",
+          "False",
+          "False",
+          "0",
+          "0",
+          "3",
+          "0"
+        ]
+      },
+      {
+        "record_id": 103060,
+        "timestamp_utc": "2026-07-23T20:09:36.2766654Z",
+        "provider": "EventLog",
+        "event_id": 6008,
+        "level": "Error",
+        "message": "The previous system shutdown at 1:31:43 PM on ?7/?23/?2026 was unexpected.",
+        "properties": [
+          "1:31:43 PM",
+          "?7/?23/?2026",
+          "",
+          "",
+          "48148",
+          "",
+          "",
+          "234 7 7 0 4 0 23 0 13 0 31 0 43 0 91 3 234 7 7 0 4 0 23 0 18 0 31 0 43 0 91 3 96 9 0 0 60 0 0 0 1 0 0 0 96 9 0 0 1 0 0 0 176 4 0 0 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 103462,
+        "timestamp_utc": "2026-07-23T21:49:55.0486394Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 103477,
+        "timestamp_utc": "2026-07-24T14:15:34.3944517Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0x103746b0 for Disk 0 (PDO name: \\Device\\0000003c) was retried.",
+        "properties": [
+          "\\Device\\Harddisk0\\DR0",
+          "0x103746b0",
+          "0",
+          "\\Device\\0000003c",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 42"
+        ]
+      },
+      {
+        "record_id": 103476,
+        "timestamp_utc": "2026-07-24T14:15:34.3944517Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 103690,
+        "timestamp_utc": "2026-07-24T15:11:09.2916140Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 103701,
+        "timestamp_utc": "2026-07-24T16:06:31.4094152Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 103703,
+        "timestamp_utc": "2026-07-24T16:33:37.0522206Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 103704,
+        "timestamp_utc": "2026-07-24T16:34:23.6054245Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 103705,
+        "timestamp_utc": "2026-07-24T16:42:38.7861534Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 103754,
+        "timestamp_utc": "2026-07-24T17:39:26.3530292Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 103755,
+        "timestamp_utc": "2026-07-24T17:39:26.3547329Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0x618980 for Disk 0 (PDO name: \\Device\\0000003c) was retried.",
+        "properties": [
+          "\\Device\\Harddisk0\\DR0",
+          "0x618980",
+          "0",
+          "\\Device\\0000003c",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 42"
+        ]
+      },
+      {
+        "record_id": 103776,
+        "timestamp_utc": "2026-07-24T20:01:24.3730035Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 103777,
+        "timestamp_utc": "2026-07-24T20:36:17.8419473Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 103781,
+        "timestamp_utc": "2026-07-24T21:18:19.6385339Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 103788,
+        "timestamp_utc": "2026-07-24T22:22:16.8982335Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 103820,
+        "timestamp_utc": "2026-07-25T08:33:15.4047922Z",
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "event_id": 41,
+        "level": "Critical",
+        "message": "The system has rebooted without cleanly shutting down first. This error could be caused if the system stopped responding, crashed, or lost power unexpectedly.",
+        "properties": [
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "False",
+          "0",
+          "0",
+          "False",
+          "0",
+          "0",
+          "False",
+          "True",
+          "0",
+          "0",
+          "3",
+          "0"
+        ]
+      },
+      {
+        "record_id": 103789,
+        "timestamp_utc": "2026-07-25T08:34:51.6908511Z",
+        "provider": "EventLog",
+        "event_id": 6008,
+        "level": "Error",
+        "message": "The previous system shutdown at 5:20:19 PM on ?7/?24/?2026 was unexpected.",
+        "properties": [
+          "5:20:19 PM",
+          "?7/?24/?2026",
+          "",
+          "",
+          "26600",
+          "",
+          "",
+          "234 7 7 0 5 0 24 0 17 0 20 0 19 0 201 0 234 7 7 0 5 0 24 0 22 0 20 0 19 0 201 0 96 9 0 0 60 0 0 0 1 0 0 0 96 9 0 0 1 0 0 0 176 4 0 0 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 103999,
+        "timestamp_utc": "2026-07-25T12:24:01.4789213Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0x2b31f1b0 for Disk 0 (PDO name: \\Device\\0000003c) was retried.",
+        "properties": [
+          "\\Device\\Harddisk0\\DR0",
+          "0x2b31f1b0",
+          "0",
+          "\\Device\\0000003c",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 40"
+        ]
+      },
+      {
+        "record_id": 103998,
+        "timestamp_utc": "2026-07-25T12:24:01.4789213Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 104001,
+        "timestamp_utc": "2026-07-25T13:07:26.1264743Z",
+        "provider": "disk",
+        "event_id": 153,
+        "level": "Warning",
+        "message": "The IO operation at logical block address 0x2b33a238 for Disk 0 (PDO name: \\Device\\0000003c) was retried.",
+        "properties": [
+          "\\Device\\Harddisk0\\DR0",
+          "0x2b33a238",
+          "0",
+          "\\Device\\0000003c",
+          "15 1 4 0 4 0 44 0 0 0 0 0 153 0 4 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4 40"
+        ]
+      },
+      {
+        "record_id": 104000,
+        "timestamp_utc": "2026-07-25T13:07:26.1264743Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 104002,
+        "timestamp_utc": "2026-07-25T13:15:11.4034693Z",
+        "provider": "storahci",
+        "event_id": 129,
+        "level": "Warning",
+        "message": "Reset to device, \\Device\\RaidPort0, was issued.",
+        "properties": [
+          "\\Device\\RaidPort0",
+          "15 0 24 0 1 0 0 0 0 0 0 0 129 0 4 128 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 129 0 4 128 0 0 0 0 0 0 0 0"
+        ]
+      },
+      {
+        "record_id": 104091,
+        "timestamp_utc": "2026-07-25T15:49:01.9168397Z",
+        "provider": "Microsoft-Windows-Kernel-Power",
+        "event_id": 41,
+        "level": "Critical",
+        "message": "The system has rebooted without cleanly shutting down first. This error could be caused if the system stopped responding, crashed, or lost power unexpectedly.",
+        "properties": [
+          "122",
+          "18446608018909707832",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "False",
+          "0",
+          "1",
+          "True",
+          "0",
+          "1",
+          "False",
+          "False",
+          "0",
+          "0",
+          "3",
+          "0"
+        ]
+      },
+      {
+        "record_id": 104061,
+        "timestamp_utc": "2026-07-25T15:49:25.7708136Z",
+        "provider": "EventLog",
+        "event_id": 6008,
+        "level": "Error",
+        "message": "The previous system shutdown at 10:15:22 AM on ?7/?25/?2026 was unexpected.",
+        "properties": [
+          "10:15:22 AM",
+          "?7/?25/?2026",
+          "",
+          "",
+          "24135",
+          "",
+          "",
+          "234 7 7 0 6 0 25 0 10 0 15 0 22 0 13 2 234 7 7 0 6 0 25 0 15 0 15 0 22 0 13 2 96 9 0 0 60 0 0 0 1 0 0 0 96 9 0 0 1 0 0 0 176 4 0 0 0 0 0 0 0 0 0 0"
+        ]
+      }
+    ],
+    "error": null
+  },
+  "event_analysis": {
+    "overall_severity": "critical",
+    "coverage_status": "available",
+    "finding_count": 2,
+    "domain_event_counts": {
+      "storage": 106,
+      "system_stability": 15
+    },
+    "unclassified_event_count": 0,
+    "findings": [
+      {
+        "domain": "storage",
+        "severity": "critical",
+        "confidence": "high",
+        "title": "Storage path errors or resets detected",
+        "event_count": 106,
+        "event_ids": [
+          51,
+          129,
+          153,
+          157
+        ],
+        "providers": [
+          "disk",
+          "storahci"
+        ],
+        "first_seen_utc": "2026-04-30T21:57:37.1441388Z",
+        "last_seen_utc": "2026-07-25T13:15:11.4034693Z",
+        "record_ids": [
+          66400,
+          66399,
+          66427,
+          66426,
+          66448,
+          66463,
+          66466,
+          66929,
+          66943,
+          66942,
+          66949,
+          66950,
+          66998,
+          66999,
+          67027,
+          67026,
+          67028,
+          67032,
+          67033,
+          67031,
+          67029,
+          67030,
+          67097,
+          67098,
+          67099,
+          67100,
+          67101,
+          67116,
+          67117,
+          67118,
+          71038,
+          82389,
+          82635,
+          82677,
+          82678,
+          82679,
+          82683,
+          82688,
+          82689,
+          82869,
+          82870,
+          82871,
+          88764,
+          88767,
+          88768,
+          88769,
+          89380,
+          89392,
+          89500,
+          89501,
+          89553,
+          89554,
+          89555,
+          89556,
+          89558,
+          89560,
+          89570,
+          89571,
+          90217,
+          90222,
+          90221,
+          90223,
+          90356,
+          90903,
+          90904,
+          93211,
+          93212,
+          93221,
+          93875,
+          94833,
+          95344,
+          95365,
+          95416,
+          95525,
+          96458,
+          96939,
+          96940,
+          96941,
+          99287,
+          100964,
+          102189,
+          102194,
+          102476,
+          102480,
+          102779,
+          102992,
+          102993,
+          103462,
+          103477,
+          103476,
+          103690,
+          103701,
+          103703,
+          103704,
+          103705,
+          103754,
+          103755,
+          103776,
+          103777,
+          103781,
+          103788,
+          103999,
+          103998,
+          104001,
+          104000,
+          104002
+        ],
+        "summary": "Windows recorded 106 storage/controller event(s); concrete I/O evidence overrides green summary status.",
+        "recommendation": "Back up data, avoid stress tests, inspect per-disk evidence, and isolate the drive/cable/port/power path."
+      },
+      {
+        "domain": "system_stability",
+        "severity": "critical",
+        "confidence": "high",
+        "title": "Unexpected shutdown or bugcheck evidence detected",
+        "event_count": 15,
+        "event_ids": [
+          41,
+          1001,
+          6008
+        ],
+        "providers": [
+          "EventLog",
+          "Microsoft-Windows-Kernel-Power",
+          "Microsoft-Windows-WER-SystemErrorReporting"
+        ],
+        "first_seen_utc": "2026-06-25T23:46:42.7257833Z",
+        "last_seen_utc": "2026-07-25T15:49:25.7708136Z",
+        "record_ids": [
+          84380,
+          84354,
+          84513,
+          87865,
+          87840,
+          90414,
+          90389,
+          90938,
+          90912,
+          103085,
+          103060,
+          103820,
+          103789,
+          104091,
+          104061
+        ],
+        "summary": "Windows recorded 15 stability event(s), including 1 bugcheck report(s).",
+        "recommendation": "Correlate timestamps with WHEA, storage, memory, and display findings before changing hardware."
+      }
+    ]
+  },
+  "filesystem": null,
+  "findings": [
+    {
+      "domain": "storage",
+      "severity": "critical",
+      "confidence": "high",
+      "title": "Storage path errors or resets detected",
+      "event_count": 106,
+      "event_ids": [
+        51,
+        129,
+        153,
+        157
+      ],
+      "providers": [
+        "disk",
+        "storahci"
+      ],
+      "first_seen_utc": "2026-04-30T21:57:37.1441388Z",
+      "last_seen_utc": "2026-07-25T13:15:11.4034693Z",
+      "record_ids": [
+        66400,
+        66399,
+        66427,
+        66426,
+        66448,
+        66463,
+        66466,
+        66929,
+        66943,
+        66942,
+        66949,
+        66950,
+        66998,
+        66999,
+        67027,
+        67026,
+        67028,
+        67032,
+        67033,
+        67031,
+        67029,
+        67030,
+        67097,
+        67098,
+        67099,
+        67100,
+        67101,
+        67116,
+        67117,
+        67118,
+        71038,
+        82389,
+        82635,
+        82677,
+        82678,
+        82679,
+        82683,
+        82688,
+        82689,
+        82869,
+        82870,
+        82871,
+        88764,
+        88767,
+        88768,
+        88769,
+        89380,
+        89392,
+        89500,
+        89501,
+        89553,
+        89554,
+        89555,
+        89556,
+        89558,
+        89560,
+        89570,
+        89571,
+        90217,
+        90222,
+        90221,
+        90223,
+        90356,
+        90903,
+        90904,
+        93211,
+        93212,
+        93221,
+        93875,
+        94833,
+        95344,
+        95365,
+        95416,
+        95525,
+        96458,
+        96939,
+        96940,
+        96941,
+        99287,
+        100964,
+        102189,
+        102194,
+        102476,
+        102480,
+        102779,
+        102992,
+        102993,
+        103462,
+        103477,
+        103476,
+        103690,
+        103701,
+        103703,
+        103704,
+        103705,
+        103754,
+        103755,
+        103776,
+        103777,
+        103781,
+        103788,
+        103999,
+        103998,
+        104001,
+        104000,
+        104002
+      ],
+      "summary": "Windows recorded 106 storage/controller event(s); concrete I/O evidence overrides green summary status.",
+      "recommendation": "Back up data, avoid stress tests, inspect per-disk evidence, and isolate the drive/cable/port/power path."
+    },
+    {
+      "domain": "system_stability",
+      "severity": "critical",
+      "confidence": "high",
+      "title": "Unexpected shutdown or bugcheck evidence detected",
+      "event_count": 15,
+      "event_ids": [
+        41,
+        1001,
+        6008
+      ],
+      "providers": [
+        "EventLog",
+        "Microsoft-Windows-Kernel-Power",
+        "Microsoft-Windows-WER-SystemErrorReporting"
+      ],
+      "first_seen_utc": "2026-06-25T23:46:42.7257833Z",
+      "last_seen_utc": "2026-07-25T15:49:25.7708136Z",
+      "record_ids": [
+        84380,
+        84354,
+        84513,
+        87865,
+        87840,
+        90414,
+        90389,
+        90938,
+        90912,
+        103085,
+        103060,
+        103820,
+        103789,
+        104091,
+        104061
+      ],
+      "summary": "Windows recorded 15 stability event(s), including 1 bugcheck report(s).",
+      "recommendation": "Correlate timestamps with WHEA, storage, memory, and display findings before changing hardware."
+    },
+    {
+      "domain": "storage_device",
+      "severity": "critical",
+      "confidence": "high",
+      "title": "Drive evidence requires attention: P3-512",
+      "evidence_count": 4,
+      "summary": "Windows reports Healthy summary status, but the combined drive severity is critical. Evidence: read errors=13, max read latency ms=9047.0, max write latency ms=4041.0, temperature C=31.0.",
+      "recommendation": "Back up important data and correlate this disk with Windows storage events before any benchmark or stress test."
+    }
+  ],
+  "collection_status": {
+    "system_inventory": {
+      "available": true,
+      "error": null
+    },
+    "event_log": {
+      "available": true,
+      "error": null
+    },
+    "physical_drives": {
+      "available": true,
+      "error": null
+    },
+    "disk_space": {
+      "available": true,
+      "error": null
+    },
+    "volumes": {
+      "available": true,
+      "error": null
+    },
+    "trim": {
+      "available": true,
+      "error": null
+    },
+    "mft": {
+      "available": true,
+      "error": null
+    }
+  },
+  "recommendations": [
+    "Back up irreplaceable data and do not run storage benchmarks or write-heavy diagnostics until storage evidence is resolved.",
+    "Correlate each crash timestamp with storage, WHEA, memory, display, and power evidence; a Kernel-Power event alone does not identify the cause.",
+    "Use active benchmarks only on known-stable, backed-up hardware after passive preflight finds no unresolved fault evidence."
+  ]
+}
