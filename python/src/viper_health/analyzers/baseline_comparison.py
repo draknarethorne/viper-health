@@ -152,6 +152,41 @@ def compare_to_baseline(
                 f"({baseline_health:.0f} → {current_health:.0f})"
             )
     
+    # Compare filesystem-pressure metrics if present. These are the primary
+    # signals for cross-machine comparison (e.g. laptop vs desktop): tiny-file
+    # burden and free-space headroom. Each tuple is
+    # (key, higher_is_better, warn%, crit%, label, unit).
+    _FS_METRICS = (
+        ("tiny_files", False, 25.0, 50.0, "Tiny-file count", ""),
+        ("tiny_file_ratio", False, 25.0, 50.0, "Tiny-file ratio", "%"),
+        ("free_percent", True, 15.0, 30.0, "Free space", "%"),
+    )
+    for key, higher_is_better, warn, crit, label, unit in _FS_METRICS:
+        if key not in baseline_data or key not in current_data:
+            continue
+        try:
+            baseline_value = float(baseline_data[key])
+            current_value = float(current_data[key])
+        except (TypeError, ValueError):
+            continue
+
+        change = calculate_change(
+            key,
+            baseline_value,
+            current_value,
+            threshold_warning=warn,
+            threshold_critical=crit,
+            higher_is_better=higher_is_better,
+        )
+        changes.append(change)
+
+        if change.severity in ("degraded", "critical"):
+            direction = "decreased" if higher_is_better else "increased"
+            alerts.append(
+                f"{label} {direction} {abs(change.change_percent):.1f}% "
+                f"({baseline_value:.1f}{unit} → {current_value:.1f}{unit})"
+            )
+    
     # Determine overall severity
     severities = [c.severity for c in changes]
     if "critical" in severities:

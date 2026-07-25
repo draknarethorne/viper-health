@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "profile_type": "machine_profile",
+  "timestamp": "2026-07-25T03:33:10.139551+00:00",
+  "machine": {
+    "hostname": "CMIS-957903A-GT",
+    "os": "Windows",
+    "os_release": "11",
+    "os_version": "10.0.26200",
+    "architecture": "AMD64",
+    "processor": "Intel64 Family 6 Model 142 Stepping 10, GenuineIntel",
+    "python_version": "3.13.14",
+    "cpu_count": 8
+  },
+  "scan_root": "C:\\Users\\scott",
+  "drive": "C:",
+  "elevated": false,
+  "disk_space": {
+    "drive": "C:",
+    "total_bytes": 1022870155264,
+    "used_bytes": 690941657088,
+    "free_bytes": 331928498176,
+    "free_percent": 32.5,
+    "severity": "good"
+  },
+  "free_percent": 32.5,
+  "total_files": 195308,
+  "tiny_files": 98935,
+  "tiny_file_ratio": 50.66,
+  "directories_scanned": 32838,
+  "total_bytes": 63091515077,
+  "findings_count": 0,
+  "health_score": {
+    "overall_score": 100.0,
+    "severity_band": "good"
+  },
+  "drives": [
+    {
+      "device_id": "0",
+      "friendly_name": "SAMSUNG MZVLB1T0HALR-000L2",
+      "media_type": "SSD",
+      "health_status": "Healthy",
+      "temperature_c": null,
+      "wear_percent": null,
+      "power_on_hours": null,
+      "read_errors_total": null,
+      "write_errors_total": null,
+      "severity": "good",
+      "bus_type": "RAID",
+      "reliability_available": false
+    },
+    {
+      "device_id": "1",
+      "friendly_name": "TOSHIBA External USB 3.0",
+      "media_type": "Unspecified",
+      "health_status": "Healthy",
+      "temperature_c": null,
+      "wear_percent": null,
+      "power_on_hours": null,
+      "read_errors_total": null,
+      "write_errors_total": null,
+      "severity": "good",
+      "bus_type": "USB",
+      "reliability_available": false
+    }
+  ],
+  "trim": {
+    "drive": "C:",
+    "trim_enabled": true,
+    "raw_value": 0,
+    "severity": "good"
+  },
+  "benchmark_results": [
+    {
+      "test_name": "sequential_write",
+      "operation": "write",
+      "pattern": "sequential",
+      "throughput_mb_s": 264.47,
+      "iops": 67705.0,
+      "severity": "good"
+    },
+    {
+      "test_name": "sequential_read",
+      "operation": "read",
+      "pattern": "sequential",
+      "throughput_mb_s": 619.34,
+      "iops": 158551.0,
+      "severity": "warning"
+    },
+    {
+      "test_name": "random_write",
+      "operation": "write",
+      "pattern": "random",
+      "throughput_mb_s": 42.23,
+      "iops": 10811.0,
+      "severity": "warning"
+    },
+    {
+      "test_name": "random_read",
+      "operation": "read",
+      "pattern": "random",
+      "throughput_mb_s": 129.38,
+      "iops": 33122.0,
+      "severity": "warning"
+    }
+  ]
+}

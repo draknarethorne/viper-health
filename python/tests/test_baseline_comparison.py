@@ -246,3 +246,103 @@ def test_compare_to_baseline_improvement(tmp_path):
     
     assert comparison.overall_severity == "improved"
     assert len(comparison.alerts) == 0  # No alerts for improvements
+
+
+def test_compare_cross_machine_tiny_file_pressure(tmp_path):
+    """Cross-machine: current machine has far more tiny files (degraded)."""
+    baseline_path = tmp_path / "desktop.json"
+    baseline_data = {
+        "timestamp": "2026-01-01",
+        "tiny_files": 10_000,
+        "tiny_file_ratio": 5.0,
+        "free_percent": 40.0,
+    }
+    baseline_path.write_text(json.dumps(baseline_data))
+
+    # Laptop has 60% more tiny files and less free space.
+    current_data = {
+        "timestamp": "2026-01-02",
+        "tiny_files": 16_000,  # +60% (critical)
+        "tiny_file_ratio": 8.0,  # +60% (critical)
+        "free_percent": 40.0,
+    }
+
+    comparison = compare_to_baseline(current_data, baseline_path)
+
+    metric_names = {c.metric_name for c in comparison.changes}
+    assert "tiny_files" in metric_names
+    assert "tiny_file_ratio" in metric_names
+    assert comparison.overall_severity == "critical"
+    assert any("Tiny-file count" in a for a in comparison.alerts)
+
+
+def test_compare_cross_machine_free_space_drop(tmp_path):
+    """Cross-machine: current machine has much less free space (degraded)."""
+    baseline_path = tmp_path / "desktop.json"
+    baseline_data = {
+        "timestamp": "2026-01-01",
+        "tiny_files": 10_000,
+        "free_percent": 40.0,
+    }
+    baseline_path.write_text(json.dumps(baseline_data))
+
+    current_data = {
+        "timestamp": "2026-01-02",
+        "tiny_files": 10_000,  # stable
+        "free_percent": 30.0,  # -25% (degraded; higher is better)
+    }
+
+    comparison = compare_to_baseline(current_data, baseline_path)
+
+    free_change = next(c for c in comparison.changes if c.metric_name == "free_percent")
+    assert free_change.severity == "degraded"
+    assert any("Free space decreased" in a for a in comparison.alerts)
+
+
+def test_compare_cross_machine_stable_when_similar(tmp_path):
+    """Cross-machine: near-identical machines report stable with no alerts."""
+    baseline_path = tmp_path / "desktop.json"
+    baseline_data = {
+        "timestamp": "2026-01-01",
+        "tiny_files": 10_000,
+        "tiny_file_ratio": 5.0,
+        "free_percent": 40.0,
+        "health_score": {"overall_score": 100.0},
+    }
+    baseline_path.write_text(json.dumps(baseline_data))
+
+    current_data = {
+        "timestamp": "2026-01-02",
+        "tiny_files": 10_100,  # +1%
+        "tiny_file_ratio": 5.05,
+        "free_percent": 39.5,
+        "health_score": {"overall_score": 99.0},
+    }
+
+    comparison = compare_to_baseline(current_data, baseline_path)
+
+    assert comparison.overall_severity == "stable"
+    assert comparison.alerts == []
+
+
+def test_compare_cross_machine_ignores_non_numeric_metrics(tmp_path):
+    """Non-numeric metric values are skipped gracefully."""
+    baseline_path = tmp_path / "desktop.json"
+    baseline_data = {
+        "timestamp": "2026-01-01",
+        "free_percent": "unavailable",
+        "tiny_files": 10_000,
+    }
+    baseline_path.write_text(json.dumps(baseline_data))
+
+    current_data = {
+        "timestamp": "2026-01-02",
+        "free_percent": 30.0,
+        "tiny_files": 10_000,
+    }
+
+    comparison = compare_to_baseline(current_data, baseline_path)
+
+    metric_names = {c.metric_name for c in comparison.changes}
+    assert "free_percent" not in metric_names  # skipped (non-numeric baseline)
+    assert "tiny_files" in metric_names
