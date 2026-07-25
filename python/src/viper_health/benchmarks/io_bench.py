@@ -1,10 +1,9 @@
 """
-SSD I/O performance benchmarking utilities.
+Optional I/O performance measurement utilities.
 
-Measures sequential and random read/write performance to identify:
-- Throughput bottlenecks
-- QLC SSD slowdown under load
-- Random vs sequential performance gaps
+Measurements are intended for same-machine baseline comparisons. Absolute
+throughput cannot diagnose media health or infer NAND type, DRAM, cache state,
+temperature, or a root cause.
 """
 
 from __future__ import annotations
@@ -31,86 +30,26 @@ class BenchmarkResult:
     iops: float
 
 
-def assess_benchmark_performance(result: BenchmarkResult) -> dict[str, any]:
+def assess_benchmark_performance(result: BenchmarkResult) -> dict[str, object]:
+    """Describe a measurement without turning it into a health diagnosis.
+
+    A valid positive result is informational. Degradation classification belongs
+    in baseline comparison where hardware, block size, workload, and machine
+    context can be held constant.
     """
-    Assess benchmark performance against typical SSD thresholds.
-    
-    Thresholds based on:
-    - Modern SATA SSD: ~500-550 MB/s sequential
-    - Budget NVMe: ~1500-3000 MB/s sequential
-    - QLC SSD without DRAM cache: degraded under load
-    - DRAM-less QLC write: can drop to <100 MB/s when SLC cache full
-    
-    Returns:
-        Dictionary with severity and recommendations
-    """
-    perf = result.throughput_mb_s
-    
-    # Define thresholds based on operation and pattern
-    if result.pattern == "sequential" and result.operation == "write":
-        # Sequential write - most critical for QLC SSDs
-        # Good: >200 MB/s (SLC cache active)
-        # Warning: 100-200 MB/s (cache partially full)
-        # Critical: <100 MB/s (cache exhausted, metadata pressure)
-        if perf >= 200:
-            severity = "good"
-            message = "SLC cache healthy, good write performance"
-        elif perf >= 100:
-            severity = "warning"
-            message = "Moderate write performance, cache may be filling"
-        else:
-            severity = "critical"
-            message = "Poor write performance - SLC cache exhausted or metadata pressure"
-    
-    elif result.pattern == "sequential" and result.operation == "read":
-        # Sequential read - usually fast even on QLC
-        # Good: >800 MB/s
-        # Warning: 400-800 MB/s
-        # Critical: <400 MB/s
-        if perf >= 800:
-            severity = "good"
-            message = "Excellent sequential read performance"
-        elif perf >= 400:
-            severity = "warning"
-            message = "Moderate read performance"
-        else:
-            severity = "critical"
-            message = "Poor read performance - drive health concern"
-    
-    elif result.pattern == "random" and result.operation == "write":
-        # Random write - DRAM-less QLC SSDs struggle here
-        # Good: >50 MB/s (with DRAM/cache)
-        # Warning: 20-50 MB/s (typical DRAM-less QLC)
-        # Critical: <20 MB/s (severe degradation)
-        if perf >= 50:
-            severity = "good"
-            message = "Good random write performance"
-        elif perf >= 20:
-            severity = "warning"
-            message = "Typical DRAM-less QLC random write performance"
-        else:
-            severity = "critical"
-            message = "Severely degraded random write - metadata pressure likely"
-    
-    else:  # random read
-        # Random read - moderate expectations for QLC
-        # Good: >300 MB/s
-        # Warning: 100-300 MB/s
-        # Critical: <100 MB/s
-        if perf >= 300:
-            severity = "good"
-            message = "Excellent random read performance"
-        elif perf >= 100:
-            severity = "warning"
-            message = "Moderate random read performance"
-        else:
-            severity = "critical"
-            message = "Poor random read performance"
-    
+    valid = (
+        result.throughput_mb_s > 0
+        and result.iops > 0
+        and result.duration_seconds > 0
+    )
     return {
-        "severity": severity,
-        "message": message,
-        "throughput_mb_s": round(perf, 2),
+        "severity": "info" if valid else "critical",
+        "message": (
+            "Measurement captured; compare with a same-machine, same-configuration baseline."
+            if valid
+            else "Invalid benchmark measurement; do not infer hardware health."
+        ),
+        "throughput_mb_s": round(result.throughput_mb_s, 2),
         "iops": round(result.iops, 0),
     }
 

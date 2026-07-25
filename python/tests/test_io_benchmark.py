@@ -165,8 +165,8 @@ def test_run_io_benchmark_helper(tmp_path):
     assert all(isinstance(r, BenchmarkResult) for r in results)
 
 
-def test_assess_benchmark_performance_good():
-    """Test benchmark performance assessment with good metrics."""
+def test_assess_benchmark_performance_is_informational():
+    """Positive measurements are facts, not absolute health verdicts."""
     result = BenchmarkResult(
         test_name="sequential_write",
         operation="write",
@@ -180,12 +180,12 @@ def test_assess_benchmark_performance_good():
     
     assessment = assess_benchmark_performance(result)
     
-    assert assessment["severity"] == "good"
-    assert "SLC cache healthy" in assessment["message"]
+    assert assessment["severity"] == "info"
+    assert "same-machine" in assessment["message"]
 
 
-def test_assess_benchmark_performance_warning():
-    """Test benchmark performance assessment with warning metrics."""
+def test_assess_benchmark_performance_does_not_infer_cache_state():
+    """A slower absolute result still requires a comparable baseline."""
     result = BenchmarkResult(
         test_name="sequential_write",
         operation="write",
@@ -199,12 +199,12 @@ def test_assess_benchmark_performance_warning():
     
     assessment = assess_benchmark_performance(result)
     
-    assert assessment["severity"] == "warning"
-    assert "cache may be filling" in assessment["message"]
+    assert assessment["severity"] == "info"
+    assert "cache" not in assessment["message"].lower()
 
 
-def test_assess_benchmark_performance_critical():
-    """Test benchmark performance assessment with critical metrics."""
+def test_assess_benchmark_performance_does_not_diagnose_slow_result():
+    """Absolute throughput cannot diagnose media or metadata health."""
     result = BenchmarkResult(
         test_name="sequential_write",
         operation="write",
@@ -218,12 +218,12 @@ def test_assess_benchmark_performance_critical():
     
     assessment = assess_benchmark_performance(result)
     
-    assert assessment["severity"] == "critical"
-    assert "SLC cache exhausted" in assessment["message"] or "metadata pressure" in assessment["message"]
+    assert assessment["severity"] == "info"
+    assert "hardware health" not in assessment["message"].lower()
 
 
-def test_assess_random_write_dram_less_qlc():
-    """Test random write assessment for typical DRAM-less QLC performance."""
+def test_assess_random_write_does_not_infer_nand_or_dram():
+    """Random-write throughput does not identify NAND or DRAM design."""
     result = BenchmarkResult(
         test_name="random_write",
         operation="write",
@@ -237,5 +237,6 @@ def test_assess_random_write_dram_less_qlc():
     
     assessment = assess_benchmark_performance(result)
     
-    assert assessment["severity"] == "warning"
-    assert "DRAM-less QLC" in assessment["message"]
+    assert assessment["severity"] == "info"
+    assert "QLC" not in assessment["message"]
+    assert "DRAM" not in assessment["message"]

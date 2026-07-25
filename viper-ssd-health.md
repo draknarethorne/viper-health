@@ -577,12 +577,14 @@ Phase 3:
 - Free space — ✅ `collectors/disk_space.py`
 - Drive health / SMART / temperature — ✅ `collectors/smart_data.py`
 - Process I/O — ✅ `collectors/io_processes.py`
-- I/O benchmarks — ✅ `benchmarks/io_bench.py`
+- I/O measurements — ✅ `benchmarks/io_bench.py`
+- Benchmark safety preflight — ✅ `analyzers/benchmark_preflight.py`
 
-> **Known safety gap (2026-07-25):** `benchmark_io` remains implemented, but it
-> does not yet enforce Windows storage-event preflight. It must not be run on
-> the affected P3-512 system. Documentation treats benchmarks as optional and
-> prohibited on unstable storage until code-level gating is added.
+`benchmark_io` and `profile_machine --benchmark` fail closed unless Windows
+System event coverage and physical-drive reliability counters are available
+and contain no warning or critical evidence. There is no override. Absolute
+throughput is informational and must be interpreted only against a
+same-machine, same-configuration baseline.
 
 **Maintenance mode (Sections 3, 8): intentionally deferred.**
 

@@ -154,6 +154,11 @@ See [`config/scan-presets.yaml`](config/scan-presets.yaml) for full preset defin
 > P3-512 system, `benchmark_io` and `profile_machine --benchmark` are prohibited
 > until the disk has been replaced and the replacement path is stable.
 
+Both benchmark entry points enforce a mandatory passive preflight and fail
+closed when event coverage or drive reliability data is unavailable, or when
+warning/critical evidence exists. There is no override. Results are
+measurements for same-machine baseline comparison, not health verdicts.
+
 Benchmarks are optional diagnostics for known-stable storage, not health tests:
 
 ```bash
@@ -171,7 +176,7 @@ python -m viper_health.cli.benchmark_io --output data/benchmarks/baseline.json
 
 - Sequential write/read throughput and IOPS
 - Random write/read throughput and IOPS
-- Color-coded health assessment (✅ GOOD, ⚠️ WARNING, ❌ CRITICAL)
+- Informational measurements for same-machine baseline comparison
 
 **Current generic thresholds (workload guidance, not failure prediction):**
 

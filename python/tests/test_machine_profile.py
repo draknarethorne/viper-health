@@ -3,6 +3,7 @@
 import json
 from unittest.mock import patch
 
+from viper_health.analyzers.benchmark_preflight import BenchmarkPreflight
 from viper_health.benchmarks.io_bench import BenchmarkResult
 from viper_health.cli.profile_machine import (
     SCHEMA_VERSION,
@@ -108,7 +109,7 @@ def test_summarize_benchmark_runs_uses_median_and_spread():
     assert summary["throughput_mb_s_stdev"] == 8.16
     assert summary["iops"] == 7_500
     assert summary["duration_seconds"] == 1.5
-    assert summary["severity"] == "warning"
+    assert summary["severity"] == "info"
 
 
 @patch("viper_health.collectors.volume_info.get_volume_info")
@@ -144,15 +145,20 @@ def test_build_machine_profile_repeats_benchmark(mock_benchmark, tmp_path):
         [_benchmark_result("sequential_write", 220.0, 55_000.0, 0.9)],
     ]
 
-    profile = build_machine_profile(
-        tmp_path,
-        include_drives=False,
-        include_trim=False,
-        run_benchmark=True,
-        benchmark_size_mb=64,
-        benchmark_block_size_kb=8,
-        benchmark_runs=3,
-    )
+    allowed = BenchmarkPreflight(True, 30, (), "info", 0, 1, ())
+    with patch(
+        "viper_health.cli.profile_machine.run_benchmark_preflight",
+        return_value=allowed,
+    ):
+        profile = build_machine_profile(
+            tmp_path,
+            include_drives=False,
+            include_trim=False,
+            run_benchmark=True,
+            benchmark_size_mb=64,
+            benchmark_block_size_kb=8,
+            benchmark_runs=3,
+        )
 
     assert mock_benchmark.call_count == 3
     assert profile["benchmark_config"]["test_file_size_mb"] == 64
@@ -160,6 +166,34 @@ def test_build_machine_profile_repeats_benchmark(mock_benchmark, tmp_path):
     assert profile["benchmark_config"]["runs"] == 3
     assert profile["benchmark_results"][0]["throughput_mb_s"] == 200.0
     assert profile["benchmark_results"][0]["iops"] == 50_000
+    assert profile["benchmark_results"][0]["severity"] == "info"
+
+
+@patch("viper_health.cli.profile_machine.run_io_benchmark")
+def test_build_machine_profile_blocks_benchmark_before_write(mock_benchmark, tmp_path):
+    blocked = BenchmarkPreflight(
+        False,
+        30,
+        ("storage: 2 relevant events (critical)",),
+        "critical",
+        2,
+        1,
+        (),
+    )
+    with patch(
+        "viper_health.cli.profile_machine.run_benchmark_preflight",
+        return_value=blocked,
+    ):
+        profile = build_machine_profile(
+            tmp_path,
+            include_drives=False,
+            include_trim=False,
+            run_benchmark=True,
+        )
+
+    mock_benchmark.assert_not_called()
+    assert profile["benchmark_preflight"]["allowed"] is False
+    assert profile["benchmark_results"]["available"] is False
 
 
 def test_build_machine_profile_is_json_serializable(tmp_path):

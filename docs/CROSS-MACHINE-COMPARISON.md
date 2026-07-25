@@ -9,6 +9,11 @@ That flag writes and deletes temporary files and is prohibited on any storage
 path with recent Event 129/153 records, media/reallocation errors, storage
 bugchecks, or an incomplete backup.
 
+Benchmark requests run a mandatory fail-closed preflight. Missing event-log or
+drive-reliability coverage also blocks the benchmark, and there is no override.
+Compare benchmark values only when machine, target, block size, and workload
+configuration are equivalent.
+
 ---
 
 ## TL;DR

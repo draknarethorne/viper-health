@@ -35,6 +35,7 @@ from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
 
+from viper_health.analyzers.benchmark_preflight import run_benchmark_preflight
 from viper_health.benchmarks.io_bench import (
     assess_benchmark_performance,
     run_io_benchmark,
@@ -116,6 +117,7 @@ def _summarize_benchmark_runs(runs: list[list]) -> list[dict]:
                 "pattern": first.pattern,
                 "throughput_mb_s": median_throughput,
                 "iops": median_iops,
+                "duration_seconds": statistics.median(durations),
             },
         )()
         assessment = assess_benchmark_performance(assessment_result)
@@ -187,6 +189,7 @@ def build_machine_profile(
     benchmark_size_mb: int = 100,
     benchmark_block_size_kb: int = 4,
     benchmark_runs: int = 3,
+    benchmark_preflight_days: int = 30,
     exclude_paths: list[str] | None = None,
     show_progress: bool = False,
 ) -> dict:
@@ -203,6 +206,7 @@ def build_machine_profile(
         benchmark_size_mb: Test-file size for the benchmark, in MB.
         benchmark_block_size_kb: I/O block size used for all benchmark tests.
         benchmark_runs: Number of benchmark repetitions; medians are reported.
+        benchmark_preflight_days: Event lookback required before active I/O.
         exclude_paths: Paths/globs to prune from the filesystem walk.
         show_progress: Emit progress updates during the scan.
 
@@ -325,6 +329,17 @@ def build_machine_profile(
         try:
             if benchmark_runs < 1:
                 raise ValueError("benchmark_runs must be at least 1")
+            preflight = run_benchmark_preflight(
+                lookback_days=benchmark_preflight_days,
+            )
+            profile["benchmark_preflight"] = preflight.to_dict()
+            if not preflight.allowed:
+                profile["benchmark_results"] = {
+                    "available": False,
+                    "error": "Benchmark blocked by passive health preflight",
+                    "reasons": list(preflight.reasons),
+                }
+                return profile
             benchmark_target = root if root.is_dir() else None
             profile["benchmark_config"] = {
                 "target_dir": str(benchmark_target) if benchmark_target else None,
@@ -416,6 +431,12 @@ Examples:
         help="Benchmark repetitions; profile reports medians (default: 3)",
     )
     parser.add_argument(
+        "--benchmark-preflight-days",
+        type=int,
+        default=30,
+        help="Event lookback required before benchmark writes (default: 30)",
+    )
+    parser.add_argument(
         "--no-drives",
         action="store_true",
         help="Skip drive/SMART health collection (faster, no PowerShell)",
@@ -472,6 +493,7 @@ Examples:
         benchmark_size_mb=args.benchmark_size,
         benchmark_block_size_kb=args.benchmark_block_size,
         benchmark_runs=args.benchmark_runs,
+        benchmark_preflight_days=args.benchmark_preflight_days,
         exclude_paths=args.exclude_paths,
         show_progress=args.progress,
     )

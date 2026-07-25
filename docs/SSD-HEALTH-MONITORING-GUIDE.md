@@ -98,9 +98,14 @@ review:
 
 ### Benchmark preflight
 
-`benchmark_io` is implemented but does not yet refuse execution based on recent
-storage events or media errors. Until code-level gating exists, operators must
-perform the safety decision manually.
+`benchmark_io` and `profile_machine --benchmark` now fail closed unless the
+Windows System event query and physical-drive reliability counters are
+available and show no unresolved warning or critical evidence. Storage resets,
+disk retries, bugchecks, WHEA events, drive errors, unknown drive severity, or
+missing critical coverage block the write workload. There is no override.
+
+Passing preflight means only that the required passive evidence did not block
+the measurement. It does not certify hardware health.
 
 ## Benchmark safety policy
 
