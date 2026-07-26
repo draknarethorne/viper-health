@@ -18,7 +18,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from viper_health.collectors.target_roots import TargetRoot
-from viper_health.utils.fs_counter import TreeCount, bytes_to_gib, count_tree
+from viper_health.utils.fs_counter import TreeCount, count_tree, format_bytes
 
 
 @dataclass(frozen=True)
@@ -114,15 +114,15 @@ def _classify(
     if count.total_bytes >= thresholds.size_critical_bytes:
         severity = "critical"
         reasons.append(
-            f"{bytes_to_gib(count.total_bytes):.1f} GiB >= critical "
-            f"{bytes_to_gib(thresholds.size_critical_bytes):.1f} GiB"
+            f"{format_bytes(count.total_bytes)} >= critical "
+            f"{format_bytes(thresholds.size_critical_bytes)}"
         )
     elif count.total_bytes >= thresholds.size_warning_bytes:
         if severity != "critical":
             severity = "warning"
         reasons.append(
-            f"{bytes_to_gib(count.total_bytes):.1f} GiB >= warning "
-            f"{bytes_to_gib(thresholds.size_warning_bytes):.1f} GiB"
+            f"{format_bytes(count.total_bytes)} >= warning "
+            f"{format_bytes(thresholds.size_warning_bytes)}"
         )
 
     reason = "; ".join(reasons) if reasons else "within normal thresholds"

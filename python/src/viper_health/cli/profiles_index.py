@@ -27,6 +27,7 @@ from viper_health.analyzers.machine_ranking import (
     resource_spec_scores,
     storage_expected_vs_actual,
 )
+from viper_health.utils.fs_counter import format_bytes
 
 
 def _repo_profiles_dir() -> Path:
@@ -51,7 +52,7 @@ def _newest_report(host_dir: Path) -> Path | None:
 
 def _gib(value: object) -> str:
     try:
-        return f"{int(value) / (1024 ** 3):.0f} GiB"
+        return format_bytes(int(value))
     except (TypeError, ValueError):
         return "?"
 

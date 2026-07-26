@@ -33,8 +33,8 @@ KNOWN_APPS: dict[str, dict[str, str]] = {
 # Helper, Update Orchestrator) that merely contain generic words.
 _MANUAL_SERVICE_HINTS = (
     "adobe", "acrobat update", "google update", "googleupdater", "edgeupdate",
-    "brave update", "mozilla maintenance", "intel(r) driver", "nvidia",
-    "steam client", "epic online", "office click-to-run", "dropbox update",
+    "brave update", "mozilla maintenance", "intel(r) driver", "nvidia telemetry",
+    "nvidia geforce experience", "steam client", "epic online", "dropbox update",
 )
 
 # Core services we never suggest changing.
@@ -43,7 +43,8 @@ _PROTECTED_SERVICE_TOKENS = (
     "dcomlaunch", "rpcss", "lsm", "profsvc", "eventlog", "windows security",
     "ip helper", "iphlpsvc", "orchestrator", "usosvc", "dosvc",
     "delivery optimization", "medic", "waasmedic", "cryptographic", "cryptsvc",
-    "connected devices", "network", "firewall",
+    "connected devices", "network", "firewall", "click-to-run",
+    "nvidia display container", "nvidia localsystem", "container ls",
 )
 
 

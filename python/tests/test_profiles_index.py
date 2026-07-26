@@ -52,7 +52,7 @@ def test_collect_machine_rows_picks_newest(tmp_path):
     assert row["host"] == "DESK-1"
     assert row["severity"] == "GOOD"  # newest report wins
     assert row["capability"] == "SOLID"
-    assert row["ram"] == "32 GiB"
+    assert row["ram"] == "32.00 GB"
     assert row["drive"] == "Samsung SSD"
     assert row["free_percent"] == 42.5
 

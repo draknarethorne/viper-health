@@ -103,3 +103,31 @@ def bytes_to_gib(value: int) -> float:
 def bytes_to_mib(value: int) -> float:
     """Convert bytes to mebibytes."""
     return value / (1024 ** 2)
+
+
+def format_bytes(value: float, *, decimals: int | None = None) -> str:
+    """Format a byte count as an auto-scaled, Windows-consistent size string.
+
+    Uses binary magnitudes (1 GB = 1024 MB, matching Windows Explorer and the
+    rest of the toolkit) but the conventional GB/MB/TB/KB labels. Negative
+    values are formatted with a leading sign.
+
+    Args:
+        value: Byte count (may be negative).
+        decimals: Fixed decimal places; when None, scales precision by unit
+            (2 for GB/TB, 1 for MB/KB, 0 for bytes).
+    """
+    sign = "-" if value < 0 else ""
+    magnitude = abs(float(value))
+    for unit, threshold, default_dp in (
+        ("TB", 1024 ** 4, 2),
+        ("GB", 1024 ** 3, 2),
+        ("MB", 1024 ** 2, 1),
+        ("KB", 1024, 1),
+    ):
+        if magnitude >= threshold:
+            places = default_dp if decimals is None else decimals
+            return f"{sign}{magnitude / threshold:.{places}f} {unit}"
+    places = 0 if decimals is None else decimals
+    return f"{sign}{magnitude:.{places}f} B"
+

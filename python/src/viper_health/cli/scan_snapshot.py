@@ -17,7 +17,7 @@ from viper_health.collectors.target_roots import (
     get_all_targets,
     get_targets_for_category,
 )
-from viper_health.utils.fs_counter import bytes_to_mib
+from viper_health.utils.fs_counter import format_bytes
 
 try:
     from colorama import Fore, Style, init as colorama_init
@@ -91,11 +91,11 @@ def _cmd_diff(args: argparse.Namespace) -> int:
             print(f"   {f.path}")
             print(
                 f"   Δ files: {sign}{f.files_delta:,}  |  "
-                f"Δ size: {sign}{bytes_to_mib(f.bytes_delta):.1f} MiB"
+                f"Δ size: {sign}{format_bytes(f.bytes_delta)}"
             )
             print(
                 f"   Velocity: {fcolor}{f.files_per_day:,.0f} files/day"
-                f"{Style.RESET_ALL} ({bytes_to_mib(f.bytes_per_day):.1f} MiB/day)"
+                f"{Style.RESET_ALL} ({format_bytes(f.bytes_per_day)}/day)"
             )
             print()
 

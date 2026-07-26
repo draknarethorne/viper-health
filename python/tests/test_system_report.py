@@ -137,9 +137,9 @@ def test_markdown_formats_storage_and_successful_collection_status():
 
     markdown = build_system_health_markdown(report)
 
-    assert "**Disk space (C:):** 300.00 GiB free / 500.00 GiB total (60.0%) — GOOD" in markdown
+    assert "**Disk space (C:):** 300.00 GB free / 500.00 GB total (60.0%) — GOOD" in markdown
     assert "**TRIM (C:):** Enabled, raw value 0 — GOOD" in markdown
-    assert "**MFT (C:):** 1.5 GiB, 1 fragment(s) — GOOD" in markdown
+    assert "**MFT (C:):** 1.5 GB, 1 fragment(s) — GOOD" in markdown
     assert "| disk_space | True | None |" in markdown
     assert "{'drive':" not in markdown
 

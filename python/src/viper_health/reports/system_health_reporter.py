@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from viper_health.utils.fs_counter import format_bytes
+
 
 _SEVERITY_ICON = {
     "critical": "CRITICAL",
@@ -26,7 +28,7 @@ def _escape(value: object, *, limit: int = 220) -> str:
 
 def _bytes_gib(value: object) -> str:
     try:
-        return f"{int(value) / (1024**3):,.2f} GiB"
+        return format_bytes(int(value))
     except (TypeError, ValueError):
         return "Unknown"
 
@@ -56,7 +58,7 @@ def _storage_summary(label: str, value: object) -> str:
         )
 
     size = value.get("mft_size_gb")
-    size_text = f"{size} GiB" if size is not None else _bytes_gib(value.get("mft_size_bytes"))
+    size_text = f"{size} GB" if size is not None else _bytes_gib(value.get("mft_size_bytes"))
     fragments = value.get("mft_fragments", "Unknown")
     return (
         f"- **MFT ({drive}):** {size_text}, {fragments} fragment(s) — "

@@ -26,6 +26,7 @@ import yaml
 from viper_health.analyzers.startup_load import analyze_startup
 from viper_health.collectors.reclaimable_space import scan_reclaimable_space
 from viper_health.collectors.startup_items import collect_startup_inventory
+from viper_health.utils.fs_counter import format_bytes
 from viper_health.maintenance.safe_cleanup import (
     DELETE,
     QUARANTINE,
@@ -46,9 +47,7 @@ except ImportError:  # pragma: no cover - cosmetic
 
 
 def _gib(value: int) -> str:
-    if value >= 1024**3:
-        return f"{value / 1024**3:.2f} GiB"
-    return f"{value / 1024**2:.1f} MiB"
+    return format_bytes(value)
 
 
 def _repo_root() -> Path:

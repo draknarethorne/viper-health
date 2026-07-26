@@ -7,6 +7,7 @@ from viper_health.utils.fs_counter import (
     bytes_to_gib,
     bytes_to_mib,
     count_tree,
+    format_bytes,
 )
 
 
@@ -61,3 +62,18 @@ def test_count_tree_single_file(tmp_path: Path):
 def test_byte_converters():
     assert bytes_to_gib(1024**3) == 1.0
     assert bytes_to_mib(1024**2) == 1.0
+
+
+def test_format_bytes_auto_scales_with_gb_mb_tb_labels():
+    assert format_bytes(0) == "0 B"
+    assert format_bytes(1536) == "1.5 KB"
+    assert format_bytes(5 * 1024**2) == "5.0 MB"
+    assert format_bytes(2 * 1024**3) == "2.00 GB"
+    assert format_bytes(3 * 1024**4) == "3.00 TB"
+    # Never uses the binary "iB" labels.
+    assert "iB" not in format_bytes(4 * 1024**3)
+
+
+def test_format_bytes_handles_negative():
+    assert format_bytes(-2 * 1024**2) == "-2.0 MB"
+

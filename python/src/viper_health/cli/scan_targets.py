@@ -16,7 +16,7 @@ from viper_health.collectors.target_roots import (
     CATEGORY_UPDATE_RESIDUE,
     get_targets_for_category,
 )
-from viper_health.utils.fs_counter import bytes_to_gib
+from viper_health.utils.fs_counter import format_bytes
 
 try:
     from colorama import Fore, Style, init as colorama_init
@@ -79,7 +79,7 @@ def _print_category(report: CategoryReport) -> None:
         print(f"   Path: {f.path}")
         print(
             f"   Files: {f.file_count:,}  |  "
-            f"Size: {bytes_to_gib(f.total_bytes):.2f} GiB  |  "
+            f"Size: {format_bytes(f.total_bytes)}  |  "
             f"Tiny: {f.tiny_files:,}"
         )
         print(f"   {fcolor}{f.severity.upper()}{Style.RESET_ALL}: {f.reason}")
@@ -88,7 +88,7 @@ def _print_category(report: CategoryReport) -> None:
     print(
         f"{Style.BRIGHT}Category Totals:{Style.RESET_ALL} "
         f"{report.total_files:,} files, "
-        f"{bytes_to_gib(report.total_bytes):.2f} GiB, "
+        f"{format_bytes(report.total_bytes)}, "
         f"{report.total_tiny_files:,} tiny files"
     )
     print(

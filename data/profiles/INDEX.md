@@ -1,6 +1,6 @@
 # Viper Health — Machine Index
 
-_Generated (UTC): 2026-07-26T18:08:43.340197+00:00_
+_Generated (UTC): 2026-07-26T22:30:08.024674+00:00_
 
 Layered rankings across machines. **Fault severity is health**; the
 ranking score is an advisory performance & configuration aid and never
@@ -45,8 +45,8 @@ _Cells show actual/expected MB/s. Efficiency is the mean of actual÷expected._
 
 | Machine | Fault | Conf. | Model | CPU | RAM | Primary drive | Bus | Wear | Free | Tiny % | Report (UTC) |
 | --- | --- | --- | --- | --- | ---: | --- | --- | ---: | ---: | ---: | --- |
-| CMIS-957903A-GT | GOOD | HIGH | LENOVO 81CU | Intel Core i7-8550U CPU @ 1.80GH | 16 GiB | SAMSUNG MZVLB1T0HALR-000L2 | RAID | 0.0% | 32.2% | 49.5% | 2026-07-26 |
-| CMIS-957903A-ST | CRITICAL | HIGH | STGAUBRON STGAUBRON | AMD Ryzen 5 5500 | 16 GiB | P3-512 | SATA | 0.0% | 66.1% | ? | 2026-07-25 |
+| CMIS-957903A-GT | GOOD | HIGH | LENOVO 81CU | Intel Core i7-8550U CPU @ 1.80GH | 15.82 GB | SAMSUNG MZVLB1T0HALR-000L2 | RAID | 0.0% | 32.1% | 49.5% | 2026-07-26 |
+| CMIS-957903A-ST | CRITICAL | HIGH | STGAUBRON STGAUBRON | AMD Ryzen 5 5500 | 15.89 GB | P3-512 | SATA | 0.0% | 66.1% | ? | 2026-07-25 |
 
 ## Legend
 
