@@ -49,6 +49,8 @@ It is designed to:
 | **Comprehensive System Report** | ✅ Complete | specs + events + storage + JSON/Markdown | `python/src/viper_health/cli/system_report.py` |
 | **Machine Capability Assessment** | ✅ Complete | advisory CPU/GPU/RAM/OS tier + optimizations | `python/src/viper_health/analyzers/spec_assessment.py` |
 | **Profiles Index** | ✅ Complete | cross-machine comparison table + latest.* pointers | `python/src/viper_health/cli/profiles_index.py` |
+| **Reclaimable Space + Background Load** | ✅ Complete | recycle bin/temp/cache sizing, startup/service/process load | `python/src/viper_health/cli/scan_cleanup.py` |
+| **Safe Cleanup Engine** | ✅ Complete | dry-run default, allowlist+immutable gating, quarantine-first, manifest, caps | `python/src/viper_health/maintenance/safe_cleanup.py` |
 | **Benchmark Preflight** | ✅ Complete | mandatory fail-closed evidence gate | `python/src/viper_health/analyzers/benchmark_preflight.py` |
 | **Suite Runner** | ✅ Complete | preset-based scans | `python/src/viper_health/cli/suite.py` |
 | **I/O Benchmarks** | ✅ Complete | seq/random read/write | `python/src/viper_health/benchmarks/` |

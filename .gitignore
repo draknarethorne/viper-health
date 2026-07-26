@@ -21,9 +21,11 @@ Thumbs.db
 data/reports/*
 data/snapshots/*
 data/baselines/*
+data/quarantine/*
 !data/reports/.gitkeep
 !data/snapshots/.gitkeep
 !data/baselines/.gitkeep
+!data/quarantine/.gitkeep
 
 # Temporary/working files
 tmp/

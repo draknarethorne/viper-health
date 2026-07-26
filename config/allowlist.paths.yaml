@@ -12,3 +12,8 @@ immutable_roots:
 
 approved_cleanup_roots:
   - "%LOCALAPPDATA%\\Temp"
+  - "%WINDIR%\\Temp"
+  - "%LOCALAPPDATA%\\Microsoft\\Windows\\Explorer"
+  - "%LOCALAPPDATA%\\Microsoft\\Windows\\INetCache"
+  - "%LOCALAPPDATA%\\CrashDumps"
+  - "%LOCALAPPDATA%\\Microsoft\\Windows\\WER\\ReportQueue"
