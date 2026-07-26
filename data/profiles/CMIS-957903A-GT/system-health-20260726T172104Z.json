@@ -1,0 +1,247 @@
+{
+  "schema_version": 1,
+  "report_type": "comprehensive_system_health",
+  "timestamp_utc": "2026-07-26T17:21:04.071627+00:00",
+  "host": "CMIS-957903A-GT",
+  "mode": "observe",
+  "event_lookback_days": 120,
+  "assessment": {
+    "severity": "good",
+    "confidence": "medium",
+    "conclusion": "No fault findings were detected in the evidence successfully collected. Unavailable sections: mft."
+  },
+  "system_inventory": {
+    "available": true,
+    "collected_at_utc": "2026-07-26T17:21:07.1585230Z",
+    "ComputerSystem": {
+      "Manufacturer": "LENOVO",
+      "Model": "81CU",
+      "SystemType": "x64-based PC",
+      "TotalPhysicalMemoryBytes": 16986812416
+    },
+    "OperatingSystem": {
+      "Caption": "Microsoft Windows 11 Pro",
+      "Version": "10.0.26200",
+      "BuildNumber": "26200",
+      "Architecture": "64-bit",
+      "InstallDateUtc": "2025-01-10T04:37:27.0000000Z",
+      "LastBootUtc": "2026-07-19T05:31:59.9000230Z",
+      "TotalVisibleMemoryKb": 16588684,
+      "FreePhysicalMemoryKb": 5721540
+    },
+    "Baseboard": {
+      "Manufacturer": "LENOVO",
+      "Product": "LNVNB161216",
+      "Version": "SDK0R32862 WIN"
+    },
+    "Bios": {
+      "Manufacturer": "LENOVO",
+      "Name": "7KCN33WW(V1.14)",
+      "SMBIOSVersion": "7KCN33WW(V1.14)",
+      "ReleaseDateUtc": "2020-12-29T00:00:00.0000000Z"
+    },
+    "Cpu": [
+      {
+        "Name": "Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz",
+        "Manufacturer": "GenuineIntel",
+        "Cores": 4,
+        "LogicalProcessors": 8,
+        "MaxClockMhz": 2001,
+        "CurrentClockMhz": 1800,
+        "LoadPercent": 16,
+        "Status": "OK"
+      }
+    ],
+    "MemoryModules": [
+      {
+        "Manufacturer": "Samsung",
+        "PartNumber": "M471A1K43BB1-CTD",
+        "CapacityBytes": 8589934592,
+        "SpeedMhz": 2400,
+        "ConfiguredSpeedMhz": 2400,
+        "BankLabel": "BANK 0",
+        "DeviceLocator": "ChannelA-DIMM0"
+      },
+      {
+        "Manufacturer": "Samsung",
+        "PartNumber": "M471A1K43CB1-CTD",
+        "CapacityBytes": 8589934592,
+        "SpeedMhz": 2400,
+        "ConfiguredSpeedMhz": 2400,
+        "BankLabel": "BANK 2",
+        "DeviceLocator": "ChannelB-DIMM0"
+      }
+    ],
+    "Gpus": [
+      {
+        "Name": "NVIDIA GeForce GTX 1050",
+        "DriverVersion": "32.0.15.7688",
+        "DriverDate": "2025-06-24T00:00:00.0000000Z",
+        "AdapterRamBytes": 4293918720,
+        "Status": "OK",
+        "VideoMode": null
+      },
+      {
+        "Name": "Intel(R) UHD Graphics 620",
+        "DriverVersion": "26.20.100.6913",
+        "DriverDate": "2019-06-04T00:00:00.0000000Z",
+        "AdapterRamBytes": 1073741824,
+        "Status": "OK",
+        "VideoMode": "3840 x 2160 x 4294967296 colors"
+      }
+    ],
+    "Batteries": [
+      {
+        "Name": "PABAS0241231",
+        "Status": "OK",
+        "EstimatedChargeRemaining": 95,
+        "BatteryStatus": 2
+      }
+    ],
+    "AcpiThermalZones": [],
+    "SecureBootEnabled": null,
+    "Tpm": {
+      "Present": null,
+      "Ready": null,
+      "Enabled": null,
+      "Activated": null,
+      "ManufacturerVersion": ""
+    },
+    "error": null
+  },
+  "storage": {
+    "drives": [
+      {
+        "device_id": "0",
+        "friendly_name": "SAMSUNG MZVLB1T0HALR-000L2",
+        "media_type": "SSD",
+        "health_status": "Healthy",
+        "temperature_c": null,
+        "wear_percent": null,
+        "power_on_hours": null,
+        "read_errors_total": null,
+        "write_errors_total": null,
+        "severity": "good",
+        "bus_type": "RAID",
+        "reliability_available": false,
+        "read_latency_max_ms": null,
+        "write_latency_max_ms": null,
+        "flush_latency_max_ms": null
+      },
+      {
+        "device_id": "1",
+        "friendly_name": "TOSHIBA External USB 3.0",
+        "media_type": "Unspecified",
+        "health_status": "Healthy",
+        "temperature_c": null,
+        "wear_percent": null,
+        "power_on_hours": null,
+        "read_errors_total": null,
+        "write_errors_total": null,
+        "severity": "good",
+        "bus_type": "USB",
+        "reliability_available": false,
+        "read_latency_max_ms": null,
+        "write_latency_max_ms": null,
+        "flush_latency_max_ms": null
+      }
+    ],
+    "disk_space": {
+      "drive": "C:",
+      "total_bytes": 1022870155264,
+      "used_bytes": 694331187200,
+      "free_bytes": 328538968064,
+      "free_percent": 32.1,
+      "severity": "good"
+    },
+    "elevated": false,
+    "volumes": [
+      {
+        "drive": "C:",
+        "label": "My Drive",
+        "filesystem": "NTFS",
+        "drive_type": "Fixed",
+        "health_status": "Healthy",
+        "total_bytes": 1022870155264,
+        "free_bytes": 328538968064,
+        "free_percent": 32.1
+      },
+      {
+        "drive": "D:",
+        "label": "My Data",
+        "filesystem": "NTFS",
+        "drive_type": "Fixed",
+        "health_status": "Healthy",
+        "total_bytes": 500105760768,
+        "free_bytes": 56883052544,
+        "free_percent": 11.4
+      }
+    ],
+    "trim": {
+      "drive": "C:",
+      "trim_enabled": true,
+      "raw_value": 0,
+      "severity": "good"
+    },
+    "mft": {
+      "available": false,
+      "error": "Error getting MFT info for C:: MFT analysis requires administrator privileges. Please run from an elevated command prompt/PowerShell."
+    }
+  },
+  "event_log": {
+    "available": true,
+    "lookback_days": 120,
+    "query_start_utc": "2026-03-28T17:21:07.5623860Z",
+    "collected_at_utc": "2026-07-26T17:21:08.8015639Z",
+    "log_oldest_utc": "2026-06-17T20:11:43.0274137Z",
+    "log_newest_utc": "2026-07-26T17:17:20.9035234Z",
+    "log_record_count": 40253,
+    "event_count": 0,
+    "events": [],
+    "error": null
+  },
+  "event_analysis": {
+    "overall_severity": "info",
+    "coverage_status": "available",
+    "finding_count": 0,
+    "domain_event_counts": {},
+    "unclassified_event_count": 0,
+    "findings": []
+  },
+  "filesystem": null,
+  "findings": [],
+  "collection_status": {
+    "system_inventory": {
+      "available": true,
+      "error": null
+    },
+    "event_log": {
+      "available": true,
+      "error": null
+    },
+    "physical_drives": {
+      "available": true,
+      "error": null
+    },
+    "disk_space": {
+      "available": true,
+      "error": null
+    },
+    "volumes": {
+      "available": true,
+      "error": null
+    },
+    "trim": {
+      "available": true,
+      "error": null
+    },
+    "mft": {
+      "available": false,
+      "error": "Error getting MFT info for C:: MFT analysis requires administrator privileges. Please run from an elevated command prompt/PowerShell."
+    }
+  },
+  "recommendations": [
+    "Re-run from an elevated PowerShell terminal to improve collection coverage for: mft.",
+    "Use active benchmarks only on known-stable, backed-up hardware after passive preflight finds no unresolved fault evidence."
+  ]
+}

@@ -75,6 +75,9 @@ def test_build_report_is_serializable_and_marks_storage_fault_critical(
     assert report["assessment"]["severity"] == "critical"
     assert report["event_analysis"]["domain_event_counts"]["storage"] == 2
     assert "benchmark" in report["recommendations"][-1].lower()
+    # Capability is advisory and must not affect the fault severity.
+    assert report["capability"]["available"] is True
+    assert report["capability"]["tier"] in {"solid", "capable", "dated", "weak", "unknown"}
     json.dumps(report)
 
 

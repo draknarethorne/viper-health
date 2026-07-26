@@ -146,6 +146,39 @@ def build_system_health_markdown(report: dict[str, Any]) -> str:
     else:
         lines.extend([f"System inventory unavailable: {_escape(inventory.get('error'))}", ""])
 
+    capability = report.get("capability")
+    if isinstance(capability, dict):
+        lines.extend(["## Machine capability (advisory)", ""])
+        lines.extend(
+            [
+                "> Advisory only. This capability rating reflects specifications and is",
+                "> intentionally separate from the fault severity above — it never",
+                "> upgrades or masks concrete fault evidence.",
+                "",
+                f"- **Overall capability:** {_escape(capability.get('tier')).upper()}",
+                f"- **Summary:** {_escape(capability.get('summary'), limit=500)}",
+                "",
+            ]
+        )
+        components = capability.get("components") or {}
+        if components:
+            lines.extend(["| Component | Tier | Notes |", "| --- | --- | --- |"])
+            for name, comp in components.items():
+                if not isinstance(comp, dict):
+                    continue
+                notes = comp.get("notes") or []
+                note_text = "; ".join(str(note) for note in notes) if notes else "—"
+                lines.append(
+                    f"| {_escape(name)} | {_escape(comp.get('tier')).upper()} | {_escape(note_text, limit=400)} |"
+                )
+            lines.append("")
+        recommendations = capability.get("recommendations") or []
+        if recommendations:
+            lines.extend(["**Optimization recommendations:**", ""])
+            for recommendation in recommendations:
+                lines.append(f"- {_escape(recommendation, limit=400)}")
+            lines.append("")
+
     findings = report.get("findings", [])
     lines.extend(["## Findings", ""])
     if findings:

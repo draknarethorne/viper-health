@@ -1,7 +1,7 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "profile_type": "machine_profile",
-  "timestamp": "2026-07-25T03:33:10.139551+00:00",
+  "timestamp": "2026-07-26T17:21:51.640453+00:00",
   "machine": {
     "hostname": "CMIS-957903A-GT",
     "os": "Windows",
@@ -10,7 +10,8 @@
     "architecture": "AMD64",
     "processor": "Intel64 Family 6 Model 142 Stepping 10, GenuineIntel",
     "python_version": "3.13.14",
-    "cpu_count": 8
+    "cpu_count": 8,
+    "total_memory_bytes": 16986812416
   },
   "scan_root": "C:\\Users\\scott",
   "drive": "C:",
@@ -18,18 +19,29 @@
   "disk_space": {
     "drive": "C:",
     "total_bytes": 1022870155264,
-    "used_bytes": 690941657088,
-    "free_bytes": 331928498176,
-    "free_percent": 32.5,
+    "used_bytes": 694332477440,
+    "free_bytes": 328537677824,
+    "free_percent": 32.1,
     "severity": "good"
   },
-  "free_percent": 32.5,
-  "total_files": 195308,
-  "tiny_files": 98935,
-  "tiny_file_ratio": 50.66,
-  "directories_scanned": 32838,
-  "total_bytes": 63091515077,
+  "free_percent": 32.1,
+  "total_files": 195577,
+  "tiny_files": 98993,
+  "tiny_file_ratio": 50.62,
+  "directories_scanned": 32839,
+  "total_bytes": 63077808967,
   "findings_count": 0,
+  "suppressed_findings_count": 0,
+  "finding_counts": {
+    "warning": 0,
+    "critical": 0,
+    "tiny_file_hotspots": 0,
+    "directory_density": 0
+  },
+  "scan_config": {
+    "tiny_file_max_bytes": 4096,
+    "exclude_paths": []
+  },
   "health_score": {
     "overall_score": 100.0,
     "severity_band": "good"
@@ -47,7 +59,10 @@
       "write_errors_total": null,
       "severity": "good",
       "bus_type": "RAID",
-      "reliability_available": false
+      "reliability_available": false,
+      "read_latency_max_ms": null,
+      "write_latency_max_ms": null,
+      "flush_latency_max_ms": null
     },
     {
       "device_id": "1",
@@ -61,7 +76,32 @@
       "write_errors_total": null,
       "severity": "good",
       "bus_type": "USB",
-      "reliability_available": false
+      "reliability_available": false,
+      "read_latency_max_ms": null,
+      "write_latency_max_ms": null,
+      "flush_latency_max_ms": null
+    }
+  ],
+  "volumes": [
+    {
+      "drive": "C:",
+      "label": "My Drive",
+      "filesystem": "NTFS",
+      "drive_type": "Fixed",
+      "health_status": "Healthy",
+      "total_bytes": 1022870155264,
+      "free_bytes": 328313311232,
+      "free_percent": 32.1
+    },
+    {
+      "drive": "D:",
+      "label": "My Data",
+      "filesystem": "NTFS",
+      "drive_type": "Fixed",
+      "health_status": "Healthy",
+      "total_bytes": 500105760768,
+      "free_bytes": 56883052544,
+      "free_percent": 11.4
     }
   ],
   "trim": {
@@ -70,38 +110,8 @@
     "raw_value": 0,
     "severity": "good"
   },
-  "benchmark_results": [
-    {
-      "test_name": "sequential_write",
-      "operation": "write",
-      "pattern": "sequential",
-      "throughput_mb_s": 264.47,
-      "iops": 67705.0,
-      "severity": "good"
-    },
-    {
-      "test_name": "sequential_read",
-      "operation": "read",
-      "pattern": "sequential",
-      "throughput_mb_s": 619.34,
-      "iops": 158551.0,
-      "severity": "warning"
-    },
-    {
-      "test_name": "random_write",
-      "operation": "write",
-      "pattern": "random",
-      "throughput_mb_s": 42.23,
-      "iops": 10811.0,
-      "severity": "warning"
-    },
-    {
-      "test_name": "random_read",
-      "operation": "read",
-      "pattern": "random",
-      "throughput_mb_s": 129.38,
-      "iops": 33122.0,
-      "severity": "warning"
-    }
-  ]
+  "mft": {
+    "available": false,
+    "error": "Error getting MFT info for C:: MFT analysis requires administrator privileges. Please run from an elevated command prompt/PowerShell."
+  }
 }

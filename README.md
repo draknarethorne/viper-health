@@ -47,6 +47,8 @@ It is designed to:
 | **Health Scoring** | ✅ Complete | weighted scoring | `python/src/viper_health/scoring/` |
 | **Reporters** | ✅ Complete | JSON + Markdown | `python/src/viper_health/reports/` |
 | **Comprehensive System Report** | ✅ Complete | specs + events + storage + JSON/Markdown | `python/src/viper_health/cli/system_report.py` |
+| **Machine Capability Assessment** | ✅ Complete | advisory CPU/GPU/RAM/OS tier + optimizations | `python/src/viper_health/analyzers/spec_assessment.py` |
+| **Profiles Index** | ✅ Complete | cross-machine comparison table + latest.* pointers | `python/src/viper_health/cli/profiles_index.py` |
 | **Benchmark Preflight** | ✅ Complete | mandatory fail-closed evidence gate | `python/src/viper_health/analyzers/benchmark_preflight.py` |
 | **Suite Runner** | ✅ Complete | preset-based scans | `python/src/viper_health/cli/suite.py` |
 | **I/O Benchmarks** | ✅ Complete | seq/random read/write | `python/src/viper_health/benchmarks/` |

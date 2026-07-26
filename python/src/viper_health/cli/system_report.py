@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
+from viper_health.analyzers.spec_assessment import assess_system_capability
 from viper_health.analyzers.system_events import SEVERITY_ORDER, analyze_system_events
 from viper_health.cli.scan import run_full_scan
 from viper_health.collectors.disk_space import analyze_disk_space
@@ -198,6 +199,10 @@ def build_system_health_report(
         inventory = {"available": False, "error": "Skipped by operator"}
         collection_status["system_inventory"] = _status(inventory, "Skipped by operator")
 
+    # Advisory capability assessment. Deliberately kept out of `findings` so it
+    # never influences the fault-evidence severity.
+    capability = assess_system_capability(inventory)
+
     if include_events:
         event_snapshot = collect_system_events(lookback_days=lookback_days)
         event_log = event_snapshot.to_dict()
@@ -307,6 +312,7 @@ def build_system_health_report(
         "mode": "observe",
         "event_lookback_days": lookback_days,
         "assessment": _build_assessment(findings, collection_status),
+        "capability": capability,
         "system_inventory": inventory,
         "storage": storage,
         "event_log": event_log,
@@ -389,6 +395,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Host:       {report['host']}")
     print(f"Severity:   {assessment['severity'].upper()}")
     print(f"Confidence: {assessment['confidence'].upper()}")
+    print(f"Capability: {report['capability']['tier'].upper()} (advisory)")
     print(f"Findings:   {len(report['findings'])}")
     print(f"JSON:       {json_path}")
     print(f"Markdown:   {md_path}")
