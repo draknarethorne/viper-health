@@ -79,6 +79,53 @@ def test_build_index_markdown_has_rows_and_legend(tmp_path):
     assert "## Legend" in markdown
 
 
+def test_build_index_markdown_has_layered_sections(tmp_path):
+    host_dir = tmp_path / "DESK-1"
+    _write_report(host_dir, "1", host="DESK-1")
+    # profile_machine file with benchmark medians drives Layer 3.
+    (tmp_path / "DESK-1.json").write_text(
+        json.dumps(
+            {
+                "tiny_file_ratio": 5.0,
+                "benchmark_results": [
+                    {"test_name": "sequential_write", "throughput_mb_s": 264.0},
+                    {"test_name": "sequential_read", "throughput_mb_s": 619.0},
+                    {"test_name": "random_write", "throughput_mb_s": 42.0},
+                    {"test_name": "random_read", "throughput_mb_s": 129.0},
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    rows = collect_machine_rows(tmp_path)
+    markdown = build_index_markdown(rows)
+
+    assert "## Layer 1 — Overall ranking" in markdown
+    assert "## Layer 2 — Per-resource spec scores" in markdown
+    assert "## Layer 3 — Storage: spec vs actual" in markdown
+    assert "## Layer 4 — Tuning & optimization recommendations" in markdown
+    # Layer 3 should show actual/expected for the benchmarked drive.
+    assert "264/1000" in markdown
+
+
+def test_collect_machine_rows_gathers_benchmarks(tmp_path):
+    host_dir = tmp_path / "DESK-1"
+    _write_report(host_dir, "1", host="DESK-1")
+    (tmp_path / "DESK-1.json").write_text(
+        json.dumps(
+            {
+                "benchmark_results": [
+                    {"test_name": "sequential_write", "throughput_mb_s": 264.0},
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    rows = collect_machine_rows(tmp_path)
+    assert rows[0]["benchmarks"]["sequential_write"] == 264.0
+
+
+
 def test_build_index_markdown_empty(tmp_path):
     markdown = build_index_markdown([])
     assert "No machine reports found" in markdown
