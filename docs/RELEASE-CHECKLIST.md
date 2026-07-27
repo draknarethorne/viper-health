@@ -36,7 +36,8 @@ the development/install instructions in `README.md`.
 
 ## After publishing
 
-- Download the ZIP and verify it against `SHA256SUMS.txt`.
+- Download the ZIP and verify it against `SHA256SUMS.txt` on both Windows and a
+  Unix-compatible checksum tool.
 - Confirm the archive contains no `data/`, `.venv/`, cache, or secret files.
 - Confirm the release notes identify important safety or schema changes.
 - If validation fails, remove the release artifact and correct the workflow;

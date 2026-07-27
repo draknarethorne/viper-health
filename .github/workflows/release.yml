@@ -72,7 +72,9 @@ jobs:
               throw "git archive failed with exit code $LASTEXITCODE."
           }
           $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $zip).Hash.ToLowerInvariant()
-          "$hash  $name.zip" | Set-Content -LiteralPath SHA256SUMS.txt -Encoding ascii
+            $checksum = Join-Path $env:GITHUB_WORKSPACE 'SHA256SUMS.txt'
+            $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+            [System.IO.File]::WriteAllText($checksum, "$hash  $name.zip`n", $utf8NoBom)
           "zip=$zip" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 
       - name: Create GitHub Release
