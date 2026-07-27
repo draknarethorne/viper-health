@@ -140,7 +140,7 @@ def scan_file_inventory(
         directories_scanned += 1
         dir_key = str(dirpath.resolve())
         per_directory.setdefault(dir_key, DirectoryStats())
-        
+
         # Report progress periodically
         if progress_callback and directories_scanned % progress_interval == 0:
             progress_callback(directories_scanned, total_files, str(dirpath))

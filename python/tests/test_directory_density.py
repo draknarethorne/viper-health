@@ -4,8 +4,6 @@ Tests for directory density analyzer.
 
 from pathlib import Path
 
-import pytest
-
 from viper_health.analyzers.directory_density import analyze_directory_density
 from viper_health.collectors.file_inventory import DirectoryStats, InventoryResult
 

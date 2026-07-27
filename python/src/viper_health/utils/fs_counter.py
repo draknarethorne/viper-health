@@ -130,4 +130,3 @@ def format_bytes(value: float, *, decimals: int | None = None) -> str:
             return f"{sign}{magnitude / threshold:.{places}f} {unit}"
     places = 0 if decimals is None else decimals
     return f"{sign}{magnitude:.{places}f} B"
-

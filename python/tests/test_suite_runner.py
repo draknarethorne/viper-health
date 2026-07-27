@@ -26,14 +26,14 @@ def test_expand_env_path_with_wildcards():
 def test_load_presets_default_config():
     """Test loading presets from default config file."""
     config = load_presets()
-    
+
     assert "presets" in config
     assert "defaults" in config
     assert "full-system" in config["presets"]
     assert "quick-check" in config["presets"]
     assert "user-data" in config["presets"]
     assert "workspace" in config["presets"]
-    
+
     # Check structure of a preset
     full_system = config["presets"]["full-system"]
     assert "description" in full_system
@@ -56,9 +56,9 @@ defaults:
   tiny_file_max_bytes: 4096
 """
     )
-    
+
     config = load_presets(custom_config)
-    
+
     assert "test-preset" in config["presets"]
     assert config["presets"]["test-preset"]["tiny_file_warning"] == 1000
     assert config["defaults"]["tiny_file_max_bytes"] == 4096
@@ -75,11 +75,11 @@ def test_run_preset_scan_workspace(tmp_path):
     # Create test workspace structure
     test_dir = tmp_path / "test_workspace"
     test_dir.mkdir()
-    
+
     # Create some test files
     for i in range(100):
         (test_dir / f"small_file_{i}.txt").write_text("x")
-    
+
     # Create custom config with test preset
     config_file = tmp_path / "test-presets.yaml"
     config_file.write_text(
@@ -96,14 +96,14 @@ defaults:
   tiny_file_max_bytes: 4096
 """
     )
-    
+
     # Run preset scan
     result = run_preset_scan(
         preset_name="test-workspace",
         console_summary=False,
         config_path=config_file,
     )
-    
+
     assert result["preset"] == "test-workspace"
     assert result["targets_scanned"] == 1
     assert result["targets_total"] == 1
@@ -124,7 +124,7 @@ defaults:
   tiny_file_max_bytes: 4096
 """
     )
-    
+
     with pytest.raises(ValueError, match="Unknown preset.*nonexistent"):
         run_preset_scan(
             preset_name="nonexistent",
@@ -137,9 +137,9 @@ def test_run_preset_scan_with_output_dir(tmp_path):
     test_dir = tmp_path / "scan_target"
     test_dir.mkdir()
     (test_dir / "test.txt").write_text("test")
-    
+
     output_dir = tmp_path / "reports"
-    
+
     config_file = tmp_path / "test-presets.yaml"
     config_file.write_text(
         f"""
@@ -152,19 +152,19 @@ defaults:
   tiny_file_max_bytes: 4096
 """
     )
-    
-    result = run_preset_scan(
+
+    run_preset_scan(
         preset_name="test-preset",
         output_dir=output_dir,
         console_summary=False,
         config_path=config_file,
     )
-    
+
     # Check that output files were created
     assert output_dir.exists()
     json_files = list(output_dir.glob("viper-health_test-preset_*.json"))
     assert len(json_files) == 1
-    
+
     # Verify JSON structure
     report_data = json.loads(json_files[0].read_text())
     assert report_data["preset"] == "test-preset"

@@ -27,37 +27,37 @@ def main(argv: list[str] | None = None) -> int:
 Examples:
   # Check C: drive free space
   python -m viper_health.cli.check_space
-  
+
   # Check D: drive
   python -m viper_health.cli.check_space --drive D:
-  
+
   # Save results
   python -m viper_health.cli.check_space --output space_check.json
         """,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    
+
     parser.add_argument(
         "--drive",
         type=str,
         default="C:",
         help="Drive to check (default: C:)",
     )
-    
+
     parser.add_argument(
         "--output",
         type=Path,
         help="Save results to JSON file",
     )
-    
+
     args = parser.parse_args(argv)
-    
+
     print(f"{Fore.CYAN}{Style.BRIGHT}🔍 Checking Disk Space for {args.drive}...{Style.RESET_ALL}\n")
-    
+
     try:
         info = analyze_disk_space(args.drive)
         summary = format_disk_space_summary(info)
-        
+
         # Determine color and icon
         if info.severity == "good":
             status_color = Fore.GREEN
@@ -68,7 +68,7 @@ Examples:
         else:  # critical
             status_color = Fore.RED
             status_icon = "❌"
-        
+
         # Display results
         print("="*70)
         print(f"{Fore.CYAN}{Style.BRIGHT}💾 DISK SPACE ANALYSIS{Style.RESET_ALL}")
@@ -83,7 +83,7 @@ Examples:
         print(f"{Style.BRIGHT}Health Assessment:{Style.RESET_ALL}")
         print(f"  {status_color}{Style.BRIGHT}{status_icon} Status: {info.severity.upper()}{Style.RESET_ALL}")
         print("="*70 + "\n")
-        
+
         # Recommendations
         if info.severity == "critical":
             print(f"{Fore.RED}{Style.BRIGHT}🚨 CRITICAL: Less than 10% free space!{Style.RESET_ALL}\n")
@@ -109,7 +109,7 @@ Examples:
             print()
             print(f"   {Style.BRIGHT}Target: Get to 20%+ free space{Style.RESET_ALL}")
             print()
-        
+
         elif info.severity == "warning":
             print(f"{Fore.YELLOW}{Style.BRIGHT}⚠️  WARNING: 10-20% free space{Style.RESET_ALL}\n")
             print(f"{Style.BRIGHT}What This Means:{Style.RESET_ALL}")
@@ -129,25 +129,25 @@ Examples:
             print()
             print(f"   {Style.BRIGHT}Target: Get to 25%+ free space for optimal performance{Style.RESET_ALL}")
             print()
-        
+
         else:  # good
             print(f"{Fore.GREEN}{Style.BRIGHT}✅ Healthy Free Space!{Style.RESET_ALL}\n")
             print(f"   Your drive has adequate free space ({info.free_percent:.1f}%)")
-            print(f"   Continue periodic monitoring to maintain health.")
+            print("   Continue periodic monitoring to maintain health.")
             print()
-        
+
         # Save to JSON if requested
         if args.output:
             with open(args.output, "w") as f:
                 json.dump(summary, f, indent=2)
-            
+
             print(f"{Fore.GREEN}✅ Results saved to {args.output}{Style.RESET_ALL}")
-        
+
         # Exit code based on severity
         if info.severity == "critical":
             return 1
         return 0
-    
+
     except Exception as e:
         print(f"{Fore.RED}❌ Error: {e}{Style.RESET_ALL}", file=sys.stderr)
         return 1

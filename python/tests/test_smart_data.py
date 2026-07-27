@@ -185,4 +185,3 @@ def test_get_drive_health_reliability_unavailable_behind_raid():
 def test_is_elevated_returns_bool_or_none():
     # Must never raise; returns True/False on Windows, None elsewhere.
     assert is_elevated() in (True, False, None)
-

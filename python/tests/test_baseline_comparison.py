@@ -1,12 +1,10 @@
 """Tests for baseline comparison and trend analysis."""
 
 import json
-from pathlib import Path
 
 import pytest
 
 from viper_health.analyzers.baseline_comparison import (
-    BaselineComparison,
     MetricChange,
     calculate_change,
     compare_to_baseline,
@@ -22,7 +20,7 @@ def test_metric_change_dataclass():
         change_percent=-10.0,
         severity="degraded",
     )
-    
+
     assert change.metric_name == "throughput"
     assert change.baseline_value == 200.0
     assert change.current_value == 180.0
@@ -40,7 +38,7 @@ def test_calculate_change_degraded_higher_better():
         threshold_critical=20,
         higher_is_better=True,
     )
-    
+
     assert change.change_percent == -15.0
     assert change.severity == "degraded"
 
@@ -55,7 +53,7 @@ def test_calculate_change_critical_higher_better():
         threshold_critical=20,
         higher_is_better=True,
     )
-    
+
     assert change.change_percent == -25.0
     assert change.severity == "critical"
 
@@ -70,7 +68,7 @@ def test_calculate_change_improved():
         threshold_critical=20,
         higher_is_better=True,
     )
-    
+
     assert change.change_percent == 15.0
     assert change.severity == "improved"
 
@@ -85,7 +83,7 @@ def test_calculate_change_stable():
         threshold_critical=20,
         higher_is_better=True,
     )
-    
+
     assert change.change_percent == 2.5
     assert change.severity == "stable"
 
@@ -100,7 +98,7 @@ def test_calculate_change_lower_better():
         threshold_critical=20,
         higher_is_better=False,
     )
-    
+
     assert change.change_percent == 25.0
     assert change.severity == "critical"
 
@@ -109,7 +107,7 @@ def test_compare_to_baseline_no_file(tmp_path):
     """Test baseline comparison with missing baseline file."""
     baseline_path = tmp_path / "missing.json"
     current_data = {"timestamp": "2024-01-01"}
-    
+
     with pytest.raises(FileNotFoundError):
         compare_to_baseline(current_data, baseline_path)
 
@@ -133,10 +131,10 @@ def test_compare_to_baseline_benchmark_results(tmp_path):
             },
         ],
     }
-    
+
     with open(baseline_path, "w") as f:
         json.dump(baseline_data, f)
-    
+
     # Current data shows degradation
     current_data = {
         "timestamp": "2024-02-01",
@@ -153,9 +151,9 @@ def test_compare_to_baseline_benchmark_results(tmp_path):
             },
         ],
     }
-    
+
     comparison = compare_to_baseline(current_data, baseline_path)
-    
+
     assert comparison.baseline_date == "2024-01-01"
     assert comparison.current_date == "2024-02-01"
     assert comparison.overall_severity == "critical"
@@ -173,18 +171,18 @@ def test_compare_to_baseline_mft_growth(tmp_path):
         "timestamp": "2024-01-01",
         "mft_size_bytes": 2_000_000_000,  # 2 GB
     }
-    
+
     with open(baseline_path, "w") as f:
         json.dump(baseline_data, f)
-    
+
     # Current shows 30% growth (critical)
     current_data = {
         "timestamp": "2024-02-01",
         "mft_size_bytes": 2_600_000_000,  # 2.6 GB
     }
-    
+
     comparison = compare_to_baseline(current_data, baseline_path)
-    
+
     assert comparison.overall_severity == "critical"
     assert any("MFT size" in alert for alert in comparison.alerts)
 
@@ -255,10 +253,10 @@ def test_compare_to_baseline_health_score_drop(tmp_path):
             "overall_score": 100.0,
         },
     }
-    
+
     with open(baseline_path, "w") as f:
         json.dump(baseline_data, f)
-    
+
     # Current shows 15% drop (degraded)
     current_data = {
         "timestamp": "2024-02-01",
@@ -266,9 +264,9 @@ def test_compare_to_baseline_health_score_drop(tmp_path):
             "overall_score": 85.0,
         },
     }
-    
+
     comparison = compare_to_baseline(current_data, baseline_path)
-    
+
     assert comparison.overall_severity == "degraded"
     assert any("health score" in alert for alert in comparison.alerts)
 
@@ -286,10 +284,10 @@ def test_compare_to_baseline_improvement(tmp_path):
             },
         ],
     }
-    
+
     with open(baseline_path, "w") as f:
         json.dump(baseline_data, f)
-    
+
     # Current shows improvement
     current_data = {
         "timestamp": "2024-02-01",
@@ -301,9 +299,9 @@ def test_compare_to_baseline_improvement(tmp_path):
             },
         ],
     }
-    
+
     comparison = compare_to_baseline(current_data, baseline_path)
-    
+
     assert comparison.overall_severity == "improved"
     assert len(comparison.alerts) == 0  # No alerts for improvements
 

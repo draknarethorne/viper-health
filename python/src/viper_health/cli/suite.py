@@ -32,8 +32,6 @@ from datetime import datetime, timezone
 import yaml
 
 from viper_health.cli.scan import run_full_scan
-from viper_health.reports.json_reporter import build_json_report, write_json_report
-from viper_health.reports.markdown_reporter import build_markdown_report, write_markdown_report
 
 try:
     from colorama import Fore, Style, init as colorama_init
@@ -91,13 +89,13 @@ def load_presets(config_path: Path | None = None) -> dict:
     if config_path is None:
         # Default config location - go up from src/viper_health/cli/ to repo root
         config_path = Path(__file__).parent.parent.parent.parent.parent / "config" / "scan-presets.yaml"
-    
+
     if not config_path.exists():
         raise FileNotFoundError(f"Preset configuration not found: {config_path}")
-    
+
     with open(config_path, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
-    
+
     return config
 
 
@@ -127,22 +125,22 @@ def run_preset_scan(
         Consolidated scan results
     """
     config = load_presets(config_path)
-    
+
     if preset_name not in config["presets"]:
         available = ", ".join(config["presets"].keys())
         raise ValueError(f"Unknown preset '{preset_name}'. Available: {available}")
-    
+
     preset = config["presets"][preset_name]
     defaults = config.get("defaults", {})
-    
+
     # Expand targets
     targets = [expand_env_path(t) for t in preset["targets"]]
-    
+
     # Expand exclusions (safe paths)
     exclusions = []
     if "exclusions" in preset:
         exclusions = [expand_env_path(e) for e in preset["exclusions"]]
-    
+
     # Get thresholds (preset overrides defaults)
     tiny_file_max_bytes = preset.get("tiny_file_max_bytes", defaults.get("tiny_file_max_bytes", 4096))
     tiny_file_warning = preset.get("tiny_file_warning", defaults.get("tiny_file_warning", 20000))
@@ -150,23 +148,23 @@ def run_preset_scan(
     dir_density_warning = preset.get("dir_density_warning", defaults.get("dir_density_warning", 50000))
     dir_density_critical = preset.get("dir_density_critical", defaults.get("dir_density_critical", 100000))
     mode = preset.get("mode", defaults.get("mode", "observe"))
-    
+
     # Run scans for all targets
     all_results = []
-    
+
     print(f"{Fore.CYAN}{Style.BRIGHT}{ICONS['rocket']} Running preset: {preset_name}{Style.RESET_ALL}")
     print(f"{ICONS['memo']} Description: {preset.get('description', 'No description')}")
     print(f"{ICONS['target']} Targets: {len(targets)}")
     print()
-    
+
     for idx, target in enumerate(targets, 1):
         if not target.exists():
             print(f"[{idx}/{len(targets)}] {Fore.YELLOW}{ICONS['skip']} SKIP: {target} (does not exist){Style.RESET_ALL}")
             continue
-        
+
         print(f"[{idx}/{len(targets)}] {Fore.CYAN}{ICONS['scan']} Scanning: {target}{Style.RESET_ALL}")
         print()
-        
+
         try:
             result = run_full_scan(
                 root=target,
@@ -182,12 +180,12 @@ def run_preset_scan(
             )
             result["scan_target"] = str(target)
             all_results.append(result)
-            
+
             # Print quick status
             score = result["health_score"].overall_score
             band = result["health_score"].severity_band.upper()
             findings = len(result.get("findings", []))
-            
+
             # Choose icon and color based on health
             if band == "GOOD":
                 icon = ICONS['complete']
@@ -201,17 +199,17 @@ def run_preset_scan(
             else:  # CRITICAL
                 icon = ICONS['critical']
                 health_color = Fore.RED
-            
+
             print(f"  {health_color}{Style.BRIGHT}{icon} Health: {score:.1f}/100 ({band}){Style.RESET_ALL} | {ICONS['magnify']} Findings: {findings}")
             print()
-            
+
         except Exception as e:
             print(f"  {Fore.RED}{ICONS['error']} ERROR: {e}{Style.RESET_ALL}")
             print()
             continue
-        
+
         print()
-    
+
     # Build consolidated report
     consolidated = {
         "preset": preset_name,
@@ -221,53 +219,26 @@ def run_preset_scan(
         "targets_total": len(targets),
         "scans": all_results,
     }
-    
+
     # Calculate overall health (average of all scans)
     if all_results:
         avg_score = sum(r["health_score"].overall_score for r in all_results) / len(all_results)
         total_findings = sum(len(r.get("findings", [])) for r in all_results)
         total_suppressed = sum(len(r.get("suppressed", [])) for r in all_results)
-        
+
         consolidated["summary"] = {
             "average_health_score": round(avg_score, 1),
             "total_findings": total_findings,
             "total_suppressed": total_suppressed,
         }
-    
+
     # Write outputs
     if output_dir:
         output_dir.mkdir(parents=True, exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         json_path = output_dir / f"viper-health_{preset_name}_{timestamp}.json"
         md_path = output_dir / f"viper-health_{preset_name}_{timestamp}.md"
-        
-        # Write individual scan reports
-        for scan_result in all_results:
-            # Convert HealthScore to dict for JSON serialization
-            scan_json = {
-                "scan_target": scan_result["scan_target"],
-                "inventory": {
-                    "total_files": scan_result["inventory"].total_files,
-                    "tiny_files": scan_result["inventory"].tiny_files,
-                    "directories_scanned": scan_result["inventory"].directories_scanned,
-                },
-                "health_score": {
-                    "overall_score": scan_result["health_score"].overall_score,
-                    "severity_band": scan_result["health_score"].severity_band,
-                    "components": [
-                        {
-                            "name": c.name,
-                            "score": c.score,
-                            "weight": c.weight,
-                            "weighted_contribution": c.weighted_contribution,
-                        }
-                        for c in scan_result["health_score"].components
-                    ],
-                },
-                "findings": scan_result.get("findings", []),
-                "suppressed": scan_result.get("suppressed", []),
-            }
-        
+
         # Write consolidated report
         import json
         with open(json_path, "w", encoding="utf-8") as f:
@@ -298,7 +269,7 @@ def run_preset_scan(
                     "suppressed": r.get("suppressed", []),
                 }
                 serializable_results.append(scan_dict)
-            
+
             consolidated_output = {
                 "preset": consolidated["preset"],
                 "description": consolidated["description"],
@@ -309,18 +280,18 @@ def run_preset_scan(
                 "scans": serializable_results,
             }
             json.dump(consolidated_output, f, indent=2)
-        
+
         print(f"{Fore.GREEN}{ICONS['file']} JSON report: {json_path}{Style.RESET_ALL}")
         print(f"{Fore.GREEN}{ICONS['markdown']} Markdown report: {md_path}{Style.RESET_ALL}")
-    
+
     if output_json:
         # Similar serialization for explicit JSON path
         pass
-    
+
     if output_md:
         # Generate markdown report
         pass
-    
+
     if console_summary or (not output_dir and not output_json and not output_md):
         print()
         print("=" * 70)
@@ -343,13 +314,13 @@ def run_preset_scan(
             else:
                 avg_icon = ICONS['critical']
                 avg_color = Fore.RED
-            
+
             print(f"{avg_color}{Style.BRIGHT}{avg_icon} Average Health: {avg}/100{Style.RESET_ALL}")
             print(f"{ICONS['magnify']} Total Findings: {consolidated['summary']['total_findings']}")
             print(f"{ICONS['mute']} Total Suppressed: {consolidated['summary']['total_suppressed']}")
         print("=" * 70)
         print()
-    
+
     return consolidated
 
 
@@ -373,57 +344,57 @@ Examples:
         """,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    
+
     parser.add_argument(
         "--preset",
         type=str,
         help="Preset configuration name (see --list-presets)",
     )
-    
+
     parser.add_argument(
         "--list-presets",
         action="store_true",
         help="List available presets and exit",
     )
-    
+
     parser.add_argument(
         "--output-dir",
         type=Path,
         help="Directory for auto-named output files (default: data/reports/ in project)",
     )
-    
+
     parser.add_argument(
         "--output-json",
         type=Path,
         help="Explicit JSON output file path",
     )
-    
+
     parser.add_argument(
         "--output-md",
         type=Path,
         help="Explicit Markdown output file path",
     )
-    
+
     parser.add_argument(
         "--console-summary",
         action="store_true",
         help="Print summary to console (default: true if no output specified)",
     )
-    
+
     parser.add_argument(
         "--progress",
         action="store_true",
         help="Show progress updates during scans (recommended for large scans like full-system)",
     )
-    
+
     parser.add_argument(
         "--config",
         type=Path,
         help="Custom preset configuration file (default: config/scan-presets.yaml)",
     )
-    
+
     args = parser.parse_args(argv)
-    
+
     # List presets
     if args.list_presets:
         try:
@@ -440,11 +411,11 @@ Examples:
         except Exception as e:
             print(f"Error loading presets: {e}", file=sys.stderr)
             return 1
-    
+
     # Run preset scan
     if not args.preset:
         parser.error("--preset is required (or use --list-presets)")
-    
+
     # Default output_dir to project data/reports if not specified
     output_dir = args.output_dir
     if not output_dir and not args.output_json and not args.output_md:
@@ -452,7 +423,7 @@ Examples:
         # Go up to repo root: cli -> viper_health -> src -> python -> repo_root
         repo_root = Path(__file__).parent.parent.parent.parent.parent
         output_dir = repo_root / "data" / "reports"
-    
+
     try:
         run_preset_scan(
             preset_name=args.preset,

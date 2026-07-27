@@ -14,7 +14,7 @@ from pathlib import Path
 @dataclass(frozen=True)
 class MetricChange:
     """Represents a change in a metric from baseline to current."""
-    
+
     metric_name: str
     baseline_value: float
     current_value: float
@@ -25,7 +25,7 @@ class MetricChange:
 @dataclass(frozen=True)
 class BaselineComparison:
     """Results of comparing current metrics to baseline."""
-    
+
     baseline_date: str
     current_date: str
     changes: list[MetricChange]
@@ -39,14 +39,14 @@ def compare_to_baseline(
 ) -> BaselineComparison:
     """
     Compare current metrics to saved baseline.
-    
+
     Args:
         current_data: Current scan/benchmark results
         baseline_path: Path to baseline JSON file
-    
+
     Returns:
         BaselineComparison with detected changes and alerts
-    
+
     Raises:
         FileNotFoundError: If baseline file doesn't exist
         ValueError: If baseline format is incompatible
@@ -54,17 +54,17 @@ def compare_to_baseline(
     # Load baseline
     if not baseline_path.exists():
         raise FileNotFoundError(f"Baseline file not found: {baseline_path}")
-    
+
     with open(baseline_path) as f:
         baseline_data = json.load(f)
-    
+
     # Extract dates
     baseline_date = baseline_data.get("timestamp", "unknown")
     current_date = current_data.get("timestamp", "unknown")
-    
+
     changes = []
     alerts = []
-    
+
     # Compare benchmark metrics if present
     if (
         isinstance(baseline_data.get("benchmark_results"), list)
@@ -72,17 +72,17 @@ def compare_to_baseline(
     ):
         baseline_results = baseline_data["benchmark_results"]
         current_results = current_data["benchmark_results"]
-        
+
         # Compare each benchmark test
         for baseline_test in baseline_results:
             test_name = baseline_test["test_name"]
-            
+
             # Find matching current test
             current_test = next(
                 (t for t in current_results if t["test_name"] == test_name),
                 None
             )
-            
+
             if not current_test:
                 continue
 
@@ -119,12 +119,12 @@ def compare_to_baseline(
                         f"{test_name}: {abs(change.change_percent):.1f}% {label} decrease "
                         f"({baseline_value:.0f} → {current_value:.0f} {unit})"
                     )
-    
+
     # Compare MFT metrics if present
     if "mft_size_bytes" in baseline_data and "mft_size_bytes" in current_data:
         baseline_mft = baseline_data["mft_size_bytes"]
         current_mft = current_data["mft_size_bytes"]
-        
+
         change = calculate_change(
             "mft_size",
             baseline_mft / (1024**3),  # Convert to GB
@@ -133,9 +133,9 @@ def compare_to_baseline(
             threshold_critical=25,  # >25% growth = critical
             higher_is_better=False,
         )
-        
+
         changes.append(change)
-        
+
         if change.severity in ("degraded", "critical"):
             alerts.append(
                 f"MFT size increased {abs(change.change_percent):.1f}% "
@@ -179,12 +179,12 @@ def compare_to_baseline(
                     "MFT fragmentation increased "
                     f"({baseline_fragments:.0f} → {current_fragments:.0f} fragments)"
                 )
-    
+
     # Compare health scores if present
     if "health_score" in baseline_data and "health_score" in current_data:
         baseline_health = baseline_data["health_score"]["overall_score"]
         current_health = current_data["health_score"]["overall_score"]
-        
+
         change = calculate_change(
             "health_score",
             baseline_health,
@@ -193,15 +193,15 @@ def compare_to_baseline(
             threshold_critical=20,  # >20 point drop = critical
             higher_is_better=True,
         )
-        
+
         changes.append(change)
-        
+
         if change.severity in ("degraded", "critical"):
             alerts.append(
                 f"Overall health score dropped {abs(change.change_percent):.1f}% "
                 f"({baseline_health:.0f} → {current_health:.0f})"
             )
-    
+
     # Compare filesystem-pressure metrics if present. These are the primary
     # signals for cross-machine comparison (e.g. laptop vs desktop): tiny-file
     # burden and free-space headroom. Each tuple is
@@ -236,7 +236,7 @@ def compare_to_baseline(
                 f"{label} {direction} {abs(change.change_percent):.1f}% "
                 f"({baseline_value:.1f}{unit} → {current_value:.1f}{unit})"
             )
-    
+
     # Determine overall severity
     severities = [c.severity for c in changes]
     if "critical" in severities:
@@ -247,7 +247,7 @@ def compare_to_baseline(
         overall_severity = "improved"
     else:
         overall_severity = "stable"
-    
+
     return BaselineComparison(
         baseline_date=baseline_date,
         current_date=current_date,
@@ -268,7 +268,7 @@ def calculate_change(
 ) -> MetricChange:
     """
     Calculate change in a metric and determine severity.
-    
+
     Args:
         metric_name: Name of the metric
         baseline_value: Baseline value
@@ -276,7 +276,7 @@ def calculate_change(
         threshold_warning: Percent change for warning (default: 10%)
         threshold_critical: Percent change for critical (default: 20%)
         higher_is_better: True if higher values are better (e.g., throughput)
-    
+
     Returns:
         MetricChange with severity assessment
     """
@@ -285,7 +285,7 @@ def calculate_change(
         change_percent = 0.0
     else:
         change_percent = ((current_value - baseline_value) / baseline_value) * 100
-    
+
     # Determine severity
     if higher_is_better:
         # For metrics where higher is better (throughput, health score)
@@ -307,7 +307,7 @@ def calculate_change(
             severity = "improved"
         else:
             severity = "stable"
-    
+
     return MetricChange(
         metric_name=metric_name,
         baseline_value=baseline_value,

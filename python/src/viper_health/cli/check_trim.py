@@ -25,32 +25,32 @@ def main(argv: list[str] | None = None) -> int:
 Examples:
   # Check TRIM status (system-wide setting)
   python -m viper_health.cli.check_trim
-  
+
   # Check with drive context
   python -m viper_health.cli.check_trim --drive C:
         """,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    
+
     parser.add_argument(
         "--drive",
         type=str,
         default="C:",
         help="Drive for context (TRIM is system-wide)",
     )
-    
+
     args = parser.parse_args(argv)
-    
+
     print(f"{Fore.CYAN}{Style.BRIGHT}🔍 Checking TRIM Status...{Style.RESET_ALL}\n")
-    
+
     try:
         status = check_trim_status(args.drive)
-        
+
         # Display result
         print("="*70)
         print(f"{Fore.CYAN}{Style.BRIGHT}💾 TRIM STATUS{Style.RESET_ALL}")
         print("="*70)
-        
+
         if status.trim_enabled:
             print(f"{Fore.GREEN}{Style.BRIGHT}✅ TRIM is ENABLED{Style.RESET_ALL}")
             print(f"   DisableDeleteNotify = {status.raw_value}")
@@ -86,29 +86,29 @@ Examples:
             print()
             print(f"   {Style.BRIGHT}3. Verify it's enabled:{Style.RESET_ALL}")
             print(f"      {Fore.CYAN}fsutil behavior query DisableDeleteNotify{Style.RESET_ALL}")
-            print(f"      (Should show: DisableDeleteNotify = 0)")
+            print("      (Should show: DisableDeleteNotify = 0)")
             print()
             print(f"   {Style.BRIGHT}4. Reboot system{Style.RESET_ALL}")
             print()
             print(f"   {Style.BRIGHT}5. Re-run this check to verify:{Style.RESET_ALL}")
             print(f"      {Fore.CYAN}python -m viper_health.cli.check_trim{Style.RESET_ALL}")
             print()
-        
+
         print("="*70 + "\n")
-        
+
         # Exit code based on status
         return 0 if status.trim_enabled else 1
-    
+
     except Exception as e:
         error_msg = str(e)
         print(f"{Fore.RED}❌ Error: {error_msg}{Style.RESET_ALL}", file=sys.stderr)
-        
+
         if "administrator privileges" in error_msg.lower():
             print(f"\n{Fore.YELLOW}💡 To check TRIM status:{Style.RESET_ALL}")
             print("   1. Open PowerShell or Command Prompt as Administrator")
             print("   2. Navigate to viper-health directory")
             print("   3. Run: .venv\\Scripts\\python.exe -m viper_health.cli.check_trim")
-        
+
         return 1
 
 

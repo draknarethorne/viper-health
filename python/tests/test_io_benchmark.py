@@ -1,9 +1,5 @@
 """Tests for SSD I/O benchmark module."""
 
-from pathlib import Path
-
-import pytest
-
 from viper_health.benchmarks.io_bench import (
     BenchmarkResult,
     IOBenchmarkSuite,
@@ -24,7 +20,7 @@ def test_benchmark_result_creation():
         throughput_mb_s=1.0,
         iops=256.0,
     )
-    
+
     assert result.test_name == "test"
     assert result.operation == "read"
     assert result.pattern == "sequential"
@@ -38,7 +34,7 @@ def test_io_benchmark_suite_init(tmp_path):
         test_file_size_mb=10,
         block_size_kb=4,
     )
-    
+
     assert suite.target_dir == tmp_path
     assert suite.test_file_size_mb == 10
     assert suite.block_size_kb == 4
@@ -52,9 +48,9 @@ def test_sequential_write_benchmark(tmp_path):
         test_file_size_mb=1,  # Small file for fast tests
         block_size_kb=4,
     )
-    
+
     result = suite.sequential_write()
-    
+
     assert result.test_name == "sequential_write"
     assert result.operation == "write"
     assert result.pattern == "sequential"
@@ -62,7 +58,7 @@ def test_sequential_write_benchmark(tmp_path):
     assert result.duration_seconds > 0
     assert result.throughput_mb_s > 0
     assert result.iops > 0
-    
+
     # Ensure cleanup happened
     assert not any(tmp_path.glob("viper_bench_seq_write_*.tmp"))
 
@@ -74,16 +70,16 @@ def test_sequential_read_benchmark(tmp_path):
         test_file_size_mb=1,
         block_size_kb=4,
     )
-    
+
     result = suite.sequential_read()
-    
+
     assert result.test_name == "sequential_read"
     assert result.operation == "read"
     assert result.pattern == "sequential"
     assert result.total_bytes == 1024 * 1024
     assert result.duration_seconds > 0
     assert result.throughput_mb_s > 0
-    
+
     # Ensure cleanup happened
     assert not any(tmp_path.glob("viper_bench_seq_read_*.tmp"))
 
@@ -95,16 +91,16 @@ def test_random_write_benchmark(tmp_path):
         test_file_size_mb=1,
         block_size_kb=4,
     )
-    
+
     result = suite.random_write(num_operations=100)  # Fewer ops for speed
-    
+
     assert result.test_name == "random_write"
     assert result.operation == "write"
     assert result.pattern == "random"
     assert result.total_bytes == 100 * 4096
     assert result.duration_seconds > 0
     assert result.iops > 0
-    
+
     # Ensure cleanup happened
     assert not any(tmp_path.glob("viper_bench_rand_write_*.tmp"))
 
@@ -116,16 +112,16 @@ def test_random_read_benchmark(tmp_path):
         test_file_size_mb=1,
         block_size_kb=4,
     )
-    
+
     result = suite.random_read(num_operations=100)
-    
+
     assert result.test_name == "random_read"
     assert result.operation == "read"
     assert result.pattern == "random"
     assert result.total_bytes == 100 * 4096
     assert result.duration_seconds > 0
     assert result.iops > 0
-    
+
     # Ensure cleanup happened
     assert not any(tmp_path.glob("viper_bench_rand_read_*.tmp"))
 
@@ -137,15 +133,15 @@ def test_run_all_benchmarks(tmp_path):
         test_file_size_mb=1,
         block_size_kb=4,
     )
-    
+
     results = suite.run_all()
-    
+
     assert len(results) == 4
     assert results[0].test_name == "sequential_write"
     assert results[1].test_name == "sequential_read"
     assert results[2].test_name == "random_write"
     assert results[3].test_name == "random_read"
-    
+
     # All should have positive metrics
     for result in results:
         assert result.duration_seconds > 0
@@ -160,7 +156,7 @@ def test_run_io_benchmark_helper(tmp_path):
         test_file_size_mb=1,
         block_size_kb=4,
     )
-    
+
     assert len(results) == 4
     assert all(isinstance(r, BenchmarkResult) for r in results)
 
@@ -177,9 +173,9 @@ def test_assess_benchmark_performance_is_informational():
         throughput_mb_s=250.0,  # Good performance
         iops=64000.0,
     )
-    
+
     assessment = assess_benchmark_performance(result)
-    
+
     assert assessment["severity"] == "info"
     assert "same-machine" in assessment["message"]
 
@@ -196,9 +192,9 @@ def test_assess_benchmark_performance_does_not_infer_cache_state():
         throughput_mb_s=150.0,  # Warning performance
         iops=38400.0,
     )
-    
+
     assessment = assess_benchmark_performance(result)
-    
+
     assert assessment["severity"] == "info"
     assert "cache" not in assessment["message"].lower()
 
@@ -215,9 +211,9 @@ def test_assess_benchmark_performance_does_not_diagnose_slow_result():
         throughput_mb_s=50.0,  # Critical performance
         iops=12800.0,
     )
-    
+
     assessment = assess_benchmark_performance(result)
-    
+
     assert assessment["severity"] == "info"
     assert "hardware health" not in assessment["message"].lower()
 
@@ -234,9 +230,9 @@ def test_assess_random_write_does_not_infer_nand_or_dram():
         throughput_mb_s=35.0,  # Typical for DRAM-less QLC
         iops=8960.0,
     )
-    
+
     assessment = assess_benchmark_performance(result)
-    
+
     assert assessment["severity"] == "info"
     assert "QLC" not in assessment["message"]
     assert "DRAM" not in assessment["message"]

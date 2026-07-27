@@ -3,7 +3,6 @@
 from pathlib import Path
 
 from viper_health.utils.fs_counter import (
-    TreeCount,
     bytes_to_gib,
     bytes_to_mib,
     count_tree,
@@ -76,4 +75,3 @@ def test_format_bytes_auto_scales_with_gb_mb_tb_labels():
 
 def test_format_bytes_handles_negative():
     assert format_bytes(-2 * 1024**2) == "-2.0 MB"
-

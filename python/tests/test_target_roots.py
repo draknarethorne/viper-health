@@ -4,7 +4,6 @@ from pathlib import Path
 
 import pytest
 
-from viper_health.collectors import target_roots
 from viper_health.collectors.target_roots import (
     ALL_CATEGORIES,
     CATEGORY_BROWSER_CACHE,

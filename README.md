@@ -391,10 +391,15 @@ python -m viper_health.cli.check_io --top 10
 3. Run tests
 
 ```bash
-pip install -e python
 pip install -e python[dev]
-pytest -v python/tests
+pre-commit install --install-hooks
+python -m pytest -v python/tests
 ```
+
+The `dev` extra in [`python/pyproject.toml`](python/pyproject.toml) pins the
+local quality toolchain. Pre-commit runs fast file hygiene, YAML validation,
+Ruff defect checks, and PowerShell analysis. Pre-push runs the full test suite.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for direct commands and scope.
 
 ### PowerShell contributors
 
@@ -430,9 +435,15 @@ Notable protected path example:
 
 ## 🧪 CI
 
-GitHub Actions runs Python tests on push and pull request to `main`.
+GitHub Actions independently installs the project-managed development tools,
+runs every pre-commit quality gate against the repository, performs
+PSScriptAnalyzer checks, and runs the complete Python test suite on pushes and
+pull requests to `main`. Local hooks improve feedback speed; CI remains the
+authoritative, non-bypassable gate.
 
 - workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+- tool versions and Ruff policy: [`python/pyproject.toml`](python/pyproject.toml)
+- hook policy: [`.pre-commit-config.yaml`](.pre-commit-config.yaml)
 
 ---
 

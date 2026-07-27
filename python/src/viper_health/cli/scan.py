@@ -23,7 +23,7 @@ from pathlib import Path
 from viper_health.analyzers.directory_density import analyze_directory_density
 from viper_health.analyzers.tiny_file_hotspots import analyze_tiny_file_hotspots
 from viper_health.collectors.file_inventory import scan_file_inventory
-from viper_health.reports.json_reporter import format_json_string, write_json_report
+from viper_health.reports.json_reporter import write_json_report
 from viper_health.reports.markdown_reporter import write_markdown_report
 from viper_health.reports.json_reporter import build_json_report
 from viper_health.reports.markdown_reporter import build_markdown_report
@@ -107,7 +107,7 @@ def run_full_scan(
     # Step 1: Collect inventory with progress reporting
     progress = ProgressReporter(enabled=show_progress, root_path=root)
     progress.start(f"Scanning {root}...")
-    
+
     inventory = scan_file_inventory(
         root,
         tiny_file_max_bytes=tiny_file_max_bytes,
@@ -115,7 +115,7 @@ def run_full_scan(
         progress_interval=100,
         exclude_paths=exclude_paths,
     )
-    
+
     progress.finish(inventory.directories_scanned, inventory.total_files)
 
     # Step 2: Run detectors
@@ -306,7 +306,7 @@ Examples:
         action="store_true",
         help="Print console summary (default: true if no output files specified)",
     )
-    
+
     parser.add_argument(
         "--progress",
         action="store_true",
@@ -384,7 +384,7 @@ Examples:
         else:  # critical
             health_icon = ICONS['critical']
             health_color = Fore.RED
-        
+
         print("\n" + "="*70)
         print(f"{Fore.CYAN}{Style.BRIGHT}{ICONS['stats']} VIPER HEALTH SCAN SUMMARY{Style.RESET_ALL}")
         print("="*70)

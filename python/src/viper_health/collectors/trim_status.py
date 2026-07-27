@@ -15,7 +15,7 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class TRIMStatus:
     """TRIM status information for a drive."""
-    
+
     drive: str
     trim_enabled: bool
     raw_value: int  # 0 = enabled, 1 = disabled
@@ -25,17 +25,17 @@ class TRIMStatus:
 def check_trim_status(drive: str = "C:") -> TRIMStatus:
     """
     Check if TRIM is enabled for the system.
-    
+
     Uses Windows fsutil to query DisableDeleteNotify setting.
     - 0 = TRIM enabled (good)
     - 1 = TRIM disabled (critical issue)
-    
+
     Args:
         drive: Drive letter (used for context, TRIM is system-wide)
-    
+
     Returns:
         TRIMStatus with enabled status and severity
-    
+
     Raises:
         RuntimeError: If fsutil command fails
     """
@@ -46,7 +46,7 @@ def check_trim_status(drive: str = "C:") -> TRIMStatus:
             text=True,
             check=False,
         )
-        
+
         if result.returncode != 0:
             # Check for elevation requirement
             if result.returncode == 5 or "Access is denied" in result.stderr:
@@ -55,7 +55,7 @@ def check_trim_status(drive: str = "C:") -> TRIMStatus:
                     "Please run from an elevated command prompt/PowerShell."
                 )
             raise RuntimeError(f"fsutil command failed with exit code {result.returncode}")
-        
+
         # Parse output
         # Modern Windows fsutil emits one line per filesystem with a trailing
         # description, e.g.:
@@ -95,7 +95,7 @@ def check_trim_status(drive: str = "C:") -> TRIMStatus:
 
         # If we couldn't parse, raise error
         raise RuntimeError(f"Could not parse fsutil output: {output}")
-    
+
     except subprocess.CalledProcessError as e:
         raise RuntimeError(f"Failed to check TRIM status: {e}")
     except ValueError as e:

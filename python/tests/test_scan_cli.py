@@ -65,7 +65,6 @@ def test_run_full_scan_with_safe_paths(tmp_path: Path) -> None:
 
     # Findings should not include safe_dir
     finding_paths = [f["path"] for f in results["findings"]]
-    suppressed_paths = [f["path"] for f in results["suppressed"]]
 
     # Safe dir should be in suppressed, not findings
     assert not any(str(safe_dir) in p for p in finding_paths)

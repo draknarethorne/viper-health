@@ -22,7 +22,7 @@ def test_disk_space_info_dataclass():
         free_percent=20.0,
         severity="good",
     )
-    
+
     assert info.drive == "C:"
     assert info.total_bytes == 500_000_000_000
     assert info.free_percent == 20.0
@@ -44,9 +44,9 @@ def test_analyze_disk_space_good(mock_usage):
         used=400_000_000_000,   # 400 GB
         free=100_000_000_000,   # 100 GB (20%)
     )
-    
+
     info = analyze_disk_space("C:")
-    
+
     assert info.drive == "C:"
     assert info.total_bytes == 500_000_000_000
     assert info.free_bytes == 100_000_000_000
@@ -62,9 +62,9 @@ def test_analyze_disk_space_warning(mock_usage):
         used=425_000_000_000,   # 425 GB
         free=75_000_000_000,    # 75 GB (15%)
     )
-    
+
     info = analyze_disk_space("C:")
-    
+
     assert info.free_percent == 15.0
     assert info.severity == "warning"
 
@@ -77,9 +77,9 @@ def test_analyze_disk_space_critical(mock_usage):
         used=475_000_000_000,   # 475 GB
         free=25_000_000_000,    # 25 GB (5%)
     )
-    
+
     info = analyze_disk_space("C:")
-    
+
     assert info.free_percent == 5.0
     assert info.severity == "critical"
 
@@ -88,7 +88,7 @@ def test_analyze_disk_space_critical(mock_usage):
 def test_analyze_disk_space_drive_not_found(mock_usage):
     """Test disk space analysis with non-existent drive."""
     mock_usage.side_effect = FileNotFoundError()
-    
+
     with pytest.raises(RuntimeError, match="Drive not found"):
         analyze_disk_space("Z:")
 
@@ -103,9 +103,9 @@ def test_format_disk_space_summary():
         free_percent=20.0,
         severity="good",
     )
-    
+
     summary = format_disk_space_summary(info)
-    
+
     assert summary["drive"] == "C:"
     assert summary["total_gb"] == 500.0
     assert summary["used_gb"] == 400.0

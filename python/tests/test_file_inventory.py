@@ -64,4 +64,3 @@ def test_scan_file_inventory_prunes_glob_exclude(tmp_path: Path) -> None:
 
     assert result.total_files == 1
     assert not any("cache" in Path(d).parts for d in result.per_directory)
-

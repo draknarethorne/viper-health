@@ -21,7 +21,7 @@ def test_mft_info_dataclass():
         total_files=100000,
         total_folders=10000,
     )
-    
+
     assert mft.drive == "C:"
     assert mft.mft_size_bytes == 1024*1024*1024
     assert mft.mft_fragments == 3
@@ -37,9 +37,9 @@ def test_analyze_mft_health_good():
         total_files=100000,
         total_folders=10000,
     )
-    
+
     analysis = analyze_mft_health(mft)
-    
+
     assert analysis["drive"] == "C:"
     assert analysis["mft_size_gb"] == 1.0
     assert analysis["mft_fragments"] == 2
@@ -57,9 +57,9 @@ def test_analyze_mft_health_warning_size():
         total_files=500000,
         total_folders=50000,
     )
-    
+
     analysis = analyze_mft_health(mft)
-    
+
     assert analysis["size_severity"] == "warning"
     assert analysis["fragmentation_severity"] == "good"
     assert analysis["overall_severity"] == "warning"
@@ -74,9 +74,9 @@ def test_analyze_mft_health_critical_fragmentation():
         total_files=100000,
         total_folders=10000,
     )
-    
+
     analysis = analyze_mft_health(mft)
-    
+
     assert analysis["size_severity"] == "good"
     assert analysis["fragmentation_severity"] == "critical"
     assert analysis["overall_severity"] == "critical"
@@ -91,9 +91,9 @@ def test_analyze_mft_health_critical_both():
         total_files=1000000,
         total_folders=100000,
     )
-    
+
     analysis = analyze_mft_health(mft)
-    
+
     assert analysis["size_severity"] == "critical"
     assert analysis["fragmentation_severity"] == "critical"
     assert analysis["overall_severity"] == "critical"
@@ -146,17 +146,17 @@ Mft Zone End:                    0x0000000000904640
 File Records:                    524288
 Folders:                         45678
 """
-    
+
     # Mock fragmentation query (will fail, defaults to 1)
     mock_frag = Mock()
     mock_frag.returncode = 5  # Access denied
     mock_frag.stdout = ""
-    
+
     # Configure mock to return different results for different calls
     mock_run.side_effect = [mock_ntfsinfo, mock_frag]
-    
+
     mft = get_mft_info("C:")
-    
+
     assert mft.drive == "C:"
     assert mft.mft_size_bytes == 0x40000000  # 1 GB
     assert mft.mft_fragments == 1  # Fallback
@@ -189,6 +189,6 @@ MFT Zone Size  :                   200.13 MB
 def test_get_mft_info_command_failure(mock_run):
     """Test get_mft_info when fsutil command fails."""
     mock_run.side_effect = Exception("Command failed")
-    
+
     with pytest.raises(RuntimeError, match="Error getting MFT info"):
         get_mft_info("C:")

@@ -28,49 +28,49 @@ def main(argv: list[str] | None = None) -> int:
 Examples:
   # Compare benchmark results to baseline
   python -m viper_health.cli.compare_baseline --baseline data/baselines/baseline.json --current data/benchmarks/latest.json
-  
+
   # Compare with verbose output
   python -m viper_health.cli.compare_baseline --baseline baseline.json --current current.json --verbose
         """,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    
+
     parser.add_argument(
         "--baseline",
         type=Path,
         required=True,
         help="Path to baseline JSON file",
     )
-    
+
     parser.add_argument(
         "--current",
         type=Path,
         required=True,
         help="Path to current results JSON file",
     )
-    
+
     parser.add_argument(
         "--verbose",
         action="store_true",
         help="Show all metrics, not just changes",
     )
-    
+
     args = parser.parse_args(argv)
-    
+
     print(f"{Fore.CYAN}{Style.BRIGHT}📊 Comparing to Baseline...{Style.RESET_ALL}\n")
-    
+
     try:
         # Load current data
         with open(args.current) as f:
             current_data = json.load(f)
-        
+
         # Add timestamp if not present
         if "timestamp" not in current_data:
             current_data["timestamp"] = datetime.now().isoformat()
-        
+
         # Compare
         comparison = compare_to_baseline(current_data, args.baseline)
-        
+
         # Determine overall color
         if comparison.overall_severity == "critical":
             overall_color = Fore.RED
@@ -84,7 +84,7 @@ Examples:
         else:  # stable
             overall_color = Fore.GREEN
             overall_icon = "✅"
-        
+
         # Display results
         print("="*70)
         print(f"{Fore.CYAN}{Style.BRIGHT}📈 BASELINE COMPARISON{Style.RESET_ALL}")
@@ -95,18 +95,18 @@ Examples:
         print(f"{Style.BRIGHT}Overall Trend:{Style.RESET_ALL}")
         print(f"  {overall_color}{Style.BRIGHT}{overall_icon} {comparison.overall_severity.upper()}{Style.RESET_ALL}")
         print("="*70 + "\n")
-        
+
         # Show alerts
         if comparison.alerts:
             print(f"{Fore.YELLOW}{Style.BRIGHT}🚨 ALERTS:{Style.RESET_ALL}\n")
             for alert in comparison.alerts:
                 print(f"   • {alert}")
             print()
-        
+
         # Show metric changes
         if comparison.changes:
             print(f"{Style.BRIGHT}Metric Changes:{Style.RESET_ALL}\n")
-            
+
             for change in comparison.changes:
                 # Determine color and icon
                 if change.severity == "critical":
@@ -124,24 +124,24 @@ Examples:
                         icon = "—"
                     else:
                         continue  # Skip stable metrics unless verbose
-                
+
                 # Format change
                 if change.change_percent > 0:
                     change_str = f"+{change.change_percent:.1f}%"
                 else:
                     change_str = f"{change.change_percent:.1f}%"
-                
+
                 print(f"   {icon} {color}{change.metric_name.replace('_', ' ').title()}{Style.RESET_ALL}")
                 print(f"      {change.baseline_value:.2f} → {change.current_value:.2f} ({change_str})")
                 print(f"      Status: {color}{change.severity.upper()}{Style.RESET_ALL}")
                 print()
         else:
             print(f"{Fore.CYAN}No comparable metrics found in baseline and current files.{Style.RESET_ALL}\n")
-        
+
         # Recommendations
         if comparison.overall_severity in ("degraded", "critical"):
             print(f"{Fore.YELLOW}{Style.BRIGHT}💡 RECOMMENDATIONS:{Style.RESET_ALL}\n")
-            
+
             if comparison.overall_severity == "critical":
                 print(f"{Style.BRIGHT}Immediate Actions:{Style.RESET_ALL}")
                 print("   1. Run full filesystem health scan:")
@@ -163,24 +163,24 @@ Examples:
                 print("   3. Re-run benchmark to see if performance recovers")
                 print("   4. Continue weekly monitoring to track trends")
                 print()
-        
+
         elif comparison.overall_severity == "improved":
             print(f"{Fore.GREEN}{Style.BRIGHT}🎉 Performance Improved!{Style.RESET_ALL}\n")
             print("   Your cleanup and maintenance efforts are working.")
             print("   Continue current workflow to maintain health.")
             print()
-        
+
         else:  # stable
             print(f"{Fore.GREEN}{Style.BRIGHT}✅ Performance Stable{Style.RESET_ALL}\n")
             print("   No significant changes detected.")
             print("   Continue periodic monitoring.")
             print()
-        
+
         # Exit code based on overall severity
         if comparison.overall_severity == "critical":
             return 1
         return 0
-    
+
     except FileNotFoundError as e:
         print(f"{Fore.RED}❌ Error: {e}{Style.RESET_ALL}", file=sys.stderr)
         return 1
