@@ -1,0 +1,45 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "D:/Backup"
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			"**/__pycache__": true,
+			"**/.pytest_cache": true
+		},
+		"search.exclude": {
+			"**/__pycache__": true,
+			"**/.pytest_cache": true
+		},
+		"files.watcherExclude": {
+			"**/__pycache__/**": true,
+			"**/.pytest_cache/**": true
+		},
+		"[python]": {
+			"editor.defaultFormatter": "ms-python.black-formatter"
+		},
+		"[powershell]": {
+			"editor.defaultFormatter": "ms-vscode.powershell"
+		},
+		"files.associations": {
+			"*.psd1": "powershell",
+			"*.psm1": "powershell",
+			"*.CMD": "bat"
+		}
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-python.python",
+			"ms-python.vscode-pylance",
+			"ms-python.black-formatter",
+			"ms-vscode.powershell",
+			"davidanson.vscode-markdownlint",
+			"GitHub.vscode-pull-request-github"
+		]
+	}
+}
