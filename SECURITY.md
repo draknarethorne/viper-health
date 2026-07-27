@@ -8,6 +8,10 @@ This project is in active development. Security fixes are applied to the latest 
 
 Please do **not** open public issues for security vulnerabilities.
 
+Use [GitHub private vulnerability reporting](https://github.com/draknarethorne/viper-health/security/advisories/new)
+when available. If private reporting is unavailable, contact the repository
+owner without including exploit details in a public issue.
+
 Instead, report privately with:
 
 - a clear description of the issue

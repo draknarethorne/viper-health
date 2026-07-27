@@ -445,6 +445,9 @@ authoritative, non-bypassable gate.
 - tool versions and Ruff policy: [`python/pyproject.toml`](python/pyproject.toml)
 - hook policy: [`.pre-commit-config.yaml`](.pre-commit-config.yaml)
 
+Version tags run the same gates and publish a privacy-safe source bundle with a
+SHA-256 checksum. See the [Release Checklist](docs/RELEASE-CHECKLIST.md).
+
 ---
 
 ## 🤝 Contributing

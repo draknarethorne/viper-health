@@ -1,4 +1,4 @@
-name: Create Release
+name: Release
 
 on:
   push:
@@ -11,12 +11,75 @@ permissions:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Install development tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e "python[dev]"
+
+      - name: Install PowerShell analyzer
+        shell: powershell
+        run: Install-Module PSScriptAnalyzer -RequiredVersion 1.25.0 -Scope CurrentUser -Force
+
+      - name: Validate tag and project versions
+        shell: powershell
+        run: |
+          $tagVersion = '${{ github.ref_name }}' -replace '^v', '' -replace '-.*$', ''
+          $pythonVersion = python -c "import pathlib, tomllib; print(tomllib.loads(pathlib.Path('python/pyproject.toml').read_text(encoding='utf-8'))['project']['version'])"
+          $module = Import-PowerShellDataFile .\powershell\PSViperHealth\PSViperHealth.psd1
+          if ($pythonVersion.Trim() -ne $tagVersion) {
+              throw "Tag version $tagVersion does not match Python version $pythonVersion."
+          }
+          if ($module.ModuleVersion.ToString() -ne $tagVersion) {
+              throw "Tag version $tagVersion does not match PowerShell module version $($module.ModuleVersion)."
+          }
+
+      - name: Run quality gates
+        run: pre-commit run --all-files --show-diff-on-failure
+
+      - name: Run tests
+        run: python -m pytest -q python/tests
+
+      - name: Build curated source bundle
+        id: bundle
+        shell: powershell
+        run: |
+          $name = "viper-health-${{ github.ref_name }}"
+          $zip = Join-Path $env:GITHUB_WORKSPACE "$name.zip"
+          $paths = @(
+              'python',
+              'powershell',
+              'scripts',
+              'config',
+              'docs',
+              'README.md',
+              'CONTRIBUTING.md',
+              'SECURITY.md',
+              'LICENSE',
+              'viper-ssd-health.md'
+          )
+          git archive --format=zip --prefix="$name/" --output="$zip" HEAD -- $paths
+          if ($LASTEXITCODE -ne 0) {
+              throw "git archive failed with exit code $LASTEXITCODE."
+          }
+          $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $zip).Hash.ToLowerInvariant()
+          "$hash  $name.zip" | Set-Content -LiteralPath SHA256SUMS.txt -Encoding ascii
+          "zip=$zip" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          files: |
+            ${{ steps.bundle.outputs.zip }}
+            SHA256SUMS.txt
